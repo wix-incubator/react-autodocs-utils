@@ -1,0 +1,7 @@
+*.swp
+node_modules
+npm-debug.log
+.idea
+.vscode
+yarn.lock
+package-lock.json
