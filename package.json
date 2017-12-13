@@ -4,7 +4,8 @@
   "description": "Set of utilities for extracting meta information about react components mostly to generate automated documentation",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "test:watch": "npm run test -- --watch"
   },
   "keywords": [
     "react",
@@ -19,5 +20,8 @@
     "proptypes"
   ],
   "author": "Arijus Šukys <argshook@gmail.com> (http://arijus.net)",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^21.2.1"
+  }
 }
