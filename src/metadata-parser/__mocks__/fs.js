@@ -1,10 +1,19 @@
 /* global jest */
 const fs = jest.genMockFromModule('fs');
 
-const mockFiles = {};
+let mockFiles = {};
 
 fs.__setFile = path => content =>
   mockFiles[path] = content;
+
+fs.__getFile = path =>
+  mockFiles[path];
+
+fs.__reset = () =>
+  mockFiles = {};
+
+fs.__getAll = () =>
+  mockFiles;
 
 fs.readFile = (path, encoding, callback) =>
   mockFiles[path]

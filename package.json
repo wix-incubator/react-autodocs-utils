@@ -23,5 +23,8 @@
   "license": "MIT",
   "devDependencies": {
     "jest": "^21.2.1"
+  },
+  "dependencies": {
+    "recast": "^0.13.0"
   }
 }

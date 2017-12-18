@@ -1,14 +1,15 @@
 /* global Promise */
 const {readFile} = require('fs');
-const path = require('path');
+const parser = require('../parser');
 
-module.exports = (filePath = '') =>
-  new Promise((resolve, reject) =>
-    filePath.length ?
+module.exports = (path = '') =>
+  (new Promise((resolve, reject) =>
+    path.length ?
       readFile(
-        path.resolve(__dirname, filePath),
+        path,
         'utf8',
-        (err, data) => (err ? reject(err) : resolve(data))
+        (err, data) => err ? reject(err) : resolve(data)
       )
       : reject(new Error('ERROR: Missing required `path` argument'))
-  );
+  ))
+    .then(parser);
