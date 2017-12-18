@@ -5,6 +5,11 @@ const metadataParser = require('./');
 jest.mock('fs');
 const fs = require('fs');
 
+const rootMock = {
+  description: '',
+  methods: []
+};
+
 describe('metadataParser()', () => {
   it('should be a function', () => {
     expect(typeof metadataParser).toBe('function');
@@ -23,7 +28,7 @@ describe('metadataParser()', () => {
 
     describe('with component source', () => {
       describe('that has no useful data', () => {
-        it('should return empty object', () => {
+        it('should return initial object', () => {
           const [path, source] = [
             'simple-functional.js',
             `import React from 'react';
@@ -32,29 +37,64 @@ describe('metadataParser()', () => {
 
           fs.__setFile(path)(source);
 
-          return expect(metadataParser(path)).resolves.toEqual({});
+          return expect(metadataParser(path)).resolves.toEqual(rootMock);
         });
       });
 
-      describe.skip('that has one prop', () => {
+      describe('that has props', () => {
         it('should return props object with correct type', () => {
           const [path, source] = [
             'functional-with-props.js',
             `import React from 'react';
             import PropTypes from 'prop-types';
-            const component = () => {};
-            component.PropTypes = { hello: PropTypes.bool };
+            const component = () => <div></div>;
+            component.propTypes = {
+              /** hello comment */
+              hello: PropTypes.bool,
+
+              /** goodbye comment */
+              goodbye: PropTypes.string.isRequired,
+
+              /** Mr. Deez
+               *  Nuts
+               *  */
+              nuts: PropTypes.oneOf(['deez', 'deeez'])
+            };
             export default component;
             `
           ];
 
           fs.__setFile(path)(source);
+
           return expect(metadataParser(path)).resolves.toEqual({
+            description: '',
+            methods: [],
             props: {
               hello: {
-                type: 'bool',
-                isRequired: false
-              }
+                description: 'hello comment',
+                required: false,
+                type: { name: 'bool' }
+              },
+
+              goodbye: {
+                description: 'goodbye comment',
+                required: true,
+                type: { name: 'string' }
+              },
+
+              nuts: {
+                description: 'Mr. Deez\n Nuts',
+                required: false,
+                type: {
+                  name: 'enum',
+                  value: [
+                    { computed: false, value: "'deez'" },
+                    { computed: false, value: "'deeez'" }
+                  ]
+                }
+              },
+
+
             }
           });
         });
