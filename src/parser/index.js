@@ -1,19 +1,27 @@
 /* global Promise */
 
-const {parse: reactDocgenParser} = require('react-docgen');
+const recast = require('recast');
+const babylon = require('babylon');
 
-const componentResolver = require('./component-resolver');
 const fileReader = require('../file-reader');
+const reactDocgenParser = require('./react-docgen-parser');
 
-const parser = source =>
-  reactDocgenParser(source, componentResolver);
+const recastParser = source =>
+  recast.parse(source, {
+    parser: {
+      parse: () => babylon.parse(source, {
+        plugins: ['jsx', 'classProperties', 'objectRestSpread'],
+        sourceType: 'module'
+      })
+    }
+  });
 
 const handleComposedProps = parsed =>
   Promise
     .all(parsed.composes.map(fileReader))
 
     .then(composedSources =>
-      Promise.all(composedSources.map(parser))
+      Promise.all(composedSources.map(reactDocgenParser))
     )
 
     .then(composedDefinitions =>
@@ -41,12 +49,53 @@ const handleComposedProps = parsed =>
 
     .catch(console.log);
 
-module.exports = source => {
-  const parsed = parser(source);
+const followExportDefault = source => {
+  return new Promise(resolve => {
+    let proxiedPath = '';
 
-  return new Promise((resolve, reject) =>
-    parsed.composes ?
-      handleComposedProps(parsed).then(resolve).catch(reject) :
-      resolve(parsed)
-  );
+    const visitExportDefault = source => {
+      proxiedPath = '';
+
+      recast.visit(
+        recastParser(source),
+        {
+          visitExportNamedDeclaration: function(path) {
+            const isSpecifierDefault =
+              path.node.specifiers.some(({ exported }) => exported.name === 'default');
+
+            if (isSpecifierDefault) {
+              proxiedPath = path.node.source.value;
+
+              return false;
+            }
+
+            this.traverse(path);
+          }
+        }
+      );
+
+      if (proxiedPath) {
+        fileReader(proxiedPath)
+          .then(visitExportDefault);
+      } else {
+        resolve(source);
+      }
+    };
+
+    visitExportDefault(source);
+  });
 };
+
+const parser = source =>
+  new Promise((resolve, reject) => {
+    followExportDefault(source)
+      .then(source => {
+        const parsed = reactDocgenParser(source);
+
+        return parsed.composes ?
+          handleComposedProps(parsed).then(resolve).catch(reject) :
+          resolve(parsed);
+      });
+  });
+
+module.exports = parser;

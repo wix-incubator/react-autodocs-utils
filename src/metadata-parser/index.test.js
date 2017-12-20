@@ -271,5 +271,31 @@ describe('metadataParser()', () => {
         });
       });
     });
+
+    describe('with `export default from ...`', () => {
+      it('should follow that export', () => {
+        const pathsAndSources = [
+          [
+            './index.js',
+            'export {default} from \'./component.js\';'
+          ],
+          [
+            './component.js',
+            `
+              /** I am the one who props */
+              const component = () => <div/>;
+              export default component;
+              `
+          ]
+        ];
+
+        pathsAndSources.map(([path, source]) => fs.__setFile(path)(source));
+
+        return expect(metadataParser(pathsAndSources[0][0])).resolves.toEqual({
+          description: 'I am the one who props',
+          methods: []
+        });
+      });
+    });
   });
 });

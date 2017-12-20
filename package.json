@@ -25,6 +25,7 @@
     "jest": "^21.2.1"
   },
   "dependencies": {
+    "babylon": "^6.18.0",
     "react-docgen": "^2.20.0",
     "recast": "^0.13.0"
   }
