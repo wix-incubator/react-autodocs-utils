@@ -1,141 +1,52 @@
-const recast = require('recast');
-const {utils, parse} = require('react-docgen');
+/* global Promise */
 
-const {
-  isExportsOrModuleAssignment,
-  isReactComponentClass,
-  isReactCreateClassCall,
-  isStatelessComponent,
-  normalizeClassDefinition,
-  resolveExportDeclaration,
-  resolveToValue
-} = utils;
+const {parse: reactDocgenParser} = require('react-docgen');
 
+const componentResolver = require('./component-resolver');
+const fileReader = require('../file-reader');
 
-const n = recast.types.namedTypes;
+const parser = source =>
+  reactDocgenParser(source, componentResolver);
 
-const ERROR_MULTIPLE_DEFINITIONS =
-  'Multiple exported component definitions found.';
+const handleComposedProps = parsed =>
+  Promise
+    .all(parsed.composes.map(fileReader))
 
-const isReactComponentExtendedClass = path => {
-  const node = path.node;
+    .then(composedSources =>
+      Promise.all(composedSources.map(parser))
+    )
 
-  if (!n.ClassDeclaration.check(node) && !n.ClassExpression.check(node)) {
-    return false;
-  }
+    .then(composedDefinitions =>
+      composedDefinitions.reduce(
+        (acc, definition) => ({
+          ...definition.props,
+          ...acc
+        }),
+        {}
+      )
+    )
 
-  if (!node.superClass) {
-    return false;
-  }
+    .then(composedProps =>
+      ({
+        ...parsed,
+        props: { ...parsed.props, ...composedProps }
+      })
+    )
 
-  console.warn(`<AutoDocs/> Warning: ${node.id.name} extends ${node.superClass.name} instead of React.Component. Auto generated documentation may be incomplete!`);
-  return true;
+    .then(allProps => {
+      // eslint-disable-next-line no-unused-vars
+      const { composes, ...otherProps } = allProps;
+      return otherProps;
+    })
+
+    .catch(console.log);
+
+module.exports = source => {
+  const parsed = parser(source);
+
+  return new Promise((resolve, reject) =>
+    parsed.composes ?
+      handleComposedProps(parsed).then(resolve).catch(reject) :
+      resolve(parsed)
+  );
 };
-
-const isComponentDefinition = path =>
-  [
-    isReactCreateClassCall,
-    isReactComponentClass,
-    isReactComponentExtendedClass,
-    isStatelessComponent
-  ].some(fn => fn(path));
-
-const resolveHOC = path => {
-  const node = path.node;
-
-  if (n.CallExpression.check(node) && !isReactCreateClassCall(path)) {
-    if (node.arguments.length) {
-      return resolveHOC(path.get('arguments', node.arguments.length - 1));
-    }
-  }
-
-  return path;
-};
-
-const resolveDefinition = definition => {
-  if (isReactCreateClassCall(definition)) {
-    // return argument
-    const resolvedPath = resolveToValue(definition.get('arguments', 0));
-    if (n.ObjectExpression.check(resolvedPath.node)) {
-      return resolvedPath;
-    }
-  } else if (isReactComponentClass(definition) || isReactComponentExtendedClass(definition)) {
-    normalizeClassDefinition(definition);
-    return definition;
-  } else if (isStatelessComponent(definition)) {
-    return definition;
-  }
-
-  return null;
-};
-
-const componentResolver = (ast, recast) => {
-  let definition;
-
-  const exportDeclaration = path => {
-    const definitions = resolveExportDeclaration(path)
-      .reduce((acc, definition) => {
-        if (isComponentDefinition(definition)) {
-          acc.push(definition);
-        } else {
-          const resolved = resolveToValue(resolveHOC(definition));
-          if (isComponentDefinition(resolved)) {
-            acc.push(resolved);
-          }
-        }
-
-        return acc;
-      }, []);
-
-    if (definitions.length === 0) {
-      return false;
-    }
-
-    if (definitions.length > 1 || definition) {
-      // If a file exports multiple components, ... complain!
-      throw new Error(ERROR_MULTIPLE_DEFINITIONS);
-    }
-
-    definition = resolveDefinition(definitions[0]);
-    return false;
-  };
-
-  recast.visit(ast, {
-    visitExportDeclaration: exportDeclaration,
-    visitExportNamedDeclaration: exportDeclaration,
-    visitExportDefaultDeclaration: exportDeclaration,
-
-    visitAssignmentExpression: path => {
-      // Ignore anything that is not `exports.X = ...;` or
-      // `module.exports = ...;`
-      if (!isExportsOrModuleAssignment(path)) {
-        return false;
-      }
-
-      // Resolve the value of the right hand side. It should resolve to a call
-      // expression, something like React.createClass
-      path = resolveToValue(path.get('right'));
-
-      if (!isComponentDefinition(path)) {
-        path = resolveToValue(resolveHOC(path));
-        if (!isComponentDefinition(path)) {
-          return false;
-        }
-      }
-
-      if (definition) {
-        // If a file exports multiple components, ... complain!
-        throw new Error(ERROR_MULTIPLE_DEFINITIONS);
-      }
-
-      definition = resolveDefinition(path);
-
-      return false;
-    }
-  });
-
-  return definition;
-};
-
-module.exports = source =>
-  parse(source, componentResolver);
