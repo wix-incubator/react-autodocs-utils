@@ -5,6 +5,7 @@ const babylon = require('babylon');
 
 const fileReader = require('../file-reader');
 const reactDocgenParser = require('./react-docgen-parser');
+const path = require('path');
 
 const recastParser = source =>
   recast.parse(source, {
@@ -49,7 +50,7 @@ const handleComposedProps = parsed =>
 
     .catch(console.log);
 
-const followExportDefault = source => {
+const followExportDefault = (source, cwd) => {
   return new Promise(resolve => {
     let proxiedPath = '';
 
@@ -75,8 +76,13 @@ const followExportDefault = source => {
       );
 
       if (proxiedPath) {
-        fileReader(proxiedPath)
-          .then(visitExportDefault);
+        console.log('fak',  cwd, proxiedPath, path.relative(path.dirname(cwd), proxiedPath));
+        const resolvedPath = path.resolve(path.dirname(cwd), proxiedPath);
+
+        console.log('shit', resolvedPath);
+        fileReader(resolvedPath)
+          .then(visitExportDefault)
+          .catch(e => console.log(`ERROR: unable to read ${resolvedPath}`, e));
       } else {
         resolve(source);
       }
@@ -86,9 +92,9 @@ const followExportDefault = source => {
   });
 };
 
-const parser = source =>
+const parser = (source, {cwd}) =>
   new Promise((resolve, reject) => {
-    followExportDefault(source)
+    followExportDefault(source, cwd)
       .then(source => {
         const parsed = reactDocgenParser(source);
 

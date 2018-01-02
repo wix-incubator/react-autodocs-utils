@@ -1,9 +1,11 @@
 /* global Promise describe it expect jest afterEach */
 
 const metadataParser = require('./');
+const pathResolve = require('path').resolve;
 
 jest.mock('fs');
 const fs = require('fs');
+fs.__setCwd(__dirname);
 
 const rootMock = {
   description: '',
@@ -293,6 +295,42 @@ describe('metadataParser()', () => {
 
         return expect(metadataParser(pathsAndSources[0][0])).resolves.toEqual({
           description: 'I am the one who props',
+          methods: []
+        });
+      });
+
+      fit('should follow deep exports', () => {
+        const pathsAndSources = [
+          [
+            './index.js',
+            'export {default} from \'./layer.js\''
+          ],
+          [
+            './layer.js',
+            'export {default} from \'./folder/layer2.js\''
+          ],
+          [
+            './folder/layer2.js',
+            'export {default} from \'../layer3.js\''
+          ],
+          [
+            './layer3.js',
+            'export {default} from \'./component.js\''
+          ],
+          [
+            './component.js',
+            `
+              /** You got me */
+              const component = () => <div/>;
+              export default component;
+            `
+          ]
+        ];
+
+        pathsAndSources.map(([path, source]) => fs.__setFile(path)(source));
+
+        return expect(metadataParser(pathsAndSources[0][0])).resolves.toEqual({
+          description: 'You got me',
           methods: []
         });
       });

@@ -1,13 +1,18 @@
 /* global jest */
 const fs = jest.genMockFromModule('fs');
+const pathResolve = require('path').resolve;
 
 let mockFiles = {};
+let cwd = '';
+
+fs.__setCwd = path =>
+  cwd = path;
 
 fs.__setFile = path => content =>
-  mockFiles[path] = content;
+  mockFiles[pathResolve(cwd, path)] = content;
 
 fs.__getFile = path =>
-  mockFiles[path];
+  mockFiles[pathResolve(cwd, path)];
 
 fs.__reset = () =>
   mockFiles = {};
@@ -15,10 +20,14 @@ fs.__reset = () =>
 fs.__getAll = () =>
   mockFiles;
 
-fs.readFile = (path, encoding, callback) =>
-  mockFiles[path]
-    ? callback(null, mockFiles[path])
-    : new Error(`Can't read path ${path} from mocked files`);
+fs.readFile = (path, encoding, callback) => {
+  console.log(mockFiles);
+  const file = fs.__getFile(path);
+
+  return file
+    ? callback(null, file)
+    : callback(new Error(`Can't read path ${path} from mocked files`), null);
+};
 
 
 module.exports = fs;

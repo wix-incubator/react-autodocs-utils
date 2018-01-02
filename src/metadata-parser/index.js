@@ -3,4 +3,4 @@ const parser = require('../parser');
 
 module.exports = (path = '') =>
   fileReader(path)
-    .then(parser);
+    .then(source => parser(source, { cwd: path }));
