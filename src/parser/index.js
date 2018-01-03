@@ -6,7 +6,7 @@ const babylon = require('babylon');
 const fileReader = require('../file-reader');
 const reactDocgenParser = require('./react-docgen-parser');
 const path = require('path');
-
+const requireResolve = require('./require-resolve');
 
 const recastParser = source =>
   recast.parse(source, {
@@ -18,12 +18,11 @@ const recastParser = source =>
     }
   });
 
-
 const handleComposedProps = (parsed, currentPath) =>
   Promise
     .all(parsed.composes.map(composedPath =>
       fileReader(
-        path.join(path.dirname(currentPath), composedPath)
+        requireResolve(path.join(process.cwd(), path.dirname(currentPath), composedPath))
       ))
     )
 

@@ -2,16 +2,11 @@
 const {readFile, lstat} = require('fs');
 const pathJoin = require('path').join;
 
-const log = (...msgs) => fn => {
-  console.log(...msgs);
-  return fn;
-};
-
 const isDir = path =>
   new Promise((resolve, reject) =>
     lstat(path, (err, stats) =>
       err
-        ? reject(new Error(`ERROR: Unable to get stats for ${path}`))
+        ? reject(`ERROR: Unable to get stats for ${path}, ${err}`)
         : resolve(stats.isDirectory())
     )
   );

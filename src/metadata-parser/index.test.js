@@ -1,9 +1,10 @@
-/* global Promise describe it expect jest afterEach */
+/* global Promise describe it expect jest afterEach beforeAll afterAll */
 
 const metadataParser = require('./');
 
 jest.mock('fs');
 const fs = require('fs');
+const originalProcessDescriptor = Object.getOwnPropertyDescriptor(process, 'cwd');
 
 const rootMock = {
   description: '',
@@ -11,6 +12,17 @@ const rootMock = {
 };
 
 describe('metadataParser()', () => {
+  beforeAll(() => {
+    Object.defineProperty(process, 'cwd', {
+      value: () => ''
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(process, 'cwd', originalProcessDescriptor);
+  });
+
+
   it('should be a function', () => {
     expect(typeof metadataParser).toBe('function');
   });
@@ -185,44 +197,46 @@ describe('metadataParser()', () => {
               'spread-functional.js',
 
               `import React from 'react';
-             import PropTypes from 'prop-types';
-             import moreProps from './more-props.js';
-             import evenMoreProps from './even-more-props.js';
-             const component = () => <div>Hello World!</div>;
-             component.propTypes = {
-                ...moreProps,
-                ...evenMoreProps,
-                shapeProp: PropTypes.shape({
-                  stringProp: PropTypes.string,
-                  funcProp: PropTypes.func.isRequired
-                })
-             };
-             export default component;
-            `
+              import PropTypes from 'prop-types';
+              import moreProps from './more-props.js';
+              import evenMoreProps from './even-more-props.js';
+              const component = () => <div>Hello World!</div>;
+              component.propTypes = {
+                  ...moreProps,
+                  ...evenMoreProps,
+                  shapeProp: PropTypes.shape({
+                    stringProp: PropTypes.string,
+                    funcProp: PropTypes.func.isRequired
+                  })
+              };
+              export default component;
+              `
             ],
             [
               'more-props.js',
+
               `
-            import React from 'react';
-            import PropTypes from 'prop-types';
-            const component = ({propFromAnotherFile}) => <div></div>;
-            component.propTypes = {
-              propFromAnotherFile: PropTypes.bool.isRequired
-            };
-            export default component;
-            `
+              import React from 'react';
+              import PropTypes from 'prop-types';
+              const component = ({propFromAnotherFile}) => <div></div>;
+              component.propTypes = {
+                propFromAnotherFile: PropTypes.bool.isRequired
+              };
+              export default component;
+              `
             ],
             [
               'even-more-props.js',
+
               `
-            import React from 'react';
-            import PropTypes from 'prop-types';
-            const component = ({ propFromYetAnotherFile }) => <div></div>;
-            component.propTypes = {
-              propFromYetAnotherFile: PropTypes.string.isRequired
-            };
-            export default component;
-            `
+              import React from 'react';
+              import PropTypes from 'prop-types';
+              const component = ({ propFromYetAnotherFile }) => <div></div>;
+              component.propTypes = {
+                propFromYetAnotherFile: PropTypes.string.isRequired
+              };
+              export default component;
+              `
             ]
           ];
 
