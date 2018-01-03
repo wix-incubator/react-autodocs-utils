@@ -299,26 +299,22 @@ describe('metadataParser()', () => {
         });
       });
 
-      fit('should follow deep exports', () => {
+      fit('should follow many nested exports', () => {
         const pathsAndSources = [
           [
-            './index.js',
-            'export {default} from \'./layer.js\''
+            'index.js',
+            'export {default} from \'./sibling.js\''
           ],
           [
-            './layer.js',
-            'export {default} from \'./folder/layer2.js\''
+            'sibling.js',
+            'export {default} from \'./nested/deep/proxy.js\''
           ],
           [
-            './folder/layer2.js',
-            'export {default} from \'../layer3.js\''
+            'nested/deep/proxy.js',
+            'export {default} from \'../component.js\''
           ],
           [
-            './layer3.js',
-            'export {default} from \'./component.js\''
-          ],
-          [
-            './component.js',
+            'nested/component.js',
             `
               /** You got me */
               const component = () => <div/>;

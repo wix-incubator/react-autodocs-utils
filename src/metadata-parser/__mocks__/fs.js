@@ -9,10 +9,10 @@ fs.__setCwd = path =>
   cwd = path;
 
 fs.__setFile = path => content =>
-  mockFiles[pathResolve(cwd, path)] = content;
+  mockFiles[path] = content;
 
 fs.__getFile = path =>
-  mockFiles[pathResolve(cwd, path)];
+  mockFiles[path];
 
 fs.__reset = () =>
   mockFiles = {};
@@ -20,8 +20,17 @@ fs.__reset = () =>
 fs.__getAll = () =>
   mockFiles;
 
+fs.lstat = (path, callback) =>
+  callback(null, {
+    isDirectory: () => !path.match(/\..+$/)
+  });
+
+const log = (...msgs) => fn => {
+  console.log(...msgs);
+  return fn;
+};
+
 fs.readFile = (path, encoding, callback) => {
-  console.log(mockFiles);
   const file = fs.__getFile(path);
 
   return file

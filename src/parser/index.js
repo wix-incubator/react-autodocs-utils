@@ -76,10 +76,8 @@ const followExportDefault = (source, cwd) => {
       );
 
       if (proxiedPath) {
-        console.log('fak',  cwd, proxiedPath, path.relative(path.dirname(cwd), proxiedPath));
-        const resolvedPath = path.resolve(path.dirname(cwd), proxiedPath);
+        const resolvedPath = proxiedPath;
 
-        console.log('shit', resolvedPath);
         fileReader(resolvedPath)
           .then(visitExportDefault)
           .catch(e => console.log(`ERROR: unable to read ${resolvedPath}`, e));
@@ -90,6 +88,11 @@ const followExportDefault = (source, cwd) => {
 
     visitExportDefault(source);
   });
+};
+
+const log = (...msgs) => fn => {
+  console.log(...msgs);
+  return fn;
 };
 
 const parser = (source, {cwd}) =>
