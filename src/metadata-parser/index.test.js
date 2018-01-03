@@ -1,11 +1,9 @@
 /* global Promise describe it expect jest afterEach */
 
 const metadataParser = require('./');
-const pathResolve = require('path').resolve;
 
 jest.mock('fs');
 const fs = require('fs');
-fs.__setCwd(__dirname);
 
 const rootMock = {
   description: '',
@@ -182,13 +180,14 @@ describe('metadataParser()', () => {
 
       describe('that has spread props', () => {
         it('should return correct object for functional component', () => {
-          const [rootPath, rootSource] = [
-            'spread-functional.js',
+          const pathsAndSources = [
+            [
+              'spread-functional.js',
 
-            `import React from 'react';
+              `import React from 'react';
              import PropTypes from 'prop-types';
-             import moreProps from './more-props';
-             import evenMoreProps from './even-more-props';
+             import moreProps from './more-props.js';
+             import evenMoreProps from './even-more-props.js';
              const component = () => <div>Hello World!</div>;
              component.propTypes = {
                 ...moreProps,
@@ -200,12 +199,10 @@ describe('metadataParser()', () => {
              };
              export default component;
             `
-          ];
-
-
-          const [morePropsPath, morePropsSource] = [
-            './more-props',
-            `
+            ],
+            [
+              'more-props.js',
+              `
             import React from 'react';
             import PropTypes from 'prop-types';
             const component = ({propFromAnotherFile}) => <div></div>;
@@ -214,11 +211,10 @@ describe('metadataParser()', () => {
             };
             export default component;
             `
-          ];
-
-          const [evenMorePropsPath, evenMorePropsSource] = [
-            './even-more-props',
-            `
+            ],
+            [
+              'even-more-props.js',
+              `
             import React from 'react';
             import PropTypes from 'prop-types';
             const component = ({ propFromYetAnotherFile }) => <div></div>;
@@ -227,14 +223,12 @@ describe('metadataParser()', () => {
             };
             export default component;
             `
+            ]
           ];
 
+          pathsAndSources.forEach(([path, source]) => fs.__setFile(path)(source));
 
-          fs.__setFile(rootPath)(rootSource);
-          fs.__setFile(morePropsPath)(morePropsSource);
-          fs.__setFile(evenMorePropsPath)(evenMorePropsSource);
-
-          return expect(metadataParser(rootPath)).resolves.toEqual({
+          return expect(metadataParser(pathsAndSources[0][0])).resolves.toEqual({
             ...rootMock,
             props: {
               propFromAnotherFile: {
@@ -278,16 +272,16 @@ describe('metadataParser()', () => {
       it('should follow that export', () => {
         const pathsAndSources = [
           [
-            './index.js',
+            'index.js',
             'export {default} from \'./component.js\';'
           ],
           [
-            './component.js',
+            'component.js',
             `
               /** I am the one who props */
               const component = () => <div/>;
               export default component;
-              `
+            `
           ]
         ];
 
@@ -299,7 +293,7 @@ describe('metadataParser()', () => {
         });
       });
 
-      fit('should follow many nested exports', () => {
+      it('should follow many nested exports', () => {
         const pathsAndSources = [
           [
             'index.js',
@@ -307,10 +301,10 @@ describe('metadataParser()', () => {
           ],
           [
             'sibling.js',
-            'export {default} from \'./nested/deep/proxy.js\''
+            'export {default} from \'./nested/deep/component.js\''
           ],
           [
-            'nested/deep/proxy.js',
+            'nested/deep/component.js',
             'export {default} from \'../component.js\''
           ],
           [

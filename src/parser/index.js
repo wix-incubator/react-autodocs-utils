@@ -7,6 +7,7 @@ const fileReader = require('../file-reader');
 const reactDocgenParser = require('./react-docgen-parser');
 const path = require('path');
 
+
 const recastParser = source =>
   recast.parse(source, {
     parser: {
@@ -17,9 +18,14 @@ const recastParser = source =>
     }
   });
 
-const handleComposedProps = parsed =>
+
+const handleComposedProps = (parsed, currentPath) =>
   Promise
-    .all(parsed.composes.map(fileReader))
+    .all(parsed.composes.map(composedPath =>
+      fileReader(
+        path.join(path.dirname(currentPath), composedPath)
+      ))
+    )
 
     .then(composedSources =>
       Promise.all(composedSources.map(reactDocgenParser))
@@ -48,14 +54,15 @@ const handleComposedProps = parsed =>
       return otherProps;
     })
 
-    .catch(console.log);
+    .catch(e => console.log('ERROR: Unable to handle composed props', e));
 
-const followExportDefault = (source, cwd) => {
+
+const followExports = (source, currentPath) => {
   return new Promise(resolve => {
-    let proxiedPath = '';
+    let wantedPath = '';
 
-    const visitExportDefault = source => {
-      proxiedPath = '';
+    const visitExportDefault = (source, currentPath) => {
+      wantedPath = '';
 
       recast.visit(
         recastParser(source),
@@ -65,7 +72,7 @@ const followExportDefault = (source, cwd) => {
               path.node.specifiers.some(({ exported }) => exported.name === 'default');
 
             if (isSpecifierDefault) {
-              proxiedPath = path.node.source.value;
+              wantedPath = path.node.source.value;
 
               return false;
             }
@@ -75,34 +82,32 @@ const followExportDefault = (source, cwd) => {
         }
       );
 
-      if (proxiedPath) {
-        const resolvedPath = proxiedPath;
+      if (wantedPath) {
+        const resolvedPath = path.join(
+          path.dirname(currentPath),
+          wantedPath
+        );
 
         fileReader(resolvedPath)
-          .then(visitExportDefault)
+          .then(source => visitExportDefault(source, resolvedPath))
           .catch(e => console.log(`ERROR: unable to read ${resolvedPath}`, e));
       } else {
         resolve(source);
       }
     };
 
-    visitExportDefault(source);
+    visitExportDefault(source, currentPath);
   });
 };
 
-const log = (...msgs) => fn => {
-  console.log(...msgs);
-  return fn;
-};
-
-const parser = (source, {cwd}) =>
+const parser = (source, {currentPath}) =>
   new Promise((resolve, reject) => {
-    followExportDefault(source, cwd)
+    followExports(source, currentPath)
       .then(source => {
         const parsed = reactDocgenParser(source);
 
         return parsed.composes ?
-          handleComposedProps(parsed).then(resolve).catch(reject) :
+          handleComposedProps(parsed, currentPath).then(resolve).catch(reject) :
           resolve(parsed);
       });
   });
