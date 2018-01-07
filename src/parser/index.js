@@ -6,7 +6,6 @@ const babylon = require('babylon');
 const fileReader = require('../file-reader');
 const reactDocgenParser = require('./react-docgen-parser');
 const path = require('path');
-const requireResolve = require('./require-resolve');
 
 const recastParser = source =>
   recast.parse(source, {
@@ -20,10 +19,21 @@ const recastParser = source =>
 
 const handleComposedProps = (parsed, currentPath) =>
   Promise
-    .all(parsed.composes.map(composedPath =>
-      fileReader(
-        requireResolve(path.join(process.cwd(), path.dirname(currentPath), composedPath))
-      ))
+    .all(
+      parsed.composes.map(composedPath => {
+        const readablePath = path.join(path.dirname(currentPath), composedPath);
+
+        return fileReader(readablePath)
+          .then(source => [source, readablePath]);
+      })
+    )
+
+    .then(composedSourcesAndPaths =>
+      Promise.all(
+        composedSourcesAndPaths.map(([source, path]) =>
+          followExports(source, path)
+        )
+      )
     )
 
     .then(composedSources =>
@@ -56,12 +66,13 @@ const handleComposedProps = (parsed, currentPath) =>
     .catch(e => console.log('ERROR: Unable to handle composed props', e));
 
 
+// followExports (source: string, currentPath: string) => Promise<Source: string>
 const followExports = (source, currentPath) => {
   return new Promise(resolve => {
-    let wantedPath = '';
+    let exportedPath = '';
 
     const visitExportDefault = (source, currentPath) => {
-      wantedPath = '';
+      exportedPath = '';
 
       recast.visit(
         recastParser(source),
@@ -71,7 +82,7 @@ const followExports = (source, currentPath) => {
               path.node.specifiers.some(({ exported }) => exported.name === 'default');
 
             if (isSpecifierDefault) {
-              wantedPath = path.node.source.value;
+              exportedPath = path.node.source.value;
 
               return false;
             }
@@ -81,10 +92,12 @@ const followExports = (source, currentPath) => {
         }
       );
 
-      if (wantedPath) {
+      if (exportedPath) {
         const resolvedPath = path.join(
-          path.dirname(currentPath),
-          wantedPath
+          path.extname(currentPath)
+            ? path.dirname(currentPath)
+            : currentPath,
+          exportedPath
         );
 
         fileReader(resolvedPath)

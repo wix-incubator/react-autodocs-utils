@@ -1,4 +1,5 @@
 /* global jest */
+
 const fs = jest.genMockFromModule('fs');
 
 let mockFiles = {};
@@ -27,6 +28,5 @@ fs.readFile = (path, encoding, callback) => {
     ? callback(null, file)
     : callback(new Error(`Can't read path ${path} from mocked files`), null);
 };
-
 
 module.exports = fs;

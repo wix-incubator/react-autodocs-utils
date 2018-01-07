@@ -4,7 +4,6 @@ const metadataParser = require('./');
 
 jest.mock('fs');
 const fs = require('fs');
-const originalProcessDescriptor = Object.getOwnPropertyDescriptor(process, 'cwd');
 
 const rootMock = {
   description: '',
@@ -12,17 +11,6 @@ const rootMock = {
 };
 
 describe('metadataParser()', () => {
-  beforeAll(() => {
-    Object.defineProperty(process, 'cwd', {
-      value: () => ''
-    });
-  });
-
-  afterAll(() => {
-    Object.defineProperty(process, 'cwd', originalProcessDescriptor);
-  });
-
-
   it('should be a function', () => {
     expect(typeof metadataParser).toBe('function');
   });
@@ -227,7 +215,6 @@ describe('metadataParser()', () => {
             ],
             [
               'even-more-props.js',
-
               `
               import React from 'react';
               import PropTypes from 'prop-types';
