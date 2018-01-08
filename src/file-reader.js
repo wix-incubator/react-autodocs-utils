@@ -22,14 +22,13 @@ const readEntryFile = path =>
         )
       )
     )
-    .catch((e) => {
+    .catch(e =>
       // naively try again with extension
       // TODO: obviously it shouldn't be so stupid
-      if (!path.endsWith('.js')) {
-        return readEntryFile(path + '.js');
-      }
-      return console.log(e);
-    });
+      !path.endsWith('.js')
+        ?  readEntryFile(path + '.js')
+        : Promise.reject(e)
+    );
 
 module.exports = (path = '') =>
   path.length

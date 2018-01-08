@@ -36,8 +36,8 @@ const handleComposedProps = (parsed, currentPath) =>
       )
     )
 
-    .then(composedSources =>
-      Promise.all(composedSources.map(reactDocgenParser))
+    .then(composedSourcesAndPaths =>
+      Promise.all(composedSourcesAndPaths.map(({source}) => reactDocgenParser(source)))
     )
 
     .then(composedDefinitions =>
@@ -66,7 +66,7 @@ const handleComposedProps = (parsed, currentPath) =>
     .catch(e => console.log('ERROR: Unable to handle composed props', e));
 
 
-// followExports (source: string, currentPath: string) => Promise<Source: string>
+// followExports (source: string, currentPath: string) => Promise<{source: String, exportPath: String}>
 const followExports = (source, currentPath) => {
   return new Promise(resolve => {
     let exportedPath = '';
@@ -104,7 +104,7 @@ const followExports = (source, currentPath) => {
           .then(source => visitExportDefault(source, resolvedPath))
           .catch(e => console.log(`ERROR: unable to read ${resolvedPath}`, e));
       } else {
-        resolve(source);
+        resolve({ source, exportPath: exportedPath || currentPath });
       }
     };
 
@@ -115,11 +115,11 @@ const followExports = (source, currentPath) => {
 const parser = (source, {currentPath}) =>
   new Promise((resolve, reject) => {
     followExports(source, currentPath)
-      .then(source => {
+      .then(({source, exportPath}) => {
         const parsed = reactDocgenParser(source);
 
         return parsed.composes ?
-          handleComposedProps(parsed, currentPath).then(resolve).catch(reject) :
+          handleComposedProps(parsed, exportPath).then(resolve).catch(reject) :
           resolve(parsed);
       });
   });
