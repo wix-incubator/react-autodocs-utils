@@ -1,21 +1,12 @@
 /* global Promise */
 
 const recast = require('recast');
-const babylon = require('babylon');
 
 const fileReader = require('../file-reader');
 const reactDocgenParser = require('./react-docgen-parser');
+const recastParser = require('./recast-parser');
 const path = require('path');
 
-const recastParser = source =>
-  recast.parse(source, {
-    parser: {
-      parse: () => babylon.parse(source, {
-        plugins: ['jsx', 'classProperties', 'objectRestSpread'],
-        sourceType: 'module'
-      })
-    }
-  });
 
 const handleComposedProps = (parsed, currentPath) =>
   Promise
@@ -112,6 +103,7 @@ const followExports = (source, currentPath) => {
   });
 };
 
+
 const parser = (source, {currentPath}) =>
   new Promise((resolve, reject) => {
     followExports(source, currentPath)
@@ -123,5 +115,6 @@ const parser = (source, {currentPath}) =>
           resolve(parsed);
       });
   });
+
 
 module.exports = parser;
