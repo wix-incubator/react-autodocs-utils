@@ -21,7 +21,15 @@ const readEntryFile = path =>
           (err, data) => err ? reject(err) : resolve(data)
         )
       )
-    );
+    )
+    .catch((e) => {
+      // naively try again with extension
+      // TODO: obviously it shouldn't be so stupid
+      if (!path.endsWith('.js')) {
+        return readEntryFile(path + '.js');
+      }
+      return console.log(e);
+    });
 
 module.exports = (path = '') =>
   path.length

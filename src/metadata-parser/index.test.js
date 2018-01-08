@@ -325,6 +325,57 @@ describe('metadataParser()', () => {
           methods: []
         });
       });
+
+      it('should follow a mix of proxy modules and components', () => {
+        const pathsAndSources = [
+          [
+            'MyComponent/index.js',
+            'export {default} from \'./implementation\';'
+          ],
+          [
+            'MyComponent/implementation.js',
+            `import React from 'react';
+            import Proxied from '../AnotherComponent/implementation';
+            export default class MyComponent extends React.Component {
+              static propTypes = {
+                ...Proxied.propTypes
+              }
+              render() {
+                return (<div></div>);
+              }
+            }
+            `
+          ],
+          [
+            'AnotherComponent/implementation.js',
+            `
+              import PropTypes from 'prop-types';
+              const component = () => <div/>;
+              component.propTypes = {
+                exportedProp: PropTypes.string.isRequired
+              };
+              export default component;
+            `
+          ]
+        ];
+
+        pathsAndSources.map(([path, source]) => fs.__setFile(path)(source));
+
+        return expect(metadataParser(pathsAndSources[0][0])).resolves.toEqual({
+          description: '',
+          displayName: 'MyComponent',
+          methods: [],
+          props: {
+            exportedProp: {
+              description: '',
+              required: true,
+              type: {
+                name: 'string'
+              }
+            }
+          }
+        });
+      });
     });
   });
 });
