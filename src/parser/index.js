@@ -1,10 +1,8 @@
 /* global Promise */
 
-const recast = require('recast');
-
 const fileReader = require('../file-reader');
 const reactDocgenParser = require('./react-docgen-parser');
-const recastParser = require('./recast-parser');
+const recastVisitor = require('./recast-visitor');
 const path = require('path');
 
 
@@ -65,8 +63,7 @@ const followExports = (source, currentPath) => {
     const visitExportDefault = (source, currentPath) => {
       exportedPath = '';
 
-      recast.visit(
-        recastParser(source),
+      recastVisitor(source)(
         {
           visitExportNamedDeclaration: function(path) {
             const isSpecifierDefault =

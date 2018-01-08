@@ -2,7 +2,7 @@ const babylon = require('babylon');
 const recast = require('recast');
 
 
-const recastParser = source =>
+const parser = source =>
   recast.parse(source, {
     parser: {
       parse: () => babylon.parse(source, {
@@ -13,4 +13,12 @@ const recastParser = source =>
   });
 
 
-module.exports = recastParser;
+const visitor = source =>
+  recastVisitor =>
+    recast.visit(
+      parser(source),
+      recastVisitor
+    );
+
+
+module.exports = visitor;
