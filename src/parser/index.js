@@ -63,21 +63,20 @@ const followExports = (source, currentPath) => {
     const visitExportDefault = (source, currentPath) => {
       exportedPath = '';
 
-      recastVisitor(source)(
-        {
-          visitExportNamedDeclaration: function(path) {
-            const isSpecifierDefault =
-              path.node.specifiers.some(({ exported }) => exported.name === 'default');
+      recastVisitor(source)({
+        visitExportNamedDeclaration: function(path) {
+          const isSpecifierDefault =
+            path.node.specifiers.some(({ exported }) => exported.name === 'default');
 
-            if (isSpecifierDefault) {
-              exportedPath = path.node.source.value;
+          if (isSpecifierDefault) {
+            exportedPath = path.node.source.value;
 
-              return false;
-            }
-
-            this.traverse(path);
+            return false;
           }
+
+          this.traverse(path);
         }
+      }
       );
 
       if (exportedPath) {
