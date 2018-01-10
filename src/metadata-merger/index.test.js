@@ -7,9 +7,17 @@ describe('metadataMerger', () => {
     expect(typeof metadataMerger()).toBe('function');
   });
 
+  describe('when erroneous input given', () => {
+    it('should reject promise with message', () =>
+      expect(metadataMerger()())
+        .rejects
+        .toEqual('ERROR: unable to merge `metadata` into exported story config, ensure `source` & `metadata` are defined')
+    );
+  });
+
   describe('with 2 curried calls', () => {
     it('should return promise', () => {
-      expect(metadataMerger()().then).toBeDefined();
+      expect(metadataMerger('"test"')({}).then).toBeDefined();
     });
 
     it('should add `_metadata` to exportable `source`', () => {
@@ -20,8 +28,8 @@ describe('metadataMerger', () => {
   b: 2,
 
   _metadata: {
-    "hello": 1,
-    "goodbye": 2
+    'hello': 1,
+    'goodbye': 2
   }
 };`;
 

@@ -16,11 +16,11 @@ describe('metadataParser()', () => {
   });
 
   describe('when called without parameters', () => {
-    it('should reject with error', () => {
-      return metadataParser().catch(error => {
-        expect(error).toEqual(new Error('ERROR: Missing required `path` argument'));
-      });
-    });
+    it('should reject with error', () =>
+      expect(metadataParser())
+        .rejects
+        .toEqual(new Error('ERROR: Missing required `path` argument'))
+    );
   });
 
   describe('given existing path', () => {

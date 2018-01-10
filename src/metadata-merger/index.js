@@ -1,55 +1,49 @@
 /* global Promise */
 
 const recast = require('recast');
-const babylon = require('babylon');
+
+const parse = require('../parser/recast-parser');
+const print = require('../parser/recast-printer');
 const builders = recast.types.builders;
 
-const parser = source =>
-  recast.parse(source, {
-    parser: {
-      parse: () => babylon.parse(source, {
-        plugins: ['jsx', 'classProperties', 'objectRestSpread'],
-        sourceType: 'module',
-        allowImportExportEverywhere: true
-      })
-    }
-  });
+const metadataMerger = source => metadata =>
+  new Promise((resolve, reject) =>
+    source && metadata
+      ? resolve(parse(source))
+      : reject('ERROR: unable to merge `metadata` into exported story config, ensure `source` & `metadata` are defined')
+  )
 
-const metadataMerger = (source = '') => metadata =>
-  new Promise((resolve, reject) => {
-    const sourceAST = parser(source);
-    const metadataAST = parser(`(${JSON.stringify(metadata)})`);
+    .then(ast => {
+      const metadataAST = parse(`(${JSON.stringify(metadata)})`);
 
-    let metadataProperties;
+      let metadataProperties;
 
-    recast.visit(metadataAST, {
-      visitObjectExpression: function(path) {
-        metadataProperties = path.node.properties;
-        return false;
+      recast.visit(metadataAST, {
+        visitObjectExpression: function(path) {
+          metadataProperties = path.node.properties;
+          return false;
+        }
+      });
+
+      if (!metadataProperties) {
+        return Promise.reject('ERROR: Unable to merge metadata with source');
       }
+
+      recast.visit(ast, {
+        visitExportDefaultDeclaration: function(path) {
+          path.node.declaration.properties.push(
+            builders.objectProperty(
+              builders.identifier('_metadata'),
+              builders.objectExpression(metadataProperties)
+            )
+          );
+
+          return false;
+        }
+      });
+
+      return print(ast);
     });
-
-    if (!metadataProperties) {
-      return reject('ERROR: Unable to merge metadata with source');
-    }
-
-    recast.visit(sourceAST, {
-      visitExportDefaultDeclaration: function(path) {
-        path.node.declaration.properties.push(
-          builders.objectProperty(
-            builders.identifier('_metadata'),
-            builders.objectExpression(metadataProperties)
-          )
-        );
-
-        return false;
-      }
-    });
-
-    resolve(
-      recast.prettyPrint(sourceAST, { tabWidth: 2, reuseWhitespace: true }).code
-    );
-  });
 
 
 module.exports = metadataMerger;
