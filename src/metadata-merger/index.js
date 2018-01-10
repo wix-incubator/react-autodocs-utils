@@ -15,10 +15,10 @@ const parser = source =>
     }
   });
 
-const metadataMerger = source => metadata =>
+const metadataMerger = (source = '') => metadata =>
   new Promise((resolve, reject) => {
     const sourceAST = parser(source);
-    const metadataAST = parser(`const metadata = ${JSON.stringify(metadata)}`);
+    const metadataAST = parser(`(${JSON.stringify(metadata)})`);
 
     let metadataProperties;
 

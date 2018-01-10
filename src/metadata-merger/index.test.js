@@ -7,7 +7,7 @@ describe('metadataMerger', () => {
     expect(typeof metadataMerger()).toBe('function');
   });
 
-  describe('when called twice curried', () => {
+  describe('with 2 curried calls', () => {
     it('should return promise', () => {
       expect(metadataMerger()().then).toBeDefined();
     });
