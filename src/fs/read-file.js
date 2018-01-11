@@ -1,6 +1,7 @@
 /* global Promise */
-const {readFile, lstat} = require('fs');
+const {readFile: fsReadFile, lstat} = require('fs');
 const pathJoin = require('path').join;
+
 
 const isDir = path =>
   new Promise((resolve, reject) =>
@@ -11,11 +12,12 @@ const isDir = path =>
     )
   );
 
+
 const readEntryFile = path =>
   isDir(path)
     .then(isDir =>
       new Promise((resolve, reject) =>
-        readFile(
+        fsReadFile(
           isDir ? pathJoin(path, 'index.js') : path,
           'utf8',
           (err, data) => err ? reject(err) : resolve(data)
@@ -30,7 +32,11 @@ const readEntryFile = path =>
         : Promise.reject(e)
     );
 
-module.exports = (path = '') =>
+
+const readFile = (path = '') =>
   path.length
     ? readEntryFile(path)
-    : Promise.reject(new Error('ERROR: Missing required `path` argument'));
+    : Promise.reject(new Error('ERROR: Missing required `path` argument when calling `readFile`'));
+
+
+module.exports = readFile;

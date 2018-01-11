@@ -19,7 +19,7 @@ describe('metadataParser()', () => {
     it('should reject with error', () =>
       expect(metadataParser())
         .rejects
-        .toEqual(new Error('ERROR: Missing required `path` argument'))
+        .toEqual(new Error('ERROR: Missing required `path` argument when calling `readFile`'))
     );
   });
 

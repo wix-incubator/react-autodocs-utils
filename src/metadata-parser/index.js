@@ -1,4 +1,4 @@
-const fileReader = require('../file-reader');
+const fileReader = require('../fs/read-file');
 const parser = require('../parser');
 
 module.exports = (path = '') =>
