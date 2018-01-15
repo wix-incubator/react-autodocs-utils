@@ -1,6 +1,7 @@
 const [/* execPath */, /* path */, ...args] = process.argv;
 
-const metadataParser = require('./src/metadata-parser');
+const gatherAll = require('./src/gather-all');
 
-metadataParser(args[0])
-  .then(parsed => console.log(JSON.stringify(parsed, null, 2)));
+gatherAll(args[0])
+  .then(parsed => console.log(JSON.stringify(parsed, null, 2)))
+  .catch(console.log);

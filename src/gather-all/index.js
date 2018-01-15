@@ -14,18 +14,22 @@ const containsFile = files => name => {
     : Promise.reject();
 };
 
+
 // isPath : String -> Promise
 const isPath = path =>
   path
     ? Promise.resolve(path)
     : Promise.reject('Error: gatherAll is missing required `path` argument');
 
+
 // error : String -> Promise
 const error = message =>
   Promise.reject(new Error(message));
 
+
 const graceFail = a =>
   () => Promise.resolve(a);
+
 
 const gatherAll = path =>
   isPath(path)
@@ -37,9 +41,7 @@ const gatherAll = path =>
       const metadata = maybeFile('index.js')
         .then(file =>
           metadataParser(pathJoin(path, file))
-            .catch(e =>
-              error(`Unable to parse component in path "${path}" ${e}`)
-            )
+            .catch(e => error(`Unable to parse component in path "${path}" ${e}`))
         )
         .catch(() => error(`Unable to find required \`index.js\` in path "${path}"`));
 
