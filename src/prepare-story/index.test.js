@@ -20,9 +20,10 @@ describe('prepareStory', () => {
       expect(prepareStory({})('test').then).toBeDefined();
     });
 
-    it('should add import to given source', () => {
+    it('should required imports to given source', () => {
       const source = 'const something = \'hello\'; export default something;';
       const expectation = `import story from 'wix-storybook-utils/Story';
+import storiesOf from '@storybook/react';
 const something = 'hello';
 export default something;`;
 
@@ -32,10 +33,14 @@ export default something;`;
     it('should wrap exported object with `story()`', () => {
       const source = 'export default { a: 1 };';
       const expectation = `import story from 'wix-storybook-utils/Story';
+import storiesOf from '@storybook/react';
 
 export default story({
   a: 1,
-  _config: {}
+
+  _config: {
+    storiesOf: storiesOf
+  }
 });`;
 
       return expect(prepareStory({})(source)).resolves.toEqual(expectation);
@@ -45,12 +50,14 @@ export default story({
       const source = 'export default { a: 1 };';
       const config = { a: 1 };
       const expectation = `import story from 'wix-storybook-utils/Story';
+import storiesOf from '@storybook/react';
 
 export default story({
   a: 1,
 
   _config: {
-    'a': 1
+    'a': 1,
+    storiesOf: storiesOf
   }
 });`;
 
