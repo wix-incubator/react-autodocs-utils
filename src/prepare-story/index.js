@@ -8,10 +8,8 @@ const builders = recast.types.builders;
 const namedTypes = recast.types.namedTypes;
 
 
-const buildImportDeclaration = (identifier, path) => builders.importDeclaration(
-  [
-    builders.importDefaultSpecifier(builders.identifier(identifier))
-  ],
+const buildImportDeclaration = (specifier, path) => builders.importDeclaration(
+  [ specifier ],
   builders.literal(path),
   'value'
 );
@@ -26,8 +24,15 @@ const prepareStory = storyConfig => source =>
     .then(parse)
 
     .then(ast => {
-      ast.program.body.unshift(buildImportDeclaration('storiesOf', '@storybook/react'));
-      ast.program.body.unshift(buildImportDeclaration('story', 'wix-storybook-utils/Story'));
+      ast.program.body.unshift(buildImportDeclaration(
+        builders.importSpecifier(builders.identifier('storiesOf')),
+        '@storybook/react'
+      ));
+
+      ast.program.body.unshift(buildImportDeclaration(
+        builders.importDefaultSpecifier(builders.identifier('story')),
+        'wix-storybook-utils/Story'
+      ));
 
       return ast;
     })
