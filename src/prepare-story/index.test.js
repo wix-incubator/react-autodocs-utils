@@ -22,7 +22,7 @@ describe('prepareStory', () => {
 
     it('should required imports to given source', () => {
       const source = 'const something = \'hello\'; export default something;';
-      const expectation = `import story from 'wix-storybook-utils/Story';
+      const expectation = `import storyNew from 'wix-storybook-utils/StoryNew';
 import { storiesOf } from '@storybook/react';
 const something = 'hello';
 export default something;`;
@@ -32,10 +32,10 @@ export default something;`;
 
     it('should wrap exported object with `story()`', () => {
       const source = 'export default { a: 1 };';
-      const expectation = `import story from 'wix-storybook-utils/Story';
+      const expectation = `import storyNew from 'wix-storybook-utils/StoryNew';
 import { storiesOf } from '@storybook/react';
 
-export default story({
+export default storyNew({
   a: 1,
 
   _config: {
@@ -49,10 +49,10 @@ export default story({
     it('should add _config to exported object', () => {
       const source = 'export default { a: 1 };';
       const config = { a: 1 };
-      const expectation = `import story from 'wix-storybook-utils/Story';
+      const expectation = `import storyNew from 'wix-storybook-utils/StoryNew';
 import { storiesOf } from '@storybook/react';
 
-export default story({
+export default storyNew({
   a: 1,
 
   _config: {

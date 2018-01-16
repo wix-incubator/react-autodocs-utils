@@ -30,8 +30,8 @@ const prepareStory = storyConfig => source =>
       ));
 
       ast.program.body.unshift(buildImportDeclaration(
-        builders.importDefaultSpecifier(builders.identifier('story')),
-        'wix-storybook-utils/Story'
+        builders.importDefaultSpecifier(builders.identifier('storyNew')),
+        'wix-storybook-utils/StoryNew'
       ));
 
       return ast;
@@ -70,9 +70,9 @@ const prepareStory = storyConfig => source =>
               )
             );
 
-            // wrap exported object with `story()`
+            // wrap exported object with `storyNew()`
             path.node.declaration = builders.callExpression(
-              builders.identifier('story'),
+              builders.identifier('storyNew'),
               [ exportedObject ]
             );
           }
