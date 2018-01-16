@@ -28,6 +28,7 @@ const metadataMock = {
 
 const readmeMock = '# Hello readme!';
 const readmeAccessibilityMock = '# Hello Accessiblity!';
+const readmeTestkitMock = '# Hello Testkit!';
 
 describe('gatherAll', () => {
   beforeEach(fs.__reset);
@@ -42,17 +43,19 @@ describe('gatherAll', () => {
       });
     });
 
-    describe('which is folder with index.js, README.md and README.accessibility.md', () => {
+    describe('which is folder with index.js, README.md, README.accessibility.md and README.testkit.md', () => {
       it('should resolve with component metadata', () => {
-        fs.__setFolder('component-folder')([ 'index.js', 'readme.md', 'readme.accessibility.md' ]);
+        fs.__setFolder('component-folder')([ 'index.js', 'readme.md', 'readme.accessibility.md', 'readme.testkit.md' ]);
         fs.__setFile('component-folder/index.js')(componentSourceMock);
         fs.__setFile('component-folder/readme.md')(readmeMock);
         fs.__setFile('component-folder/readme.accessibility.md')(readmeAccessibilityMock);
+        fs.__setFile('component-folder/readme.testkit.md')(readmeTestkitMock);
 
         return expect(gatherAll('component-folder')).resolves.toEqual({
           ...metadataMock,
           readme: readmeMock,
-          readmeAccessibility: readmeAccessibilityMock
+          readmeAccessibility: readmeAccessibilityMock,
+          readmeTestkit: readmeTestkitMock
         });
       });
     });

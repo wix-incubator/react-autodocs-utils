@@ -27,16 +27,17 @@ const error = message =>
   Promise.reject(new Error(message));
 
 
-const graceFail = a =>
-  () => Promise.resolve(a);
-
-
 const gatherAll = path =>
   isPath(path)
     .then(readFolder)
 
     .then(files => {
       const maybeFile = containsFile(files);
+
+      const readMarkdown = markdownPath =>
+        maybeFile(markdownPath)
+          .then(file => readFile(pathJoin(path, file)))
+          .catch(() => Promise.resolve(''));
 
       const metadata = maybeFile('index.js')
         .then(file =>
@@ -45,22 +46,20 @@ const gatherAll = path =>
         )
         .catch(() => error(`Unable to find required \`index.js\` in path "${path}"`));
 
-      const readme = maybeFile('readme.md')
-        .then(file => readFile(pathJoin(path, file)))
-        .catch(graceFail(''));
-
-      const readmeAccessibility = maybeFile('readme.accessibility.md')
-        .then(file => readFile(pathJoin(path, file)))
-        .catch(graceFail(''));
+      const readme = readMarkdown('readme.md');
+      const readmeAccessibility = readMarkdown('readme.accessibility.md');
+      const readmeTestkit = readMarkdown('readme.testkit.md');
 
       return Promise.all([
         metadata,
         readme,
-        readmeAccessibility
-      ]).then(([metadata, readme, readmeAccessibility]) => ({
+        readmeAccessibility,
+        readmeTestkit
+      ]).then(([metadata, readme, readmeAccessibility, readmeTestkit]) => ({
         ...metadata,
         readme,
-        readmeAccessibility
+        readmeAccessibility,
+        readmeTestkit
       }));
     });
 
