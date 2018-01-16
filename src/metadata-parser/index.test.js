@@ -190,7 +190,7 @@ describe('metadataParser()', () => {
               import evenMoreProps from './even-more-props.js';
               const component = () => <div>Hello World!</div>;
               component.propTypes = {
-                  ...moreProps,
+                  ...moreProps.propTypes,
                   ...evenMoreProps,
                   shapeProp: PropTypes.shape({
                     stringProp: PropTypes.string,
@@ -218,9 +218,23 @@ describe('metadataParser()', () => {
               `
               import React from 'react';
               import PropTypes from 'prop-types';
+              import goDeeperProps from './go-deeper-props.js';
               const component = ({ propFromYetAnotherFile }) => <div></div>;
               component.propTypes = {
+                ...goDeeperProps.propTypes,
                 propFromYetAnotherFile: PropTypes.string.isRequired
+              };
+              export default component;
+              `
+            ],
+            [
+              'go-deeper-props.js',
+              `
+              import React from 'react';
+              import PropTypes from 'prop-types';
+              const component = ({ propFromDeep }) => <div></div>;
+              component.propTypes = {
+                propFromDeep: PropTypes.string.isRequired
               };
               export default component;
               `
@@ -262,7 +276,14 @@ describe('metadataParser()', () => {
                     }
                   }
                 }
-              }
+              },
+              propFromDeep: {
+                description: '',
+                type: {
+                  name: 'string'
+                },
+                required: true
+              },
             }
           });
         });

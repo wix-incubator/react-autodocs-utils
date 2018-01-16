@@ -5,7 +5,6 @@ const reactDocgenParser = require('./react-docgen-parser');
 const recastVisitor = require('./recast-visitor');
 const path = require('path');
 
-
 const handleComposedProps = (parsed, currentPath) =>
   Promise
     .all(
@@ -19,9 +18,7 @@ const handleComposedProps = (parsed, currentPath) =>
 
     .then(composedSourcesAndPaths =>
       Promise.all(
-        composedSourcesAndPaths.map(([source, path]) =>
-          followExports(source, path)
-        )
+        composedSourcesAndPaths.map(([source, path]) => followExports(source, path))
       )
     )
 
@@ -29,8 +26,31 @@ const handleComposedProps = (parsed, currentPath) =>
       Promise.all(composedSourcesAndPaths.map(({source}) => reactDocgenParser(source)))
     )
 
-    .then(composedDefinitions =>
-      composedDefinitions.reduce(
+    .then(parsedComponents => {
+      // here we receive list of object containing parsed component
+      // props. some of them may contain composed props from other
+      // components, in which case we handleComposedProps again
+      // recursively
+
+      const withComposed = parsedComponents
+        .filter(parsed => parsed.composes)
+        .map(parsed => handleComposedProps(parsed, currentPath));
+
+      const withoutComposed = parsedComponents
+        .filter(parsed => !parsed.composes)
+        .map(parsed => Promise.resolve(parsed));
+
+      return Promise.all([
+        Promise.all(withComposed),
+        Promise.all(withoutComposed)
+      ])
+        .then(([ withComposed, withoutComposed ]) =>
+          [...withComposed, ...withoutComposed]
+        );
+    })
+
+    .then(parsedComponents =>
+      parsedComponents.reduce(
         (acc, definition) => ({
           ...definition.props,
           ...acc
