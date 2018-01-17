@@ -28,8 +28,8 @@ describe('metadataMerger', () => {
   b: 2,
 
   _metadata: {
-    'hello': 1,
-    'goodbye': 2
+    "hello":1,
+    "goodbye":2
   }
 };`;
 

@@ -45,7 +45,12 @@ describe('gatherAll', () => {
 
     describe('which is folder with index.js, README.md, README.accessibility.md and README.testkit.md', () => {
       it('should resolve with component metadata', () => {
-        fs.__setFolder('component-folder')([ 'index.js', 'readme.md', 'readme.accessibility.md', 'readme.testkit.md' ]);
+        fs.__setFolder('component-folder')([
+          'index.js',
+          'readme.md',
+          'readme.accessibility.md',
+          'readme.testkit.md'
+        ]);
         fs.__setFile('component-folder/index.js')(componentSourceMock);
         fs.__setFile('component-folder/readme.md')(readmeMock);
         fs.__setFile('component-folder/readme.accessibility.md')(readmeAccessibilityMock);
