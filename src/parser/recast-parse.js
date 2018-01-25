@@ -2,7 +2,7 @@ const babylon = require('babylon');
 const recast = require('recast');
 
 
-const parser = source =>
+const parse = source =>
   recast.parse(source, {
     parser: {
       parse: () => babylon.parse(source, {
@@ -13,4 +13,4 @@ const parser = source =>
   });
 
 
-module.exports = parser;
+module.exports = parse;

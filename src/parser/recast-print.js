@@ -1,6 +1,8 @@
 const recast = require('recast');
 
-const printer = ast =>
+
+const print = ast =>
   recast.print(ast).code;
 
-module.exports = printer;
+
+module.exports = print;

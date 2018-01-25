@@ -1,11 +1,11 @@
 /* global Promise */
 
-const recastVisitor = require('../parser/recast-visitor');
+const recastVisit = require('../parser/recast-visit');
 
 
 const pathFinder = (source = '') =>
   new Promise((resolve) =>
-    recastVisitor(source)({
+    recastVisit(source)({
       visitExportDefaultDeclaration: function(path) {
         const componentPath = path.node.declaration.properties
           .find(({ key: { name } }) => name === 'componentPath');

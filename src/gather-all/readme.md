@@ -2,5 +2,3 @@
 as possible.
 
 This is the entry point. Internally it uses `metadataParser`, `fileReader` `pathFinder` and such
-
-or, well, it will use once i implement :)

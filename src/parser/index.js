@@ -1,8 +1,8 @@
 /* global Promise */
 
 const fileReader = require('../fs/read-file');
-const reactDocgenParser = require('./react-docgen-parser');
-const recastVisitor = require('./recast-visitor');
+const reactDocgenParse = require('./react-docgen-parse');
+const recastVisit = require('./recast-visit');
 const path = require('path');
 
 const handleComposedProps = (parsed, currentPath) =>
@@ -23,7 +23,7 @@ const handleComposedProps = (parsed, currentPath) =>
     )
 
     .then(composedSourcesAndPaths =>
-      Promise.all(composedSourcesAndPaths.map(({source}) => reactDocgenParser(source)))
+      Promise.all(composedSourcesAndPaths.map(({source}) => reactDocgenParse(source)))
     )
 
     .then(parsedComponents => {
@@ -83,7 +83,7 @@ const followExports = (source, currentPath) =>
     const visitExportDefault = (source, currentPath) => {
       exportedPath = '';
 
-      recastVisitor(source)({
+      recastVisit(source)({
         visitExportNamedDeclaration: function(path) {
           const isSpecifierDefault =
             path.node.specifiers.some(({ exported }) => exported.name === 'default');
@@ -123,7 +123,7 @@ const parser = (source, {currentPath}) =>
   new Promise((resolve, reject) => {
     followExports(source, currentPath)
       .then(({source, exportPath}) => {
-        const parsed = reactDocgenParser(source);
+        const parsed = reactDocgenParse(source);
 
         return parsed.composes
           ? handleComposedProps(parsed, exportPath).then(resolve).catch(reject)
