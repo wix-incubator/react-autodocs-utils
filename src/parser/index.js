@@ -9,7 +9,10 @@ const handleComposedProps = (parsed, currentPath) =>
   Promise
     .all(
       parsed.composes.map(composedPath => {
-        const readablePath = path.join(path.dirname(currentPath), composedPath);
+        const readablePath =
+          composedPath.startsWith('.')
+            ? path.join(path.dirname(currentPath), composedPath)
+            : path.join('node_modules', composedPath);
 
         return fileReader(readablePath)
           .then(source => [source, readablePath]);

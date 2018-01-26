@@ -65,17 +65,49 @@ describe('gatherAll', () => {
     });
 
     describe('which is folder with component importing from node_modules', () => {
-      it.skip('should resolve with component metadata', () => {
+      it('should resolve with component metadata', () => {
         fs.__setFS({
-          'index.js': 'hello',
+          src: {
+            components: {
+              Badge: {
+                'index.js':
+                  `import * as React from 'react';
+                  import {Badge as CoreBadge} from 'wix-ui-core/Badge';
+                  const component = () => <div/>;
+                  component.propTypes = {
+                    ...CoreBadge.propTypes,
+                  };
+                  export default component;
+                  `
+              }
+            }
+          },
+
           node_modules: {
-            'wix-ui-backoffice': {
-              'index.js': 'hello wix-ui-backoffice'
+            'wix-ui-core': {
+              Badge: {
+                'index.js': componentSourceMock
+              }
             }
           }
         });
 
-        expect(true).toBe(true);
+        return expect(gatherAll('src/components/Badge')).resolves.toEqual({
+          description: '',
+          methods: [],
+          props: {
+            test: {
+              description: '',
+              required: true,
+              type: {
+                name: 'string'
+              }
+            }
+          },
+          readme: '',
+          readmeAccessibility: '',
+          readmeTestkit: ''
+        });
       });
     });
   });
