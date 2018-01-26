@@ -9,19 +9,23 @@ fs.__setFS = tree =>
   mockFS = tree;
 
 fs.lstat = (path, callback) =>
-  callback(null, {
-    // very naive mocking, we assume filesnames not containing dot are directories
-    isDirectory: () => !path.match(/\..+$/)
-  });
+  getNodeInTree(mockFS)(path)
+    .then(source => typeof source !== 'string')
+    .catch(() => Promise.resolve(false))
+    .then(isDir =>
+      callback(null, {
+        isDirectory: () => isDir
+      })
+    );
 
-const getNodeInTree = tree => predicate => path =>
+const getNodeInTree = tree => path =>
   new Promise((resolve, reject) => {
     const [ contents ] = path
       .split(pathSep)
       .reduce(
         ([ /* contents */, cwd ], pathPart) =>
           cwd
-            ? predicate(cwd[pathPart])
+            ? cwd && cwd[pathPart]
               ? [ cwd[pathPart], cwd[pathPart] ]
               : [ null, cwd[pathPart] ]
             : reject(new Error(`ERROR: Trying to read non existing path "${path}" in mocked files`))
@@ -34,13 +38,13 @@ const getNodeInTree = tree => predicate => path =>
   });
 
 fs.readFile = (path, encoding, callback) =>
-  getNodeInTree(mockFS)(candidate => typeof candidate === 'string')(path)
+  getNodeInTree(mockFS)(path)
     .then(source => callback(null, source))
     .catch(e => callback(e, null));
 
 
 fs.readdir = (path, encoding, callback) =>
-  getNodeInTree(mockFS)(candidate => candidate.toString() === '[object Object]')(path)
+  getNodeInTree(mockFS)(path)
     .then(folder => callback(null, Object.keys(folder)))
     .catch(e => callback(e, null));
 

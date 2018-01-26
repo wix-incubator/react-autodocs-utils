@@ -350,6 +350,23 @@ describe('metadataParser()', () => {
         });
       });
     });
+
+    describe('with non `index.js` entry', () => {
+      it('should resolve entry file corrrectly', () => {
+        fs.__setFS({
+          'index.js': 'export {default} from \'./Component\'',
+          'Component.tsx':
+            `import React from 'react';
+            /** tsx component */
+            export default () => <div/>;`
+        });
+
+        return expect(metadataParser('index.js')).resolves.toEqual({
+          description: 'tsx component',
+          methods: []
+        });
+      });
+    });
   });
 
   describe('given component importing from other modules', () => {
