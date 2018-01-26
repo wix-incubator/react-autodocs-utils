@@ -14,7 +14,6 @@ fs.lstat = (path, callback) =>
     isDirectory: () => !path.match(/\..+$/)
   });
 
-
 const getNodeInTree = tree => predicate => path =>
   new Promise((resolve, reject) => {
     const [ contents ] = path
@@ -23,9 +22,9 @@ const getNodeInTree = tree => predicate => path =>
         ([ /* contents */, cwd ], pathPart) =>
           cwd
             ? predicate(cwd[pathPart])
-              ? [ cwd[pathPart], {} ]
+              ? [ cwd[pathPart], cwd[pathPart] ]
               : [ null, cwd[pathPart] ]
-            : reject(new Error('ERROR: Trying to read non existing path in mocked files'))
+            : reject(new Error(`ERROR: Trying to read non existing path "${path}" in mocked files`))
         , [ null, tree ]
       );
 
