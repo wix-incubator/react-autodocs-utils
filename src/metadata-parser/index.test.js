@@ -399,4 +399,34 @@ describe('metadataParser()', () => {
       });
     });
   });
+
+  describe('given component importing from other modules', () => {
+    it('should resolve node_modules path', () => {
+      const pathsAndSources = [
+        [
+          'MyComponent/index.js',
+          'export {default} from \'wix-ui-backoffice/Component\''
+        ],
+        [
+          'node_modules/wix-ui-backoffice/Component/index.js',
+          `export {default} from './Component.js'
+          `
+        ],
+        [
+          'node_modules/wix-ui-backoffice/Component/Component.js',
+          `import React from 'react';
+          /** backoffice component */
+          export default () => <div/>;
+          `
+        ]
+      ];
+
+      pathsAndSources.map(([path, source]) => fs.__setFile(path)(source));
+
+      return expect(metadataParser(pathsAndSources[0][0])).resolves.toEqual({
+        description: 'backoffice component',
+        methods: []
+      });
+    });
+  });
 });

@@ -26,16 +26,19 @@ const followExports = (source, currentPath) =>
 
           this.traverse(path);
         }
-      }
-      );
+      });
 
       if (exportedPath) {
-        const resolvedPath = path.join(
-          path.extname(currentPath)
-            ? path.dirname(currentPath)
-            : currentPath,
-          exportedPath
-        );
+        const resolvedPath =
+          exportedPath.startsWith('.')
+            ? path.join(
+              path.extname(currentPath)
+                ? path.dirname(currentPath)
+                : currentPath,
+
+              exportedPath
+            )
+            : path.join('node_modules', exportedPath);
 
         fileReader(resolvedPath)
           .then(source => visitExportDefault(source, resolvedPath))
