@@ -31,12 +31,13 @@ const readmeAccessibilityMock = '# Hello Accessiblity!';
 const readmeTestkitMock = '# Hello Testkit!';
 
 describe('gatherAll', () => {
-  beforeEach(fs.__reset);
-
   describe('given path argument', () => {
     describe('which is empty folder', () => {
       it('should reject with error', () => {
-        fs.__setFolder('some-path')([]);
+        fs.__setFS({
+          'some-path': {}
+        });
+
         expect(gatherAll('some-path'))
           .rejects
           .toEqual(new Error('Unable to find required `index.js` in path "some-path"'));
@@ -45,16 +46,14 @@ describe('gatherAll', () => {
 
     describe('which is folder with index.js, README.md, README.accessibility.md and README.testkit.md', () => {
       it('should resolve with component metadata', () => {
-        fs.__setFolder('component-folder')([
-          'index.js',
-          'readme.md',
-          'readme.accessibility.md',
-          'readme.testkit.md'
-        ]);
-        fs.__setFile('component-folder/index.js')(componentSourceMock);
-        fs.__setFile('component-folder/readme.md')(readmeMock);
-        fs.__setFile('component-folder/readme.accessibility.md')(readmeAccessibilityMock);
-        fs.__setFile('component-folder/readme.testkit.md')(readmeTestkitMock);
+        fs.__setFS({
+          'component-folder': {
+            'index.js': componentSourceMock,
+            'readme.md': readmeMock,
+            'readme.accessibility.md': readmeAccessibilityMock,
+            'readme.testkit.md': readmeTestkitMock
+          }
+        });
 
         return expect(gatherAll('component-folder')).resolves.toEqual({
           ...metadataMock,
@@ -62,6 +61,21 @@ describe('gatherAll', () => {
           readmeAccessibility: readmeAccessibilityMock,
           readmeTestkit: readmeTestkitMock
         });
+      });
+    });
+
+    describe('which is folder with component importing from node_modules', () => {
+      it.skip('should resolve with component metadata', () => {
+        fs.__setFS({
+          'index.js': 'hello',
+          node_modules: {
+            'wix-ui-backoffice': {
+              'index.js': 'hello wix-ui-backoffice'
+            }
+          }
+        });
+
+        expect(true).toBe(true);
       });
     });
   });

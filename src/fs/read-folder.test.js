@@ -8,10 +8,14 @@ const readFolder = require('./read-folder');
 describe('readFolder', () => {
   describe('given existing path', () => {
     it('should resolve with array of folder entries', () => {
-      const mockFolder = ['file.js', 'folder'];
-      fs.__setFolder('folder-name')(mockFolder);
+      fs.__setFS({
+        'folder-name': {
+          'file.js': '',
+          folder: {}
+        }
+      });
 
-      return expect(readFolder('folder-name')).resolves.toEqual(mockFolder);
+      return expect(readFolder('folder-name')).resolves.toEqual(['file.js', 'folder']);
     });
   });
 
