@@ -1,19 +1,12 @@
 /* global Promise */
+
 const {readFile: fsReadFileAsync, lstat} = require('fs');
 const {join: pathJoin, extname: pathExtname} = require('path');
 
-const promisify = require('../promisify');
-const readFolder = require('./read-folder');
+const promisify = require('../promises/promisify');
+const promiseFirst = require('../promises/first');
 
 const fsReadFile = promisify(fsReadFileAsync);
-
-const invertPromise = promise =>
-  new Promise((resolve, reject) =>
-    promise.then(reject).catch(resolve)
-  );
-
-const promiseFirst = promises =>
-  invertPromise(Promise.all(promises.map(invertPromise)));
 
 
 const isDir = path =>
