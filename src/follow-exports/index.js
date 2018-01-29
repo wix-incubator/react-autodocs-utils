@@ -1,8 +1,10 @@
 /* global Promise */
 
 const path = require('path');
+
 const recastVisit = require('../parser/recast-visit');
 const fileReader = require('../fs/read-file');
+const get = require('../get');
 
 
 // followExports (source: string, currentPath: string) => Promise<{source: String, exportPath: String}>
@@ -20,6 +22,25 @@ const followExports = (source, currentPath) =>
 
           if (isSpecifierDefault) {
             exportedPath = path.node.source.value;
+
+            return false;
+          }
+
+          this.traverse(path);
+        },
+
+        visitAssignmentExpression: function(path) {
+          const node = path.node;
+          const getter = get(node);
+
+          const isDefaultExport = [
+            getter('left.object.name') === 'module',
+            getter('left.property.name') === 'exports',
+            getter('right.callee.name') === 'require',
+          ].every(i => i);
+
+          if (isDefaultExport) {
+            exportedPath = getter('right.arguments.0.value');
 
             return false;
           }

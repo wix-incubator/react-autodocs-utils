@@ -351,6 +351,25 @@ describe('metadataParser()', () => {
       });
     });
 
+    describe('with `module.exports = require(\'path\')`', () => {
+      it('should follow that export', () => {
+        fs.__setFS({
+          'index.js': 'module.exports = require(\'./component\')',
+          'component.js': `
+          import React from 'react';
+          /** i'm looking for you */
+          const component = () => <div/>;
+          export default component;
+          `
+        });
+
+        return expect(metadataParser('index.js')).resolves.toEqual({
+          description: 'i\'m looking for you',
+          methods: []
+        });
+      });
+    });
+
     describe('with non `index.js` entry', () => {
       it('should resolve entry file corrrectly', () => {
         fs.__setFS({
