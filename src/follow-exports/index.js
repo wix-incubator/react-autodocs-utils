@@ -7,6 +7,22 @@ const fileReader = require('../fs/read-file');
 const get = require('../get');
 
 
+const resolvePath = (cwd, relativePath) => {
+  const resolved = relativePath.startsWith('.')
+    ? path.join(
+      path.extname(cwd)
+        ? path.dirname(cwd)
+        : cwd,
+      relativePath
+    )
+    : path.join('node_modules', relativePath);
+
+  const desired = resolved.replace('dist/', '');
+
+  return desired;
+};
+
+
 // followExports (source: string, currentPath: string) => Promise<{source: String, exportPath: String}>
 const followExports = (source, currentPath) =>
   new Promise(resolve => {
@@ -50,16 +66,7 @@ const followExports = (source, currentPath) =>
       });
 
       if (exportedPath) {
-        const resolvedPath =
-          exportedPath.startsWith('.')
-            ? path.join(
-              path.extname(currentPath)
-                ? path.dirname(currentPath)
-                : currentPath,
-
-              exportedPath
-            )
-            : path.join('node_modules', exportedPath);
+        const resolvedPath = resolvePath(currentPath, exportedPath);
 
         fileReader(resolvedPath)
           .then(source => visitExportDefault(source, resolvedPath))

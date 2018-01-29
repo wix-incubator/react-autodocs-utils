@@ -368,6 +368,27 @@ describe('metadataParser()', () => {
           methods: []
         });
       });
+
+      it('should remove `dist/` from path', () => {
+        // TODO: yeah well removing `dist` is quite an assumption
+        fs.__setFS({
+          'index.js': 'module.exports = require(\'./dist/src/component\')',
+
+          src: {
+            'component.jsx': `
+              import React from 'react';
+              /** what a lovely day */
+              const component = () => <div/>;
+              export default component;
+              `
+          }
+        });
+
+        return expect(metadataParser('index.js')).resolves.toEqual({
+          description: 'what a lovely day',
+          methods: []
+        });
+      });
     });
 
     describe('with non `index.js` entry', () => {
