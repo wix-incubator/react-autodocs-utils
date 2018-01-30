@@ -38,9 +38,10 @@ describe('gatherAll', () => {
           'some-path': {}
         });
 
-        expect(gatherAll('some-path'))
-          .rejects
-          .toEqual(new Error('Unable to find required `index.js` in path "some-path"'));
+        return gatherAll('some-path')
+          .catch(({ message }) => {
+            expect(message).toMatch('Unable to parse component in path "some-path", reason:');
+          });
       });
     });
 
@@ -107,6 +108,44 @@ describe('gatherAll', () => {
           readme: '',
           readmeAccessibility: '',
           readmeTestkit: ''
+        });
+      });
+    });
+
+    describe('which is folder with components of various extensions', () => {
+      it('should resolve with component metadata', () => {
+        fs.__setFS({
+          folder: {
+            'index.tsx': `
+              import PropTypes from 'prop-types';
+              import composed from 'some-module/Component';
+              const component = () => <div/>;
+              component.propTypes = { ...composed.propTypes };
+              export default component;
+            `,
+
+            'readme.md': readmeMock,
+            'readme.accessibility.md': readmeAccessibilityMock,
+            'readme.testkit.md': readmeTestkitMock
+          },
+
+          node_modules: {
+            'some-module': {
+              'Component.ts': `
+              import PropTypes from 'prop-types';
+              const component = () => <div/>;
+              component.propTypes = { test: PropTypes.string.isRequired };
+              export default component;
+              `
+            }
+          }
+        });
+
+        return expect(gatherAll('folder')).resolves.toEqual({
+          ...metadataMock,
+          readme: readmeMock,
+          readmeAccessibility: readmeAccessibilityMock,
+          readmeTestkit: readmeTestkitMock
         });
       });
     });

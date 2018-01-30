@@ -32,19 +32,15 @@ const gatherAll = path =>
     .then(readFolder)
 
     .then(files => {
-      const maybeFile = containsFile(files);
+      const metadata = metadataParser(path)
+        .catch(e =>
+          error(`Unable to parse component in path "${path}", reason: ${e}`)
+        );
 
       const readMarkdown = markdownPath =>
-        maybeFile(markdownPath)
+        containsFile(files)(markdownPath)
           .then(file => readFile(pathJoin(path, file)))
           .catch(() => Promise.resolve(''));
-
-      const metadata = maybeFile('index.js')
-        .then(file =>
-          metadataParser(pathJoin(path, file))
-            .catch(e => error(`Unable to parse component in path "${path}" ${e}`))
-        )
-        .catch(() => error(`Unable to find required \`index.js\` in path "${path}"`));
 
       const readme = readMarkdown('readme.md');
       const readmeAccessibility = readMarkdown('readme.accessibility.md');
