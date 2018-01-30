@@ -8,6 +8,8 @@ const promiseFirst = require('../promises/first');
 
 const fsReadFile = promisify(fsReadFileAsync);
 
+const SUPPORTED_FILE_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx'];
+
 
 const isDir = path =>
   new Promise((resolve, reject) =>
@@ -30,7 +32,7 @@ const readEntryFile = path =>
       pathExtname(entryPath)
         ? fsReadFile(path, 'utf8')
         : promiseFirst(
-          ['.js', '.jsx', '.ts', '.tsx']
+          SUPPORTED_FILE_EXTENSIONS
             .map(extension => fsReadFile(entryPath + extension, 'utf8'))
         )
     );
