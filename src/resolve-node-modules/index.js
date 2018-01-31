@@ -1,3 +1,5 @@
+/* global Promise */
+
 const readFolder = require('../fs/read-folder');
 const path = require('path');
 
@@ -8,7 +10,9 @@ const resolveNodeModulesPath = (cwd, modulePath) => {
     .then(files =>
       files.includes('node_modules')
         ? path.join(checkPath, 'node_modules', modulePath)
-        : resolveNodeModulesPath(checkPath, modulePath)
+        : checkPath !== '.'
+          ? resolveNodeModulesPath(checkPath, modulePath)
+          : Promise.reject('ERROR: Unable to resolve node_moduels path in "${modulePath}"')
     );
 };
 

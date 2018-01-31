@@ -154,6 +154,86 @@ describe('gatherAll', () => {
           readmeTestkit: readmeTestkitMock
         });
       });
+
+      it('should resolve real world scenario', () => {
+        fs.__setFS({
+          src: {
+            components: {
+              Badge: {
+                'index.js':
+                  `import * as React from 'react';
+                  import {oneOf} from 'prop-types';
+                  import {Badge as CoreBadge} from 'wix-ui-core/Badge';
+                  export class Badge extends React.PureComponent {
+                    static propTypes = {
+                      ...CoreBadge.propTypes,
+                      skin: oneOf(['red', 'blue'])
+                    }
+
+                    render() {
+                      return <div/>;
+                    }
+                  }`,
+
+                'readme.md': readmeMock,
+                'readme.accessibility.md': readmeAccessibilityMock,
+                'readme.testkit.md': readmeTestkitMock
+              }
+            }
+          },
+
+          node_modules: {
+            'wix-ui-core': {
+              'Badge.js': 'module.exports = require(\'./dist/src/components/Badge\');',
+
+              src: {
+                components: {
+                  Badge: {
+                    'index.ts':
+                      `import * as React from 'react';
+                      import {string} from 'prop-types';
+                      const Badge = () => <div/>;
+                      Badge.propTypes = {
+                        children: string
+                      }
+                      export default Badge;
+                      `
+                  }
+                }
+              }
+            }
+          }
+        });
+
+        return expect(gatherAll('src/components/Badge')).resolves.toEqual({
+          description: '',
+          methods: [],
+          displayName: 'Badge',
+          props: {
+            skin: {
+              description: '',
+              type: {
+                name: 'enum',
+                value: [
+                  { computed: false, value: "'red'" },
+                  { computed: false, value: "'blue'" }
+                ]
+              },
+              required: false
+            },
+            children: {
+              type: {
+                name: 'string'
+              },
+              description: '',
+              required: false
+            }
+          },
+          readme: readmeMock,
+          readmeAccessibility: readmeAccessibilityMock,
+          readmeTestkit: readmeTestkitMock
+        });
+      });
     });
   });
 
