@@ -191,6 +191,14 @@ describe('gatherAll', () => {
                   Badge: {
                     'index.ts':
                       `import * as React from 'react';
+                      import BadgeComponent from './Badge';
+                      import {withClasses} from 'wix-ui-jss';
+                      import {styles} from './styles';
+                      export default withClasses(BadgeComponent, styles)
+                      `,
+
+                    'Badge.tsx':
+                      `import * as React from 'react';
                       import {string} from 'prop-types';
                       const Badge = () => <div/>;
                       Badge.propTypes = {

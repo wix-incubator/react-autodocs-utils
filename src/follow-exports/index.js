@@ -31,6 +31,7 @@ const followExports = (source, currentPath) =>
       exportedPath = '';
 
       recastVisit(source)({
+        // export {default} from 'path';
         visitExportNamedDeclaration: function(path) {
           const isSpecifierDefault =
             path.node.specifiers.some(({ exported }) => exported.name === 'default');
@@ -44,9 +45,9 @@ const followExports = (source, currentPath) =>
           this.traverse(path);
         },
 
+        // module.exports = require('path')
         visitAssignmentExpression: function(path) {
-          const node = path.node;
-          const getter = get(node);
+          const getter = get(path.node);
 
           const isDefaultExport = [
             getter('left.object.name') === 'module',
@@ -58,6 +59,33 @@ const followExports = (source, currentPath) =>
             exportedPath = getter('right.arguments.0.value');
 
             return false;
+          }
+
+          this.traverse(path);
+        },
+
+        // export default hoc(Component);
+        visitExportDefaultDeclaration: function(path) {
+          const getter = get(path.node);
+
+          if (getter('declaration.type') === 'CallExpression') {
+            if (getter('declaration.callee.name') === 'withClasses') {
+              const componentName = getter('declaration.arguments.0.name');
+
+              recastVisit(source)({
+                visitImportDeclaration: function(path) {
+                  const componentImport =
+                    path.node.specifiers.find(specifier => specifier.local.name === componentName);
+
+                  if (componentImport) {
+                    exportedPath = path.node.source.value;
+                    return false;
+                  }
+
+                  this.traverse(path);
+                }
+              });
+            }
           }
 
           this.traverse(path);
