@@ -40,6 +40,7 @@ const gatherAll = path =>
       const readMarkdown = markdownPath =>
         containsFile(files)(markdownPath)
           .then(file => readFile(pathJoin(path, file)))
+          .then(({source}) => source)
           .catch(() => Promise.resolve(''));
 
       const readme = readMarkdown('readme.md');

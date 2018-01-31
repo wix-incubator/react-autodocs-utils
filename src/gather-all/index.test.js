@@ -86,8 +86,14 @@ describe('gatherAll', () => {
 
           node_modules: {
             'wix-ui-core': {
-              Badge: {
-                'index.js': componentSourceMock
+              'Badge.js': 'module.exports = require(\'./dist/src/components/Badge\');',
+
+              src: {
+                components: {
+                  Badge: {
+                    'index.js': componentSourceMock
+                  }
+                }
               }
             }
           }

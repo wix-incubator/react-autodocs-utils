@@ -3,23 +3,22 @@
 const path = require('path');
 
 const recastVisit = require('../parser/recast-visit');
-const fileReader = require('../fs/read-file');
+const readFile = require('../fs/read-file');
+const resolveNodeModulesPath = require('../resolve-node-modules');
 const get = require('../get');
 
 
 const resolvePath = (cwd, relativePath) => {
-  const resolved = relativePath.startsWith('.')
-    ? path.join(
+  const desiredPath = relativePath.replace('dist/', '');
+
+  return relativePath.startsWith('.')
+    ? Promise.resolve(path.join(
       path.extname(cwd)
         ? path.dirname(cwd)
         : cwd,
-      relativePath
-    )
-    : path.join('node_modules', relativePath);
-
-  const desired = resolved.replace('dist/', '');
-
-  return desired;
+      desiredPath
+    ))
+    : resolveNodeModulesPath(cwd, desiredPath);
 };
 
 
@@ -66,11 +65,12 @@ const followExports = (source, currentPath) =>
       });
 
       if (exportedPath) {
-        const resolvedPath = resolvePath(currentPath, exportedPath);
-
-        fileReader(resolvedPath)
-          .then(source => visitExportDefault(source, resolvedPath))
-          .catch(e => console.log(`ERROR: unable to read ${resolvedPath}`, e));
+        resolvePath(currentPath, exportedPath)
+          .then(resolvedPath =>
+            readFile(resolvedPath)
+              .then(({ source }) => visitExportDefault(source, resolvedPath))
+              .catch(e => console.log(`ERROR: unable to read ${resolvedPath}`, e))
+          );
       } else {
         resolve({ source, exportPath: exportedPath || currentPath });
       }

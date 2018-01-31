@@ -436,5 +436,61 @@ describe('metadataParser()', () => {
         methods: []
       });
     });
+
+    it('should resolve deep node_modules path', () => {
+      fs.__setFS({
+        MyComponent: {
+          'index.js': 'export {default} from \'wix-ui-backoffice/Component\''
+        },
+
+        node_modules: {
+          'wix-ui-backoffice': {
+            Component: {
+              'index.js': 'export {default} from \'../src/components/Component\'',
+            },
+
+            src: {
+              components: {
+                'Component.js':
+                  `import React from 'react';
+                  import CoreProps from 'wix-ui-core/Component';
+                  /** backoffice component */
+                  const component = () => <div/>;
+                  component.propTypes = {
+                    ...CoreProps
+                  }
+                  export default component;`
+              }
+            },
+
+            node_modules: {
+              'wix-ui-core': {
+                'Component.tsx':
+                `import React from 'react'
+                import PropTypes from 'prop-types';
+                const component = () => <div/>;
+                component.propTypes = {
+                  /** hello from core */
+                  coreProp: PropTypes.func
+                };
+                export default component;`
+              }
+            }
+          }
+        }
+      });
+
+      return expect(metadataParser('MyComponent/index.js')).resolves.toEqual({
+        description: 'backoffice component',
+        methods: [],
+        props: {
+          coreProp: {
+            required: false,
+            description: 'hello from core',
+            type: { name: 'func' }
+          }
+        }
+      });
+    });
   });
 });

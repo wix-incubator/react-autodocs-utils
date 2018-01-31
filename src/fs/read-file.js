@@ -19,7 +19,6 @@ const isDir = path =>
         : resolve(stats.isDirectory())
     ));
 
-
 const readEntryFile = path =>
   isDir(path)
     .then(isDir =>
@@ -30,14 +29,19 @@ const readEntryFile = path =>
 
     .then(entryPath =>
       pathExtname(entryPath)
-        ? fsReadFile(path, 'utf8')
+        ? fsReadFile(path, 'utf8').then(source => ({ source, path }))
         : promiseFirst(
           SUPPORTED_FILE_EXTENSIONS
-            .map(extension => fsReadFile(entryPath + extension, 'utf8'))
+            .map(extension => {
+              const path = entryPath + extension;
+              return fsReadFile(path, 'utf8')
+                .then(source => ({ source, path }));
+            })
         )
     );
 
 
+// readFile -> String -> Promise<{ source: String, path: String }>
 const readFile = (path = '') =>
   path.length
     ? readEntryFile(path)

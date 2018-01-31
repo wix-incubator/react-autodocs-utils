@@ -1,27 +1,29 @@
 /* global Promise */
 
-const fileReader = require('../fs/read-file');
+const path = require('path');
+
+const readFile = require('../fs/read-file');
 const reactDocgenParse = require('./react-docgen-parse');
 const followExports = require('../follow-exports');
-const path = require('path');
+const resolveNodeModules = require('../resolve-node-modules');
 
 const handleComposedProps = (parsed, currentPath) =>
   Promise
     .all(
       parsed.composes.map(composedPath => {
-        const readablePath =
+        const readablePathPromise =
           composedPath.startsWith('.')
-            ? path.join(path.dirname(currentPath), composedPath)
-            : path.join('node_modules', composedPath);
+            ? Promise.resolve(path.join(path.dirname(currentPath), composedPath))
+            : resolveNodeModules(currentPath, composedPath);
 
-        return fileReader(readablePath)
-          .then(source => [source, readablePath]);
+        return readablePathPromise
+          .then(readFile);
       })
     )
 
     .then(composedSourcesAndPaths =>
       Promise.all(
-        composedSourcesAndPaths.map(([source, path]) => followExports(source, path))
+        composedSourcesAndPaths.map(({ source, path }) => followExports(source, path))
       )
     )
 
@@ -83,6 +85,7 @@ const parser = (source, {currentPath}) =>
     followExports(source, currentPath)
       .then(({source, exportPath}) => {
         const parsed = reactDocgenParse(source);
+
 
         return parsed.composes
           ? handleComposedProps(parsed, exportPath).then(resolve).catch(reject)

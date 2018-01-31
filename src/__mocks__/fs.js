@@ -44,9 +44,11 @@ fs.readFile = (path, encoding, callback) =>
 
 
 fs.readdir = (path, encoding, callback) =>
-  getNodeInTree(mockFS)(path)
-    .then(folder => callback(null, Object.keys(folder)))
-    .catch(e => callback(e, null));
+  path === '.'
+    ? callback(null, Object.keys(mockFS))
+    : getNodeInTree(mockFS)(path)
+      .then(folder => callback(null, Object.keys(folder)))
+      .catch(e => callback(e, null));
 
 
 module.exports = fs;

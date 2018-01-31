@@ -14,7 +14,10 @@ describe('readFile', () => {
         'test.file': content
       });
 
-      return expect(readFile('test.file')).resolves.toEqual(content);
+      return expect(readFile('test.file')).resolves.toEqual({
+        source: content,
+        path: 'test.file'
+      });
     });
   });
 
