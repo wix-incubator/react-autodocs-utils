@@ -1,6 +1,6 @@
 /* global Promise */
 
-const path = require('path');
+const { join: pathJoin, dirname: pathDirname } = require('path');
 
 const readFile = require('../fs/read-file');
 const reactDocgenParse = require('./react-docgen-parse');
@@ -13,7 +13,7 @@ const handleComposedProps = (parsed, currentPath) =>
       parsed.composes.map(composedPath => {
         const readablePathPromise =
           composedPath.startsWith('.')
-            ? Promise.resolve(path.join(path.dirname(currentPath), composedPath))
+            ? Promise.resolve(pathJoin(pathDirname(currentPath), composedPath))
             : resolveNodeModules(currentPath, composedPath);
 
         return readablePathPromise
@@ -28,8 +28,11 @@ const handleComposedProps = (parsed, currentPath) =>
     )
 
     .then(composedSourcesAndPaths =>
-      Promise.all(composedSourcesAndPaths.map(({source}) => reactDocgenParse(source)))
-    )
+      Promise.all(
+        composedSourcesAndPaths.map(({ source, exportPath }) =>
+          reactDocgenParse(source, { path: exportPath })
+        )
+      ))
 
     .then(parsedComponents => {
       // here we receive list of object containing parsed component
@@ -84,8 +87,7 @@ const parser = (source, {currentPath}) =>
   new Promise((resolve, reject) => {
     followExports(source, currentPath)
       .then(({source, exportPath}) => {
-        const parsed = reactDocgenParse(source);
-
+        const parsed = reactDocgenParse(source, { path: exportPath });
 
         return parsed.composes
           ? handleComposedProps(parsed, exportPath).then(resolve).catch(reject)

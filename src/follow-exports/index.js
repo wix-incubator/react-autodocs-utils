@@ -64,7 +64,7 @@ const followExports = (source, currentPath) =>
           this.traverse(path);
         },
 
-        // export default hoc(Component);
+        // export default withClasses(Component);
         visitExportDefaultDeclaration: function(path) {
           const getter = get(path.node);
 

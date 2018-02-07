@@ -27,6 +27,8 @@
   "dependencies": {
     "babylon": "6.18.0",
     "react-docgen": "2.20.0",
-    "recast": "0.13.0"
+    "react-docgen-typescript": "^1.2.3",
+    "recast": "0.13.0",
+    "typescript": "^2.7.1"
   }
 }

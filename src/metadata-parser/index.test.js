@@ -493,4 +493,39 @@ describe('metadataParser()', () => {
       });
     });
   });
+
+  describe.skip('given component writter in typescript', () => {
+    it('should parse metadata', () => {
+      fs.__setFS({
+        'index.ts':
+        `import * as React from 'react';
+        import { Component } from 'react';
+        export interface Props {
+          /** this is a text prop */
+          text: any;
+        }
+
+        /** This is the component */
+        export class Component extends Component<Props> {
+          render() {
+            return <div>test</div>;
+          }
+        }
+        `
+      });
+
+      return expect(metadataParser('index.ts')).resolves.toEqual({
+        description: 'This is the component',
+        methods: [],
+        displayName: 'Component',
+        props: {
+          text: {
+            required: false,
+            description: 'this is a text prop',
+            type: { name: 'string' }
+          }
+        }
+      });
+    });
+  });
 });
