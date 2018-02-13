@@ -1,13 +1,6 @@
-const recast = require('recast');
+const traverse = require('@babel/traverse').default;
 
-const parse = require('./recast-parse');
-
-const visit = source =>
-  visitorObject =>
-    recast.visit(
-      parse(source),
-      visitorObject
-    );
-
+const visit = ast => visitor =>
+  traverse(ast, visitor);
 
 module.exports = visit;

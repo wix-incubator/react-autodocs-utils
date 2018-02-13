@@ -26,10 +26,9 @@ describe('metadataMerger', () => {
       const expectation = `export default {
   a: 1,
   b: 2,
-
   _metadata: {
-    "hello":1,
-    "goodbye":2
+    "hello": 1,
+    "goodbye": 2
   }
 };`;
 

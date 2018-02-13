@@ -1,17 +1,14 @@
 /* global Promise */
 
-const recast = require('recast');
-
+const types = require('@babel/types');
+const visit = require('../parser/recast-visit');
 const parse = require('../parser/recast-parse');
 const print = require('../parser/recast-print');
-const builders = recast.types.builders;
-const namedTypes = recast.types.namedTypes;
 
 
-const buildImportDeclaration = (specifier, path) => builders.importDeclaration(
+const buildImportDeclaration = (specifier, path) => types.importDeclaration(
   [ specifier ],
-  builders.literal(path),
-  'value'
+  types.stringLiteral(path)
 );
 
 const prepareStory = storyConfig => source =>
@@ -25,12 +22,12 @@ const prepareStory = storyConfig => source =>
 
     .then(ast => {
       ast.program.body.unshift(buildImportDeclaration(
-        builders.importSpecifier(builders.identifier('storiesOf')),
+        types.importSpecifier(types.identifier('storiesOf'), types.identifier('storiesOf')),
         '@storybook/react'
       ));
 
       ast.program.body.unshift(buildImportDeclaration(
-        builders.importDefaultSpecifier(builders.identifier('storyNew')),
+        types.importDefaultSpecifier(types.identifier('storyNew')),
         'wix-storybook-utils/StoryNew'
       ));
 
@@ -38,9 +35,9 @@ const prepareStory = storyConfig => source =>
     })
 
     .then(ast => {
-      recast.visit(ast, {
-        visitExportDefaultDeclaration: function(path) {
-          const exportsObject = path.node.declaration.type === namedTypes.ObjectExpression.name;
+      visit(ast)({
+        ExportDefaultDeclaration(path) {
+          const exportsObject = types.isObjectExpression(path.node.declaration);
 
           if (exportsObject) {
             const exportedObject = path.node.declaration;
@@ -49,11 +46,11 @@ const prepareStory = storyConfig => source =>
             const configAST = parse(`(${JSON.stringify(storyConfig)})`);
             let configProperties;
 
-            recast.visit(configAST, {
-              visitObjectExpression: path => {
-                const storiesOfProperty = builders.objectProperty(
-                  builders.identifier('storiesOf'),
-                  builders.identifier('storiesOf')
+            visit(configAST)({
+              ObjectExpression(path) {
+                const storiesOfProperty = types.objectProperty(
+                  types.identifier('storiesOf'),
+                  types.identifier('storiesOf')
                 );
 
                 path.node.properties.push(storiesOfProperty);
@@ -64,15 +61,15 @@ const prepareStory = storyConfig => source =>
             });
 
             exportedObject.properties.push(
-              builders.objectProperty(
-                builders.identifier('_config'),
-                builders.objectExpression(configProperties)
+              types.objectProperty(
+                types.identifier('_config'),
+                types.objectExpression(configProperties)
               )
             );
 
             // wrap exported object with `storyNew()`
-            path.node.declaration = builders.callExpression(
-              builders.identifier('storyNew'),
+            path.node.declaration = types.callExpression(
+              types.identifier('storyNew'),
               [ exportedObject ]
             );
           }

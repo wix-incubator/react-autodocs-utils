@@ -3,6 +3,7 @@
 const recast = require('recast');
 
 const parse = require('../parser/recast-parse');
+const visit = require('../parser/recast-visit');
 const print = require('../parser/recast-print');
 const builders = recast.types.builders;
 
@@ -18,10 +19,9 @@ const metadataMerger = source => metadata =>
 
       let metadataProperties;
 
-      recast.visit(metadataAST, {
-        visitObjectExpression: function(path) {
+      visit(metadataAST)({
+        ObjectExpression(path) {
           metadataProperties = path.node.properties;
-          return false;
         }
       });
 
@@ -29,8 +29,8 @@ const metadataMerger = source => metadata =>
         return Promise.reject('ERROR: Unable to merge metadata with source');
       }
 
-      recast.visit(ast, {
-        visitExportDefaultDeclaration: function(path) {
+      visit(ast)({
+        ExportDefaultDeclaration(path) {
           path.node.declaration.properties.push(
             builders.objectProperty(
               builders.identifier('_metadata'),

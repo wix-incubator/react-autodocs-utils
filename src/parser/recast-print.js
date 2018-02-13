@@ -1,8 +1,8 @@
-const recast = require('recast');
+const generate = require('@babel/generator').default;
 
 
 const print = ast =>
-  recast.print(ast).code;
+  generate(ast).code;
 
 
 module.exports = print;

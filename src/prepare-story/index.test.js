@@ -37,7 +37,6 @@ export default something;`;
 import { storiesOf } from "@storybook/react";
 export default storyNew({
   a: 1,
-
   _config: {
     storiesOf: storiesOf
   }
@@ -53,9 +52,8 @@ export default storyNew({
 import { storiesOf } from "@storybook/react";
 export default storyNew({
   a: 1,
-
   _config: {
-    "a":1,
+    "a": 1,
     storiesOf: storiesOf
   }
 });`;

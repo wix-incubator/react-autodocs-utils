@@ -2,7 +2,8 @@
 
 const path = require('path');
 
-const recastVisit = require('../parser/recast-visit');
+const parse = require('../parser/recast-parse');
+const visit = require('../parser/recast-visit');
 const readFile = require('../fs/read-file');
 const resolveNodeModulesPath = require('../resolve-node-modules');
 const get = require('../get');
@@ -21,7 +22,6 @@ const resolvePath = (cwd, relativePath) => {
     : resolveNodeModulesPath(cwd, desiredPath);
 };
 
-
 // followExports (source: string, currentPath: string) => Promise<{source: String, exportPath: String}>
 const followExports = (source, currentPath) =>
   new Promise(resolve => {
@@ -30,9 +30,11 @@ const followExports = (source, currentPath) =>
     const visitExportDefault = (source, currentPath) => {
       exportedPath = '';
 
-      recastVisit(source)({
+      const ast = parse(source);
+
+      visit(ast)({
         // export {default} from 'path';
-        visitExportNamedDeclaration: function(path) {
+        ExportNamedDeclaration(path) {
           const isSpecifierDefault =
             path.node.specifiers.some(({ exported }) => exported.name === 'default');
 
@@ -41,54 +43,41 @@ const followExports = (source, currentPath) =>
 
             return false;
           }
-
-          this.traverse(path);
         },
 
         // module.exports = require('path')
-        visitAssignmentExpression: function(path) {
-          const getter = get(path.node);
-
+        AssignmentExpression(path) {
           const isDefaultExport = [
-            getter('left.object.name') === 'module',
-            getter('left.property.name') === 'exports',
-            getter('right.callee.name') === 'require',
+            path.get('left.object').isIdentifier({ name: 'module' }),
+            path.get('left.property').isIdentifier({ name: 'exports' }),
+            path.get('right.callee').isIdentifier({ name: 'require' }),
           ].every(i => i);
 
           if (isDefaultExport) {
-            exportedPath = getter('right.arguments.0.value');
-
-            return false;
+            exportedPath = path.node.right.arguments[0].value;
           }
-
-          this.traverse(path);
         },
 
         // export default withClasses(Component);
-        visitExportDefaultDeclaration: function(path) {
+        ExportDefaultDeclaration(path) {
           const getter = get(path.node);
 
           if (getter('declaration.type') === 'CallExpression') {
             if (getter('declaration.callee.name') === 'withClasses') {
               const componentName = getter('declaration.arguments.0.name');
 
-              recastVisit(source)({
-                visitImportDeclaration: function(path) {
+              visit(ast)({
+                ImportDeclaration(path) {
                   const componentImport =
-                    path.node.specifiers.find(specifier => specifier.local.name === componentName);
+        path.node.specifiers.find(specifier => specifier.local.name === componentName);
 
                   if (componentImport) {
                     exportedPath = path.node.source.value;
-                    return false;
                   }
-
-                  this.traverse(path);
                 }
               });
             }
           }
-
-          this.traverse(path);
         }
       });
 

@@ -1,6 +1,7 @@
 /* global Promise */
 
-const recastVisit = require('../parser/recast-visit');
+const parse = require('../parser/recast-parse');
+const visit = require('../parser/recast-visit');
 const get = require('../get');
 
 const getPropertyValue = path => propertyName =>
@@ -8,11 +9,11 @@ const getPropertyValue = path => propertyName =>
     .find(({ key: { name } }) => name === propertyName);
 
 const pathFinder = (source = '') => {
-  const visit = recastVisit(source);
+  const ast = parse(source);
 
   return new Promise((resolve, reject) => {
-    visit({
-      visitExportDefaultDeclaration: function(path) {
+    visit(ast)({
+      ExportDefaultDeclaration(path) {
         const componentPath = get(getPropertyValue(path)('componentPath'))('value.value');
 
         if (componentPath) {
@@ -21,8 +22,8 @@ const pathFinder = (source = '') => {
         } else {
           const componentReference = get(getPropertyValue(path)('component'))('value.name');
 
-          visit({
-            visitImportDeclaration: function(path) {
+          visit(ast)({
+            ImportDeclaration(path) {
               const componentPath = get(path)('node.specifiers')
                 .find(({ local: { name } }) => name === componentReference);
 
@@ -30,8 +31,6 @@ const pathFinder = (source = '') => {
                 resolve(get(path)('node.source.value'));
                 return false;
               }
-
-              this.traverse(path);
             }
           });
 

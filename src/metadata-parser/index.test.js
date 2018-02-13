@@ -498,20 +498,19 @@ describe('metadataParser()', () => {
     it('should parse metadata', () => {
       fs.__setFS({
         'index.ts':
-        `import * as React from 'react';
-        import { Component } from 'react';
-        export interface Props {
-          /** this is a text prop */
-          text: any;
-        }
-
-        /** This is the component */
-        export class Component extends Component<Props> {
-          render() {
-            return <div>test</div>;
+          `import * as React from 'react';
+          export interface Props {
+            /** this is a text prop */
+            text: any;
           }
-        }
-        `
+
+          /** This is the component */
+          export class Component extends React.Component<Props> {
+            render() {
+              return <div>test</div>;
+            }
+          }
+          `
       });
 
       return expect(metadataParser('index.ts')).resolves.toEqual({
