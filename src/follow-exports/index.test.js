@@ -6,10 +6,6 @@ jest.mock('fs');
 const fs = require('fs');
 
 describe('followExports()', () => {
-  it('should be a function', () => {
-    expect(typeof followExports).toBe('function');
-  });
-
   describe('given source', () => {
     describe('which does not have exports', () => {
       it('should return original source', () => {
@@ -30,6 +26,29 @@ describe('followExports()', () => {
         return expect(followExports(source, '')).resolves.toEqual({
           source: 'hello',
           exportPath: 'index.js'
+        });
+      });
+
+      it('should return source of resolved file without exports', () => {
+        const source = 'export {default} from \'./file.js\'';
+        fs.__setFS({
+          'index.js': source,
+
+          node_modules: {
+            'file.js': 'export {default} from \'../nested/deep/index.js\'',
+          },
+
+          nested: {
+            deep: {
+              'index.js': 'export {default} from \'../sibling.js\''
+            },
+            'sibling.js': 'hello'
+          }
+        });
+
+        return expect(followExports(source, 'node_modules')).resolves.toEqual({
+          source: 'hello',
+          exportPath: 'nested/sibling.js'
         });
       });
     });

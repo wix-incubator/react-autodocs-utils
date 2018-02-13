@@ -3,10 +3,10 @@
 const {readFile: fsReadFileAsync, lstat} = require('fs');
 const {join: pathJoin, extname: pathExtname} = require('path');
 
-const promisify = require('../promises/promisify');
+const promise = require('../promises/promise');
 const promiseFirst = require('../promises/first');
 
-const fsReadFile = promisify(fsReadFileAsync);
+const fsReadFile = promise(fsReadFileAsync);
 
 const SUPPORTED_FILE_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx'];
 
