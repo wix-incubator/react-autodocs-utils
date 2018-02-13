@@ -52,5 +52,31 @@ describe('followExports()', () => {
         });
       });
     });
+
+    describe('which exports with `withClasses` hoc', () => {
+      it('should return source of component', () => {
+        const source = 'module.exports = require(\'./dist/src/components/component\');';
+
+        fs.__setFS({
+          'index.js': source,
+
+          src: {
+            components: {
+              component: {
+                'index.js': `
+                  import Component from './component.js';
+                  export default withClasses(Component, styles)`,
+                'component.js': 'hello'
+              }
+            }
+          }
+        });
+
+        return expect(followExports(source, '')).resolves.toEqual({
+          source: 'hello',
+          exportPath: 'src/components/component/component.js'
+        });
+      });
+    });
   });
 });

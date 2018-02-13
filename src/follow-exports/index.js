@@ -62,8 +62,8 @@ const followExports = (source, currentPath) =>
         ExportDefaultDeclaration(path) {
           const getter = get(path.node);
 
-          if (getter('declaration.type') === 'CallExpression') {
-            if (getter('declaration.callee.name') === 'withClasses') {
+          if (path.get('declaration').isCallExpression()) {
+            if (path.get('declaration.callee').isIdentifier({ name: 'withClasses' })) {
               const componentName = getter('declaration.arguments.0.name');
 
               visit(ast)({
