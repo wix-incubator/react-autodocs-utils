@@ -7,24 +7,33 @@ const readFile = require('../read-file');
 const followExports = require('../follow-exports');
 const resolveNodeModules = require('../resolve-node-modules');
 
+const parseDocgen = (source, path) =>
+  new Promise((resolve, reject) => {
+    const parsed = reactDocgenParse(source, { path });
 
-const followProps = (parsed, currentPath) =>
-  Promise
-    .all(
-      parsed.composes.map(composedPath => {
-        const readablePathPromise =
+    return parsed.composes
+      ? reject(parsed) // we'll handle composed props in catch
+      : resolve(parsed);
+  });
+
+const handleComposedProps = (parsed, currentPath) =>
+  Promise.all(
+    parsed.composes.map(composedPath => {
+      const readablePathPromise =
           composedPath.startsWith('.')
             ? Promise.resolve(pathJoin(pathDirname(currentPath), composedPath))
             : resolveNodeModules(currentPath, composedPath);
 
-        return readablePathPromise
-          .then(readFile);
-      })
-    )
+      return readablePathPromise
+        .then(readFile);
+    })
+  )
 
     .then(composedSourcesAndPaths =>
       Promise.all(
-        composedSourcesAndPaths.map(({ source, path }) => followExports(source, path))
+        composedSourcesAndPaths.map(({ source, path }) =>
+          followExports(source, path)
+        )
       )
     )
 
@@ -36,13 +45,13 @@ const followProps = (parsed, currentPath) =>
       ))
 
     .then(parsedComponents => {
-      // here we receive list of object containing parsed component
-      // props. some of them may contain composed props from other
-      // components, in which case we followProps again recursively
+    // here we receive list of object containing parsed component
+    // props. some of them may contain composed props from other
+    // components, in which case we followProps again recursively
 
       const withComposed = parsedComponents
         .filter(parsed => parsed.composes)
-        .map(parsed => followProps(parsed, currentPath));
+        .map(parsed => handleComposedProps(parsed, currentPath));
 
       const withoutComposed = parsedComponents
         .filter(parsed => !parsed.composes)
@@ -75,12 +84,21 @@ const followProps = (parsed, currentPath) =>
     )
 
     .then(allProps => {
-      // eslint-disable-next-line no-unused-vars
+    // eslint-disable-next-line no-unused-vars
       const { composes, ...otherProps } = allProps;
       return otherProps;
     })
 
     .catch(e => console.log('ERROR: Unable to handle composed props', e));
+
+
+const followProps = (source, path) =>
+  parseDocgen(source)
+    // if resolved, no need to follow props, no need for .then
+    // if rejected, need to follow props
+    .catch(parsed =>
+      handleComposedProps(parsed, path)
+    );
 
 
 module.exports = followProps;
