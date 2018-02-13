@@ -5,7 +5,7 @@
   */
 
 
-// promise : Function => (...a) => Promise<b>
+// promise : Function => (...args) => Promise<payload>
 const promise = fn => (...args) =>
   new Promise((resolve, reject) =>
     fn(
