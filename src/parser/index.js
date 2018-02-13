@@ -84,16 +84,14 @@ const handleComposedProps = (parsed, currentPath) =>
 
 
 const parser = (source, {currentPath}) =>
-  new Promise((resolve, reject) => {
-    followExports(source, currentPath)
-      .then(({source, exportPath}) => {
-        const parsed = reactDocgenParse(source, { path: exportPath });
+  followExports(source, currentPath)
+    .then(({source, exportPath}) => {
+      const parsed = reactDocgenParse(source, { path: exportPath });
 
-        return parsed.composes
-          ? handleComposedProps(parsed, exportPath).then(resolve).catch(reject)
-          : resolve(parsed);
-      });
-  });
+      return parsed.composes
+        ? handleComposedProps(parsed, exportPath)
+        : Promise.resolve(parsed);
+    });
 
 
 module.exports = parser;

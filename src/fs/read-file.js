@@ -1,12 +1,13 @@
 /* global Promise */
 
-const {readFile: fsReadFileAsync, lstat} = require('fs');
+const {readFile: fsReadFileAsync, lstat: fsLstat} = require('fs');
 const {join: pathJoin, extname: pathExtname} = require('path');
 
 const promise = require('../promises/promise');
 const promiseFirst = require('../promises/first');
 
 const fsReadFile = promise(fsReadFileAsync);
+const lstat = promise(fsLstat);
 
 const SUPPORTED_FILE_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx'];
 
@@ -23,12 +24,11 @@ const tryReadWithExtension = entryPath =>
 
 
 const isDir = path =>
-  new Promise((resolve, reject) =>
-    lstat(path, (err, stats) =>
-      err
-        ? reject(`ERROR: Unable to get file stats for ${path}, ${err}`)
-        : resolve(stats.isDirectory())
-    ));
+  lstat(path)
+    .then(stats => stats.isDirectory())
+    .catch(err =>
+      Promise.reject(`ERROR: Unable to get file stats for ${path}, ${err}`)
+    );
 
 const readEntryFile = path =>
   isDir(path)

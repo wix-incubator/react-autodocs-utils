@@ -1,13 +1,12 @@
 /* global Promise */
 
 const {readdir} = require('fs');
+const promise = require('../promises/promise');
+
+const promiseReaddir = promise(readdir);
 
 const readFolder = path =>
-  new Promise((resolve, reject) => {
-    readdir(path, 'utf8', (err, data) =>
-      err ? reject(err) : resolve(data)
-    );
-  });
+  promiseReaddir(path, 'utf8');
 
 
 module.exports = readFolder;

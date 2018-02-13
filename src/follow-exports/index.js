@@ -62,21 +62,24 @@ const followExports = (source, currentPath) =>
         ExportDefaultDeclaration(path) {
           const getter = get(path.node);
 
-          if (path.get('declaration').isCallExpression()) {
-            if (path.get('declaration.callee').isIdentifier({ name: 'withClasses' })) {
-              const componentName = getter('declaration.arguments.0.name');
+          const isNeedle = [
+            path.get('declaration').isCallExpression(),
+            path.get('declaration.callee').isIdentifier({ name: 'withClasses' })
+          ].every(i => i);
 
-              visit(ast)({
-                ImportDeclaration(path) {
-                  const componentImport =
-        path.node.specifiers.find(specifier => specifier.local.name === componentName);
+          if (isNeedle) {
+            const componentName = getter('declaration.arguments.0.name');
 
-                  if (componentImport) {
-                    exportedPath = path.node.source.value;
-                  }
+            visit(ast)({
+              ImportDeclaration(path) {
+                const componentImport =
+      path.node.specifiers.find(specifier => specifier.local.name === componentName);
+
+                if (componentImport) {
+                  exportedPath = path.node.source.value;
                 }
-              });
-            }
+              }
+            });
           }
         }
       });
