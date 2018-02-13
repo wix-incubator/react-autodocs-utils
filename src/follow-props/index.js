@@ -3,7 +3,7 @@
 const { join: pathJoin, dirname: pathDirname } = require('path');
 const reactDocgenParse = require('../parser/react-docgen-parse');
 
-const readFile = require('../fs/read-file');
+const readFile = require('../read-file');
 const followExports = require('../follow-exports');
 const resolveNodeModules = require('../resolve-node-modules');
 

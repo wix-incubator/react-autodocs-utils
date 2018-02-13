@@ -3,7 +3,7 @@
 jest.mock('fs');
 const fs = require('fs');
 
-const readFolder = require('./read-folder');
+const readFolder = require('./');
 
 describe('readFolder', () => {
   describe('given existing path', () => {

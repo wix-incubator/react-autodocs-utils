@@ -1,6 +1,6 @@
 /* global Promise */
 
-const readFolder = require('../fs/read-folder');
+const readFolder = require('../read-folder');
 const path = require('path');
 
 const resolveNodeModulesPath = (cwd, modulePath) => {

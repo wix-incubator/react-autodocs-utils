@@ -4,7 +4,7 @@ const path = require('path');
 
 const parse = require('../parser/parse');
 const visit = require('../parser/visit');
-const readFile = require('../fs/read-file');
+const readFile = require('../read-file');
 const resolveNodeModulesPath = require('../resolve-node-modules');
 const get = require('../get');
 

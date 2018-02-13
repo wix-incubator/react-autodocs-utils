@@ -3,7 +3,7 @@
 jest.mock('fs');
 const fs = require('fs');
 
-const readFile = require('./read-file');
+const readFile = require('./');
 
 
 describe('readFile', () => {

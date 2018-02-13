@@ -1,8 +1,8 @@
 /* global Promise */
 
 const pathJoin = require('path').join;
-const readFolder = require('../fs/read-folder');
-const readFile = require('../fs/read-file');
+const readFolder = require('../read-folder');
+const readFile = require('../read-file');
 const metadataParser = require('../metadata-parser');
 
 // containsFile : List String -> Bool -> Promise
