@@ -2,9 +2,9 @@
 
 const recast = require('recast');
 
-const parse = require('../parser/recast-parse');
-const visit = require('../parser/recast-visit');
-const print = require('../parser/recast-print');
+const parse = require('../parser/parse');
+const visit = require('../parser/visit');
+const print = require('../parser/print');
 const builders = recast.types.builders;
 
 const metadataMerger = source => metadata =>

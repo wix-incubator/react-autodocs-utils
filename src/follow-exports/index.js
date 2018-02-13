@@ -2,8 +2,8 @@
 
 const path = require('path');
 
-const parse = require('../parser/recast-parse');
-const visit = require('../parser/recast-visit');
+const parse = require('../parser/parse');
+const visit = require('../parser/visit');
 const readFile = require('../fs/read-file');
 const resolveNodeModulesPath = require('../resolve-node-modules');
 const get = require('../get');

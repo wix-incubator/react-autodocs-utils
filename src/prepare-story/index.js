@@ -1,9 +1,9 @@
 /* global Promise */
 
 const types = require('@babel/types');
-const visit = require('../parser/recast-visit');
-const parse = require('../parser/recast-parse');
-const print = require('../parser/recast-print');
+const visit = require('../parser/visit');
+const parse = require('../parser/parse');
+const print = require('../parser/print');
 
 
 const buildImportDeclaration = (specifier, path) => types.importDeclaration(

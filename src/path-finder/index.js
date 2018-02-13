@@ -1,7 +1,7 @@
 /* global Promise */
 
-const parse = require('../parser/recast-parse');
-const visit = require('../parser/recast-visit');
+const parse = require('../parser/parse');
+const visit = require('../parser/visit');
 const get = require('../get');
 
 const getPropertyValue = path => propertyName =>
