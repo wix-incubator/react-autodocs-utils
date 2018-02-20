@@ -52,11 +52,17 @@ const readEntryFile = path =>
         : tryReadWithExtension(path)
     );
 
-// readFile -> String -> Promise<{ source: String, path: String }>
-const readFile = (path = '') =>
-  path.length
-    ? readEntryFile(path)
+
+const ensurePath = path =>
+  path && path.length
+    ? Promise.resolve(path)
     : Promise.reject(new Error('ERROR: Missing required `path` argument when calling `readFile`'));
+
+
+// readFile : String -> Promise<{ source: String, path: String }>
+const readFile = (path = '') =>
+  ensurePath(path)
+    .then(readEntryFile);
 
 
 module.exports = readFile;

@@ -92,7 +92,7 @@ const followExports = (source, currentPath) =>
               .catch(e => console.log(`ERROR: unable to read ${resolvedPath}`, e))
           );
       } else {
-        resolve({ source, exportPath: exportedPath || currentPath });
+        resolve({ source, path: exportedPath || currentPath });
       }
     };
 

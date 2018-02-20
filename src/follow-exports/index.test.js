@@ -25,7 +25,7 @@ describe('followExports()', () => {
 
         return expect(followExports(source, '')).resolves.toEqual({
           source: 'hello',
-          exportPath: 'index.js'
+          path: 'index.js'
         });
       });
 
@@ -48,7 +48,7 @@ describe('followExports()', () => {
 
         return expect(followExports(source, 'node_modules')).resolves.toEqual({
           source: 'hello',
-          exportPath: 'nested/sibling.js'
+          path: 'nested/sibling.js'
         });
       });
     });
@@ -74,7 +74,7 @@ describe('followExports()', () => {
 
         return expect(followExports(source, '')).resolves.toEqual({
           source: 'hello',
-          exportPath: 'src/components/component/component.js'
+          path: 'src/components/component/component.js'
         });
       });
     });
