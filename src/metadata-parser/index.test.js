@@ -494,7 +494,7 @@ describe('metadataParser()', () => {
     });
   });
 
-  describe.skip('given component writter in typescript', () => {
+  describe.skip('given component written in typescript', () => {
     it('should parse metadata', () => {
       fs.__setFS({
         'index.ts':

@@ -51,8 +51,8 @@ const handleComposedProps = (parsed, currentPath) =>
 
     .then(composedSourcesAndPaths =>
       Promise.all(
-        composedSourcesAndPaths.map(({ source, exportPath }) =>
-          reactDocgenParse(source, { path: exportPath })
+        composedSourcesAndPaths.map(({ source, path }) =>
+          reactDocgenParse(source, { path: path })
         )
       ))
 
@@ -94,7 +94,7 @@ const handleComposedProps = (parsed, currentPath) =>
 
 
 const followProps = (source, path) =>
-  parseDocgen(source)
+  parseDocgen(source, path)
     // if resolved, no need to follow props, no need for .then
     // if rejected, need to follow props
     .catch(parsed =>

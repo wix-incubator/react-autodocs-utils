@@ -9,6 +9,11 @@ const resolveNodeModulesPath = require('../resolve-node-modules');
 const get = require('../get');
 
 
+/**
+  * resolvePath is used to resolve relative and/or real path to
+  * node_modules
+  */
+// resolvePath : (cwd: string, relativePath: string) -> Promise<path: string>
 const resolvePath = (cwd, relativePath) => {
   const desiredPath = relativePath.replace('dist/', '');
 
@@ -23,6 +28,9 @@ const resolvePath = (cwd, relativePath) => {
 };
 
 
+/**
+  * extractPath is used to take exported path from source
+  */
 // extractPath : (source: string) -> Promise<path>
 const extractPath = source =>
   new Promise(resolve => {
@@ -85,7 +93,7 @@ const extractPath = source =>
   });
 
 
-// followExports (source: string, currentPath: string) => Promise<{source: String, exportPath: String}>
+// followExports (source: string, currentPath: string) => Promise<{source: String, path: String}>
 const followExports = (source, currentPath) =>
   extractPath(source, currentPath)
     .then(extractedPath =>
