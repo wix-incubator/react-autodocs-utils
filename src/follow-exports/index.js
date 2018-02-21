@@ -1,6 +1,7 @@
 /* global Promise */
 
 const path = require('path');
+const types = require('@babel/types');
 
 const parse = require('../parser/parse');
 const visit = require('../parser/visit');
@@ -47,6 +48,29 @@ const extractPath = source =>
 
           return false;
         }
+
+        // export const Component = withStylable(Component)
+        path.traverse({
+          CallExpression(path) {
+            const isWithStylable = path.get('callee').isIdentifier({ name: 'withStylable' });
+
+            if (isWithStylable) {
+              const componentName = path.get('arguments')[0].node.name;
+
+              visit(ast)({
+                ImportDeclaration(path) {
+                  const componentImportSpecifier =
+                    path.node.specifiers.find(({ local: { name } }) => name === componentName);
+
+                  if (componentImportSpecifier) {
+                    resolve(path.node.source.value);
+                    return false;
+                  }
+                }
+              });
+            }
+          }
+        });
       },
 
       // module.exports = require('path')

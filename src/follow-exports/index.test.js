@@ -1,4 +1,4 @@
-/* global describe it expect */
+/* global describe it expect jest */
 
 const followExports = require('./');
 
@@ -49,6 +49,40 @@ describe('followExports()', () => {
         return expect(followExports(source, 'node_modules')).resolves.toEqual({
           source: 'hello',
           path: 'nested/sibling.js'
+        });
+      });
+    });
+
+    describe('which has `withStylable` HOC', () => {
+      it('should resolve component', () => {
+        const source = `
+            import {
+              Component as CoreComponent,
+              ComponentProps as CoreComponentProps
+            } from 'wix-ui-core/Component';
+            import {withStylable} from 'wix-ui-core';
+
+            export const Component = withStylable<CoreComponentProps, ComponentProps>(
+              CoreComponent,
+              {},
+              i => i,
+              {}
+            );
+          `;
+
+        fs.__setFS({
+          'index.ts': source,
+
+          node_modules: {
+            'wix-ui-core': {
+              'Component.js': 'hello'
+            }
+          }
+        });
+
+        return expect(followExports(source, '')).resolves.toEqual({
+          source: 'hello',
+          path: 'node_modules/wix-ui-core/Component'
         });
       });
     });
