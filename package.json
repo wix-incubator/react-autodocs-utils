@@ -19,6 +19,13 @@
     "utils",
     "proptypes"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wix/react-autodocs-utils.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wix/react-autodocs-utils/issues"
+  },
   "author": "Arijus Šukys <argshook@gmail.com> (http://arijus.net)",
   "license": "MIT",
   "devDependencies": {
