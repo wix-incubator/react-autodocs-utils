@@ -1,12 +1,12 @@
-// const pathExtname = require('path').extname;
+const pathExtname = require('path').extname;
 
 const {parse} = require('react-docgen');
 const typescriptParse = require('react-docgen-typescript');
 
 const componentResolve = require('./component-resolve');
 
-// const isTypescript = path => ['.ts', '.tsx'].includes(pathExtname(path));
-const isTypescript = path => false;
+const isTypescript = path => ['.ts', '.tsx'].includes(pathExtname(path));
+// const isTypescript = path => false;
 
 
 const reactDocgenParse = (source, { path }) =>

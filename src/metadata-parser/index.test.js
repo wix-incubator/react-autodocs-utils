@@ -395,14 +395,14 @@ describe('metadataParser()', () => {
       it('should resolve entry file corrrectly', () => {
         fs.__setFS({
           'index.js': 'export {default} from \'./Component\'',
-          'Component.tsx':
+          'Component.jsx':
             `import React from 'react';
-            /** tsx component */
+            /** jsx component */
             export default () => <div/>;`
         });
 
         return expect(metadataParser('index.js')).resolves.toEqual({
-          description: 'tsx component',
+          description: 'jsx component',
           methods: []
         });
       });
@@ -465,7 +465,7 @@ describe('metadataParser()', () => {
 
             node_modules: {
               'wix-ui-core': {
-                'Component.tsx':
+                'Component.jsx':
                 `import React from 'react'
                 import PropTypes from 'prop-types';
                 const component = () => <div/>;

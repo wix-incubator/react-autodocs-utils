@@ -125,7 +125,7 @@ const followExports = (source, currentPath) =>
         ? resolvePath(currentPath, extractedPath)
           .then(resolvedPath =>
             readFile(resolvedPath)
-              .then(({ source }) => followExports(source, resolvedPath))
+              .then(({ source, path }) => followExports(source, path))
               .catch(e => console.log(`ERROR: unable to read ${resolvedPath}`, e))
           )
         : ({ source, path: extractedPath || currentPath })

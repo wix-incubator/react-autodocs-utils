@@ -122,7 +122,7 @@ describe('gatherAll', () => {
       it('should resolve with component metadata', () => {
         fs.__setFS({
           folder: {
-            'index.tsx': `
+            'index.jsx': `
               import PropTypes from 'prop-types';
               import composed from 'some-module/Component';
               const component = () => <div/>;
@@ -137,7 +137,7 @@ describe('gatherAll', () => {
 
           node_modules: {
             'some-module': {
-              'Component.ts': `
+              'Component.js': `
               import PropTypes from 'prop-types';
               const component = () => <div/>;
               component.propTypes = { test: PropTypes.string.isRequired };
@@ -189,7 +189,7 @@ describe('gatherAll', () => {
               src: {
                 components: {
                   Badge: {
-                    'index.ts':
+                    'index.js':
                       `import * as React from 'react';
                       import BadgeComponent from './Badge';
                       import {withClasses} from 'wix-ui-jss';
@@ -197,7 +197,7 @@ describe('gatherAll', () => {
                       export default withClasses(BadgeComponent, styles)
                       `,
 
-                    'Badge.tsx':
+                    'Badge.jsx':
                       `import * as React from 'react';
                       import {string} from 'prop-types';
                       const Badge = () => <div/>;

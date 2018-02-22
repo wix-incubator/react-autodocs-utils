@@ -82,7 +82,7 @@ describe('followExports()', () => {
 
         return expect(followExports(source, '')).resolves.toEqual({
           source: 'hello',
-          path: 'node_modules/wix-ui-core/Component'
+          path: 'node_modules/wix-ui-core/Component.js'
         });
       });
     });

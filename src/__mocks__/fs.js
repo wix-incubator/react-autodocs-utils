@@ -42,7 +42,6 @@ fs.readFile = (path, encoding, callback) =>
     .then(source => callback(null, source))
     .catch(e => callback(e, null));
 
-
 fs.readdir = (path, encoding, callback) =>
   path === '.'
     ? callback(null, Object.keys(mockFS))
