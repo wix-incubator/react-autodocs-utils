@@ -22,6 +22,7 @@ const metadataMerger = source => metadata =>
       visit(metadataAST)({
         ObjectExpression(path) {
           metadataProperties = path.node.properties;
+          path.skip();
         }
       });
 

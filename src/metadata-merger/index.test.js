@@ -22,13 +22,15 @@ describe('metadataMerger', () => {
 
     it('should add `_metadata` to exportable `source`', () => {
       const source = 'export default { a: 1, b: 2 }';
-      const metadata = { hello: 1, goodbye: 2 };
+      const metadata = { hello: 1, goodbye: { forReal: 'bye' } };
       const expectation = `export default {
   a: 1,
   b: 2,
   _metadata: {
     "hello": 1,
-    "goodbye": 2
+    "goodbye": {
+      "forReal": "bye"
+    }
   }
 };`;
 
