@@ -121,7 +121,7 @@ const extractPath = (source, path) =>
 
 
 // followExports (source: string, path: string) => Promise<{source: String, path: String}>
-const followExports = (source, path) =>
+const followExports = (source, path = '') =>
   extractPath(source, path)
     .then(extractedPath =>
       extractedPath

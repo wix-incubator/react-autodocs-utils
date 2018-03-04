@@ -16,8 +16,24 @@ describe('readFile', () => {
 
       return expect(readFile('test.file')).resolves.toEqual({
         source: content,
-        path: 'test.file'
+        path: 'test.file',
+        isTypescript: false
       });
+    });
+
+    it('should resolve with correct isTypescript flag', () => {
+      const jsFiles = [ 'index.js', 'index.jsx' ];
+      const tsFiles = [ 'index.ts', 'index.tsx', 'index.d.ts' ];
+      const allFiles = [...jsFiles, ...tsFiles];
+
+      fs.__setFS(allFiles.reduce((acc, path) => ({ ...acc, [path]: ' ' }), {}));
+
+      const expectFlag = isTypescript => files =>
+        files.map(() => expect.objectContaining({ isTypescript }));
+
+      return expect(Promise.all(allFiles.map(readFile))).resolves.toEqual(
+        [ ...expectFlag(false)(jsFiles), ...expectFlag(true)(tsFiles)  ]
+      );
     });
   });
 

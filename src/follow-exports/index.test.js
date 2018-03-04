@@ -11,7 +11,7 @@ describe('followExports()', () => {
       it('should return original source', () => {
         const source = 'const hey = "now"';
 
-        return expect(followExports(source)).resolves.toEqual({ source });
+        return expect(followExports(source)).resolves.toEqual({ source, path: '' });
       });
     });
 

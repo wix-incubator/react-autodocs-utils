@@ -9,11 +9,15 @@ const promiseFirst = require('../promises/first');
 const fsReadFile = promise(fsReadFileAsync);
 const lstat = promise(fsLstat);
 
-const SUPPORTED_FILE_EXTENSIONS = ['.js', '.jsx', '.ts', '.tsx'];
+const TYPESCRIPT_EXT = ['.ts', '.tsx'];
+const SUPPORTED_FILE_EXT = ['.js', '.jsx', ...TYPESCRIPT_EXT ];
+
+const isTypescript = path =>
+  TYPESCRIPT_EXT.includes(pathExtname(path));
 
 const tryReadWithExtension = entryPath =>
   promiseFirst(
-    SUPPORTED_FILE_EXTENSIONS
+    SUPPORTED_FILE_EXT
       .map(extension => {
         const path = entryPath + extension;
 
@@ -48,7 +52,9 @@ const readEntryFile = path =>
 
     .then(path =>
       pathExtname(path)
-        ? fsReadFile(path, 'utf8').then(source => ({ source, path }))
+        ? fsReadFile(path, 'utf8').then(source =>
+          ({ source, path, isTypescript: isTypescript(path) })
+        )
         : tryReadWithExtension(path)
     );
 
