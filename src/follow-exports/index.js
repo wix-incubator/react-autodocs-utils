@@ -1,7 +1,10 @@
 /* global Promise */
 
-const path = require('path');
-const types = require('@babel/types');
+const {
+  join: pathJoin,
+  extname: pathExtname,
+  dirname: pathDirname
+} = require('path');
 
 const parse = require('../parser/parse');
 const visit = require('../parser/visit');
@@ -19,9 +22,9 @@ const resolvePath = (cwd, relativePath) => {
   const desiredPath = relativePath.replace('dist/', '');
 
   return relativePath.startsWith('.')
-    ? Promise.resolve(path.join(
-      path.extname(cwd)
-        ? path.dirname(cwd)
+    ? Promise.resolve(pathJoin(
+      pathExtname(cwd)
+        ? pathDirname(cwd)
         : cwd,
       desiredPath
     ))
@@ -32,8 +35,8 @@ const resolvePath = (cwd, relativePath) => {
 /**
   * extractPath is used to take exported path from source
   */
-// extractPath : (source: string) -> Promise<path>
-const extractPath = source =>
+// extractPath : (source: string, path: string) -> Promise<path>
+const extractPath = (source, path) =>
   new Promise(resolve => {
     const ast = parse(source);
 
@@ -117,18 +120,18 @@ const extractPath = source =>
   });
 
 
-// followExports (source: string, currentPath: string) => Promise<{source: String, path: String}>
-const followExports = (source, currentPath) =>
-  extractPath(source, currentPath)
+// followExports (source: string, path: string) => Promise<{source: String, path: String}>
+const followExports = (source, path) =>
+  extractPath(source, path)
     .then(extractedPath =>
       extractedPath
-        ? resolvePath(currentPath, extractedPath)
+        ? resolvePath(path, extractedPath)
           .then(resolvedPath =>
             readFile(resolvedPath)
               .then(({ source, path }) => followExports(source, path))
               .catch(e => console.log(`ERROR: unable to read ${resolvedPath}`, e))
           )
-        : ({ source, path: extractedPath || currentPath })
+        : ({ source, path })
     );
 
 
