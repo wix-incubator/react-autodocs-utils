@@ -93,24 +93,25 @@ const extractPath = (source, path) =>
       ExportDefaultDeclaration(path) {
         const getter = get(path.node);
 
-        const isNeedle = [
+        // TODO: refactor multiple into generic HOC resolution
+        const isWithClasses = [
           path.get('declaration').isCallExpression(),
           path.get('declaration.callee').isIdentifier({ name: 'withClasses' })
         ].every(i => i);
 
-        if (isNeedle) {
-          const componentName = getter('declaration.arguments.0.name');
+        const componentName = isWithClasses
+          ? getter('declaration.arguments.0.name')
+          : getter('declaration.name');
 
-          visit(ast)({
-            ImportDeclaration(path) {
-              const componentImport = path.node.specifiers.find(specifier => specifier.local.name === componentName);
+        visit(ast)({
+          ImportDeclaration(path) {
+            const componentImport = path.node.specifiers.find(specifier => specifier.local.name === componentName);
 
-              if (componentImport) {
-                resolve(path.node.source.value);
-              }
+            if (componentImport) {
+              resolve(path.node.source.value);
             }
-          });
-        }
+          }
+        });
       }
     });
 

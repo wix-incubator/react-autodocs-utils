@@ -31,9 +31,8 @@ describe('followExports()', () => {
 
       it('should return source of resolved file without exports', () => {
         const source = 'export {default} from \'./file.js\'';
-        fs.__setFS({
-          'index.js': source,
 
+        fs.__setFS({
           node_modules: {
             'file.js': 'export {default} from \'../nested/deep/index.js\'',
           },
@@ -109,6 +108,26 @@ describe('followExports()', () => {
         return expect(followExports(source, '')).resolves.toEqual({
           source: 'hello',
           path: 'src/components/component/component.js'
+        });
+      });
+    });
+
+    describe('which has `export default Identifier`', () => {
+      it('should return source of that export', () => {
+        const source = `
+          import Component from \'./Component\';
+          export default Component;
+        `;
+
+        fs.__setFS({
+          Component: {
+            'index.js': 'hello'
+          }
+        });
+
+        return expect(followExports(source, '')).resolves.toEqual({
+          path: 'Component/index.js',
+          source: 'hello'
         });
       });
     });
