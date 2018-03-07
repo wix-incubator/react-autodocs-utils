@@ -60,5 +60,40 @@ export default storyNew({
 
       return expect(prepareStory(config)(source)).resolves.toEqual(expectation);
     });
+
+    it('should work with spread properties', () => {
+      const source = `
+        const stuff = { thing: { moreThings: ['hello'] } };
+        export default {
+          a: 1,
+          b: {
+            ...stuff,
+            c: ['d']
+          }
+        };
+      `;
+
+      const config = { 'i-am-config': 'yes' };
+
+      const expectation = `import storyNew from "wix-storybook-utils/StoryNew";
+import { storiesOf } from "@storybook/react";
+const stuff = {
+  thing: {
+    moreThings: ['hello']
+  }
+};
+export default storyNew({
+  a: 1,
+  b: { ...stuff,
+    c: ['d']
+  },
+  _config: {
+    "i-am-config": "yes",
+    storiesOf: storiesOf
+  }
+});`;
+
+      return expect(prepareStory(config)(source)).resolves.toEqual(expectation);
+    });
   });
 });
