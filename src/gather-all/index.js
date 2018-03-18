@@ -28,10 +28,15 @@ const error = message =>
 
 const gatherAll = path =>
   isPath(path)
-    .then(metadataParser)
+    .catch(e => {
+      throw e;
+    })
 
-    .catch(e =>
-      error(`Unable to parse component in path "${path}", reason: ${e}`)
+    .then(path =>
+      metadataParser(path)
+        .catch(e =>
+          error(`Unable to parse component in path "${path}", reason: ${e}`)
+        )
     )
 
     .then(metadata =>
