@@ -1,12 +1,9 @@
 /* global Promise */
 
-const {
-  join: pathJoin,
-  extname: pathExtname,
-  dirname: pathDirname
-} = require('path');
+const { join: pathJoin } = require('path');
 
 const parse = require('../parser/parse');
+const dirname = require('../dirname');
 const visit = require('../parser/visit');
 const readFile = require('../read-file');
 const resolveNodeModulesPath = require('../resolve-node-modules');
@@ -23,9 +20,7 @@ const resolvePath = (cwd, relativePath) => {
 
   return relativePath.startsWith('.')
     ? Promise.resolve(pathJoin(
-      pathExtname(cwd)
-        ? pathDirname(cwd)
-        : cwd,
+      dirname(cwd),
       desiredPath
     ))
     : resolveNodeModulesPath(cwd, desiredPath);
