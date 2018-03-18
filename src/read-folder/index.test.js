@@ -6,8 +6,8 @@ const fs = require('fs');
 const readFolder = require('./');
 
 describe('readFolder', () => {
-  describe('given existing path', () => {
-    it('should resolve with array of folder entries', () => {
+  describe('given path to folder', () => {
+    it('should resolve with array of filenames', () => {
       fs.__setFS({
         'folder-name': {
           'file.js': '',
@@ -16,6 +16,20 @@ describe('readFolder', () => {
       });
 
       return expect(readFolder('folder-name')).resolves.toEqual(['file.js', 'folder']);
+    });
+  });
+
+  describe('given path to file', () => {
+    it('should should resolve with array of filename', () => {
+      fs.__setFS({
+        folder: {
+          'index.js': '',
+          'some-file': '',
+          another_folder: {}
+        }
+      });
+
+      return expect(readFolder('folder/index.js')).resolves.toEqual(['index.js', 'some-file', 'another_folder']);
     });
   });
 
