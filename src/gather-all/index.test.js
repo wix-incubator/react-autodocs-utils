@@ -243,6 +243,25 @@ describe('gatherAll', () => {
         });
       });
     });
+
+    describe('which is path to concrete file', () => {
+      it('should resolve with component metadata', () => {
+        fs.__setFS({
+          'index.js': componentSourceMock,
+          'readme.md': readmeMock,
+          'readme.accessibility.md': readmeAccessibilityMock,
+          'readme.testkit.md': readmeTestkitMock
+
+        });
+
+        return expect(gatherAll('index.js')).resolves.toEqual({
+          ...metadataMock,
+          readme: readmeMock,
+          readmeAccessibility: readmeAccessibilityMock,
+          readmeTestkit: readmeTestkitMock
+        });
+      });
+    });
   });
 
   describe('when called without path', () => {
