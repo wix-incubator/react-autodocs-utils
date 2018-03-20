@@ -36,6 +36,15 @@ const pathFinder = (source = '') => {
 
           resolve(componentReference);
         }
+      },
+
+      ExportNamedDeclaration(path) {
+        const isNamedDefault =
+          path.node.specifiers.some(({ exported }) => exported.name === 'default');
+
+        if (isNamedDefault) {
+          resolve(get(path)('node.source.value'));
+        }
       }
     });
 

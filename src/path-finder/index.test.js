@@ -44,7 +44,9 @@ describe('pathFinder()', () => {
         `import defaultExport, {Component as ComponentAlias} from '${path}'
         export default {
           component: ComponentAlias
-        }`
+        }`,
+
+        `export {default} from '${path}';`
       ];
 
       sourceTestCases.map(source =>
