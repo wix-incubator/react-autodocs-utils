@@ -1,12 +1,13 @@
 /* global Promise */
 
+const types = require('@babel/types');
+
 const parse = require('../parser/parse');
 const visit = require('../parser/visit');
 const get = require('../get');
 
-const getPropertyValue = path => propertyName =>
-  get(path)('node.declaration.properties')
-    .find(({ key: { name } }) => name === propertyName);
+const extractKeyFromObject = objectExpression => key =>
+  objectExpression.properties.find(({ key: { name } }) => name === key);
 
 const pathFinder = (source = '') => {
   const ast = parse(source);
@@ -14,36 +15,47 @@ const pathFinder = (source = '') => {
   return new Promise((resolve, reject) => {
     visit(ast)({
       ExportDefaultDeclaration(path) {
-        const componentPath = get(getPropertyValue(path)('componentPath'))('value.value');
+        const declaration = path.node.declaration;
 
-        if (componentPath) {
-          resolve(componentPath);
-          return false;
-        } else {
-          const componentReference = get(getPropertyValue(path)('component'))('value.name');
+        if (types.isObjectExpression(declaration)) {
+          const componentPath = extractKeyFromObject(declaration)('componentPath');
 
-          visit(ast)({
-            ImportDeclaration(path) {
-              const componentPath = get(path)('node.specifiers')
-                .find(({ local: { name } }) => name === componentReference);
+          if (componentPath) {
+            resolve(componentPath.value.value);
+            return false;
+          } else {
+            const componentReference = extractKeyFromObject(declaration)('component').value.name;
 
-              if (componentPath) {
-                resolve(get(path)('node.source.value'));
-                return false;
+            visit(ast)({
+              ImportDeclaration(path) {
+                const componentPath = get(path)('node.specifiers')
+                  .find(({ local: { name } }) => name === componentReference);
+
+                if (componentPath) {
+                  resolve(get(path)('node.source.value'));
+                  return false;
+                }
               }
-            }
-          });
+            });
 
-          resolve(componentReference);
+            resolve(componentReference);
+          }
         }
-      },
 
-      ExportNamedDeclaration(path) {
-        const isNamedDefault =
-          path.node.specifiers.some(({ exported }) => exported.name === 'default');
+        if (types.isIdentifier(declaration)) {
+          const binding = path.scope.bindings[declaration.name];
 
-        if (isNamedDefault) {
-          resolve(get(path)('node.source.value'));
+          if (binding) {
+            visit(ast)({
+              VariableDeclarator(path) {
+                if (types.isIdentifier(binding.identifier, { name: binding.identifier.name })) {
+                  const componentPath =
+                    extractKeyFromObject(path.node.init)('componentPath').value.value;
+                  resolve(componentPath);
+                }
+              }
+            });
+          }
         }
       }
     });
