@@ -65,6 +65,26 @@ describe('gatherAll', () => {
       });
     });
 
+    describe('which is folder with index.js and some markdowns with various cases', () => {
+      it('should resolve with component metadata', () => {
+        fs.__setFS({
+          'component-folder': {
+            'index.js': componentSourceMock,
+            'README.md': readmeMock,
+            'readme.accessibility.md': readmeAccessibilityMock,
+            'README.testkit.md': readmeTestkitMock
+          }
+        });
+
+        return expect(gatherAll('component-folder')).resolves.toEqual({
+          ...metadataMock,
+          readme: readmeMock,
+          readmeAccessibility: readmeAccessibilityMock,
+          readmeTestkit: readmeTestkitMock
+        });
+      });
+    });
+
     describe('which is folder with component importing from node_modules', () => {
       it('should resolve with component metadata', () => {
         fs.__setFS({
