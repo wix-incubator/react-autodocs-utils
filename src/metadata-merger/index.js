@@ -1,7 +1,9 @@
 /* global Promise */
 
 const recast = require('recast');
+const types = require('@babel/types');
 
+const get = require('../get');
 const parse = require('../parser/parse');
 const visit = require('../parser/visit');
 const print = require('../parser/print');
@@ -32,14 +34,27 @@ const metadataMerger = source => metadata =>
 
       visit(ast)({
         ExportDefaultDeclaration(path) {
-          path.node.declaration.properties.push(
-            builders.objectProperty(
-              builders.identifier('_metadata'),
-              builders.objectExpression(metadataProperties)
-            )
-          );
+          const declaration = path.node.declaration;
 
-          return false;
+          const { configNode } = [
+            {
+              pattern: types.isObjectExpression(declaration),
+              configNode: declaration
+            },
+            {
+              pattern: types.isIdentifier(declaration),
+              configNode: get(path)(`scope.bindings.${declaration.name}.path.node.init`)
+            }
+          ].find(({pattern}) => pattern);
+
+          if (configNode) {
+            configNode.properties.push(
+              builders.objectProperty(
+                builders.identifier('_metadata'),
+                builders.objectExpression(metadataProperties)
+              )
+            );
+          }
         }
       });
 

@@ -20,7 +20,7 @@ describe('metadataMerger', () => {
       expect(metadataMerger('"test"')({}).then).toBeDefined();
     });
 
-    it('should add `_metadata` to exportable `source`', () => {
+    it('should add `_metadata` to story config', () => {
       const source = 'export default { a: 1, b: 2 }';
       const metadata = { hello: 1, goodbye: { forReal: 'bye' } };
       const expectation = `export default {
@@ -33,6 +33,26 @@ describe('metadataMerger', () => {
     }
   }
 };`;
+
+      return expect(metadataMerger(source)(metadata)).resolves.toEqual(expectation);
+    });
+
+    it('should add `_metadata` to referenced story config', () => {
+      const source = `
+        const config = { a: 1, b: { c: 2 } };
+        export default config;
+      `;
+      const metadata = { whatIs: 'love' };
+      const expectation = `const config = {
+  a: 1,
+  b: {
+    c: 2
+  },
+  _metadata: {
+    "whatIs": "love"
+  }
+};
+export default config;`;
 
       return expect(metadataMerger(source)(metadata)).resolves.toEqual(expectation);
     });
