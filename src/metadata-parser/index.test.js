@@ -7,7 +7,8 @@ const fs = require('fs');
 
 const rootMock = {
   description: '',
-  methods: []
+  methods: [],
+  props: {}
 };
 
 describe('metadataParser()', () => {
@@ -277,8 +278,8 @@ describe('metadataParser()', () => {
         });
 
         return expect(metadataParser('index.js')).resolves.toEqual({
-          description: 'I am the one who props',
-          methods: []
+          ...rootMock,
+          description: 'I am the one who props'
         });
       });
 
@@ -300,8 +301,8 @@ describe('metadataParser()', () => {
         });
 
         return expect(metadataParser('index.js')).resolves.toEqual({
-          description: 'You got me',
-          methods: []
+          ...rootMock,
+          description: 'You got me'
         });
       });
 
@@ -364,8 +365,8 @@ describe('metadataParser()', () => {
         });
 
         return expect(metadataParser('index.js')).resolves.toEqual({
-          description: 'i\'m looking for you',
-          methods: []
+          ...rootMock,
+          description: 'i\'m looking for you'
         });
       });
 
@@ -385,8 +386,8 @@ describe('metadataParser()', () => {
         });
 
         return expect(metadataParser('index.js')).resolves.toEqual({
-          description: 'what a lovely day',
-          methods: []
+          ...rootMock,
+          description: 'what a lovely day'
         });
       });
     });
@@ -402,8 +403,8 @@ describe('metadataParser()', () => {
         });
 
         return expect(metadataParser('index.js')).resolves.toEqual({
-          description: 'jsx component',
-          methods: []
+          ...rootMock,
+          description: 'jsx component'
         });
       });
     });
@@ -432,8 +433,8 @@ describe('metadataParser()', () => {
       });
 
       return expect(metadataParser('MyComponent/index.js')).resolves.toEqual({
-        description: 'backoffice component',
-        methods: []
+        ...rootMock,
+        description: 'backoffice component'
       });
     });
 
