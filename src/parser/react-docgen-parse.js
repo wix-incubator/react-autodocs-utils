@@ -25,7 +25,7 @@ const parseJavascript = source => {
   return ensurePropsKey(parsed);
 };
 
-const reactDocgenParse = (source, { path }) =>
+const reactDocgenParse = ({ source = '', path = '' }) =>
   isTypescript(path)
     ? parseTypescript(path)
     : parseJavascript(source);

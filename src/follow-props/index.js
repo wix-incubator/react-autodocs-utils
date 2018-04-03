@@ -10,7 +10,7 @@ const resolveNodeModules = require('../resolve-node-modules');
 
 const parseDocgen = (source, path) =>
   new Promise((resolve, reject) => {
-    const parsed = reactDocgenParse(source, { path });
+    const parsed = reactDocgenParse({ source, path });
 
     return parsed.composes
       ? reject(parsed) // we'll handle composed props in catch
@@ -52,7 +52,7 @@ const handleComposedProps = (parsed, currentPath) =>
     .then(composedSourcesAndPaths =>
       Promise.all(
         composedSourcesAndPaths.map(({ source, path }) =>
-          reactDocgenParse(source, { path: path })
+          reactDocgenParse({ source, path })
         )
       ))
 
