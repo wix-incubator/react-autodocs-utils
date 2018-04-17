@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "test:watch": "npm run test -- --watch"
+    "test:watch": "jest --watch"
   },
   "keywords": [
     "react",
