@@ -29,6 +29,7 @@
   "author": "Arijus Šukys <argshook@gmail.com> (http://arijus.net)",
   "license": "MIT",
   "devDependencies": {
+    "@types/react": "^16.3.11",
     "jest": "^21.2.1"
   },
   "dependencies": {
