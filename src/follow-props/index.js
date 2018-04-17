@@ -28,7 +28,7 @@ const mergeComponentProps = components =>
   );
 
 
-const handleComposedProps = (parsed, currentPath) =>
+const followComposedProps = (parsed, currentPath) =>
   Promise.all(
     parsed.composes.map(composedPath => {
       const readablePathPromise =
@@ -63,7 +63,7 @@ const handleComposedProps = (parsed, currentPath) =>
 
       const withComposed = parsedComponents
         .filter(parsed => parsed.composes)
-        .map(parsed => handleComposedProps(parsed, currentPath));
+        .map(parsed => followComposedProps(parsed, currentPath));
 
       const withoutComposed = parsedComponents
         .filter(parsed => !parsed.composes)
@@ -98,7 +98,7 @@ const followProps = (source, path) =>
     // if resolved, no need to follow props, no need for .then
     // if rejected, need to follow props
     .catch(parsed =>
-      handleComposedProps(parsed, path)
+      followComposedProps(parsed, path)
     )
     .catch(e => console.log('ERROR: Unable to handle composed props', e));
 
