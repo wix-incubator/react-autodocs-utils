@@ -1,6 +1,6 @@
 /* global Promise describe it expect jest afterEach beforeAll afterAll */
 
-const metadataParser = require('./');
+const metadataParser = require('../');
 
 jest.mock('fs');
 const fs = require('fs');
@@ -489,40 +489,6 @@ describe('metadataParser()', () => {
             required: false,
             description: 'hello from core',
             type: { name: 'func' }
-          }
-        }
-      });
-    });
-  });
-
-  describe.skip('given component written in typescript', () => {
-    it('should parse metadata', () => {
-      fs.__setFS({
-        'index.ts':
-          `import * as React from 'react';
-          export interface Props {
-            /** this is a text prop */
-            text: any;
-          }
-
-          /** This is the component */
-          export class Component extends React.Component<Props> {
-            render() {
-              return <div>test</div>;
-            }
-          }
-          `
-      });
-
-      return expect(metadataParser('index.ts')).resolves.toEqual({
-        description: 'This is the component',
-        methods: [],
-        displayName: 'Component',
-        props: {
-          text: {
-            required: false,
-            description: 'this is a text prop',
-            type: { name: 'string' }
           }
         }
       });
