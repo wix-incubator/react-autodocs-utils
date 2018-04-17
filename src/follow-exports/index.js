@@ -31,7 +31,7 @@ const resolvePath = (cwd, relativePath) => {
   * extractPath is used to take exported path from source
   */
 // extractPath : (source: string, path: string) -> Promise<path>
-const extractPath = (source, path) =>
+const extractPath = source =>
   new Promise(resolve => {
     const ast = parse(source);
 

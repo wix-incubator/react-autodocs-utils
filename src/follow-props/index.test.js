@@ -1,7 +1,11 @@
 /* global describe it expect */
 
-jasmine.DEFAULT_TIMEOUT_INTERVAL = 40;
 const followProps = require('./');
+
+// yes this is very empty
+// this function was extracted from `metadataParser` which
+// has the functionality of `followProps` tested over there.
+// although yes, it should also be tested separately, TODO
 
 describe('followProps()', () => {
   it('should be a function', () => {

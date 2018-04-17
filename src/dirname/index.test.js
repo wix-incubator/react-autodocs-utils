@@ -3,10 +3,6 @@
 const dirname = require('./');
 
 describe('dirname', () => {
-  it('should be a function', () => {
-    expect(typeof dirname).toBe('function');
-  });
-
   const pathsAndDirnames = [
     [ '', '' ],
     [ 'folder', 'folder' ],
