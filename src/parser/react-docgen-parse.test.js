@@ -1,6 +1,6 @@
 /* global describe it expect jest */
 
-const reactDocgenParse = require('./react-docgen-parse');
+const { reactDocgenParse } = require('./react-docgen-parse');
 
 describe('reactDocgenParse', () => {
   describe('given source containing unknown component shape', () => {
