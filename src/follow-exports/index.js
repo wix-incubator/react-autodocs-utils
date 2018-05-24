@@ -1,6 +1,7 @@
 /* global Promise */
 
 const { join: pathJoin } = require('path');
+const namedTypes = require('recast').types.namedTypes;
 
 const parse = require('../parser/parse');
 const dirname = require('../dirname');
@@ -34,6 +35,25 @@ const resolvePath = (cwd, relativePath) => {
 const extractPath = source =>
   new Promise(resolve => {
     const ast = parse(source);
+
+    const exportDeclarations =
+      ast.program.body
+        .filter(node =>
+          [ 'ExportDeclaration',
+            'ExportNamedDeclaration',
+            'ExportAllDeclaration'
+          ].some(checker => namedTypes[checker].check(node))
+        );
+
+    if (exportDeclarations.length === 1) {
+      const [node] = exportDeclarations;
+
+      // node without source is not a simple export, we handle those elsewhere
+      if (node.source) {
+        resolve(node.source.value);
+        return;
+      }
+    }
 
     visit(ast)({
       // export {default} from 'path';

@@ -112,6 +112,21 @@ describe('followExports()', () => {
       });
     });
 
+    describe('which has a single non default export', () => {
+      it('should return source of component', () => {
+        const source = 'export {Component, AnythingElse} from \'./thing.js\'\n\'should ignore me\'';
+
+        fs.__setFS({
+          'thing.js': 'hey!'
+        });
+
+        return expect(followExports(source, '')).resolves.toEqual({
+          source: 'hey!',
+          path: 'thing.js'
+        });
+      });
+    });
+
     describe('which has `export default Identifier`', () => {
       it('should return source of that export', () => {
         const source = `
