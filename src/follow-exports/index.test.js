@@ -86,6 +86,28 @@ describe('followExports()', () => {
       });
     });
 
+    describe('which has `createHOC` HOC', () => {
+      it('should resolve component', () => {
+        const source = `
+            import {
+              Component as CoreComponent
+            } from './Label.js';
+
+            export const Label = createHOC(CoreComponent);
+        `;
+
+        fs.__setFS({
+          'index.js': source,
+          'Label.js': 'hello'
+        });
+
+        return expect(followExports(source, '')).resolves.toEqual({
+          source: 'hello',
+          path: 'Label.js'
+        });
+      });
+    });
+
     describe('which exports with `withClasses` hoc', () => {
       it('should return source of component', () => {
         const source = 'module.exports = require(\'./dist/src/components/component\');';

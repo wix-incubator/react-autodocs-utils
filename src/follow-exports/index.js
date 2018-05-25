@@ -63,16 +63,19 @@ const extractPath = source =>
 
         if (isSpecifierDefault) {
           resolve(path.node.source.value);
-
           return false;
         }
 
         // export const Component = withStylable(Component)
+        // export const Component = createHOC(Component)
         path.traverse({
           CallExpression(path) {
-            const isWithStylable = path.get('callee').isIdentifier({ name: 'withStylable' });
+            const isWithHOC = [
+              'withStylable',
+              'createHOC'
+            ].some(name => path.get('callee').isIdentifier({ name }));
 
-            if (isWithStylable) {
+            if (isWithHOC) {
               const componentName = path.get('arguments')[0].node.name;
 
               visit(ast)({
