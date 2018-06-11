@@ -27,8 +27,8 @@ const prepareStory = storyConfig => source =>
       ));
 
       ast.program.body.unshift(buildImportDeclaration(
-        types.importDefaultSpecifier(types.identifier('storyNew')),
-        'wix-storybook-utils/StoryNew'
+        types.importDefaultSpecifier(types.identifier('story')),
+        'wix-storybook-utils/Story'
       ));
 
       return ast;
@@ -79,7 +79,7 @@ const prepareStory = storyConfig => source =>
             );
 
             path.node.declaration = types.callExpression(
-              types.identifier('storyNew'),
+              types.identifier('story'),
               [ path.node.declaration ]
             );
           }
@@ -95,9 +95,9 @@ const prepareStory = storyConfig => source =>
               )
             );
 
-            // wrap exported object with `storyNew()`
+            // wrap exported object with `story()`
             path.node.declaration = types.callExpression(
-              types.identifier('storyNew'),
+              types.identifier('story'),
               [ configObject ]
             );
           }

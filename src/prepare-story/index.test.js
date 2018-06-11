@@ -23,7 +23,7 @@ describe('prepareStory', () => {
     it('should reject with error when exported config is not an object', () => {
       const source = `const something = "hello";
 export default something;`;
-      const expectation = `import storyNew from "wix-storybook-utils/StoryNew";
+      const expectation = `import story from "wix-storybook-utils/Story";
 import { storiesOf } from "@storybook/react";
 const something = "hello";
 export default something;`;
@@ -33,9 +33,9 @@ export default something;`;
 
     it('should wrap exported object with `story()`', () => {
       const source = 'export default { a: 1 };';
-      const expectation = `import storyNew from "wix-storybook-utils/StoryNew";
+      const expectation = `import story from "wix-storybook-utils/Story";
 import { storiesOf } from "@storybook/react";
-export default storyNew({
+export default story({
   a: 1,
   _config: {
     storiesOf: storiesOf
@@ -48,9 +48,9 @@ export default storyNew({
     it('should add _config to exported object', () => {
       const source = 'export default { a: 1 };';
       const config = { a: 1 };
-      const expectation = `import storyNew from "wix-storybook-utils/StoryNew";
+      const expectation = `import story from "wix-storybook-utils/Story";
 import { storiesOf } from "@storybook/react";
-export default storyNew({
+export default story({
   a: 1,
   _config: {
     "a": 1,
@@ -67,7 +67,7 @@ export default storyNew({
         export default config;
       `;
       const config = { hello: 'config!' };
-      const expectation = `import storyNew from "wix-storybook-utils/StoryNew";
+      const expectation = `import story from "wix-storybook-utils/Story";
 import { storiesOf } from "@storybook/react";
 const config = {
   a: 1,
@@ -76,7 +76,7 @@ const config = {
     storiesOf: storiesOf
   }
 };
-export default storyNew(config);`;
+export default story(config);`;
 
       return expect(prepareStory(config)(source)).resolves.toEqual(expectation);
     });
@@ -95,14 +95,14 @@ export default storyNew(config);`;
 
       const config = { 'i-am-config': 'yes' };
 
-      const expectation = `import storyNew from "wix-storybook-utils/StoryNew";
+      const expectation = `import story from "wix-storybook-utils/Story";
 import { storiesOf } from "@storybook/react";
 const stuff = {
   thing: {
     moreThings: ['hello']
   }
 };
-export default storyNew({
+export default story({
   a: 1,
   b: { ...stuff,
     c: ['d']
