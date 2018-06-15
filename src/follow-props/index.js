@@ -93,7 +93,7 @@ const followComposedProps = (parsed, currentPath) =>
     });
 
 
-const followProps = (source, path) =>
+const followProps = ({source, path}) =>
   parseDocgen(source, path)
     // if resolved, no need to follow props, no need for .then
     // if rejected, need to follow props

@@ -5,8 +5,8 @@ const followProps = require('../follow-props');
 
 const parser = ({source, path}) =>
   followExports(source, path)
-    .then(({source, path: exportPath}) =>
-      followProps(source, exportPath)
+    .then(({source, path}) =>
+      followProps({source, path})
     );
 
 
