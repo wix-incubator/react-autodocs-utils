@@ -22,21 +22,21 @@ describe('given component written in typescript', () => {
     })
   );
 
-  it.skip('should parse metadata', () =>
+  it('should parse metadata', () =>
     expect(metadataParser(fixturePath('heading.tsx'))).resolves.toEqual({
       description: '',
       displayName: 'Heading',
       props: {
         skin: {
           name: 'skin',
-          defaultValue: 'dark',
+          defaultValue: { value: 'dark' },
           required: false,
           description: 'skin color of the heading',
           type: { name: 'Skin' }
         },
         appearance: {
           name: 'appearance',
-          defaultValue: 'H1',
+          defaultValue: { value: 'H1' },
           required: false,
           description: 'typography of the heading',
           type: { name: 'Appearance' }
