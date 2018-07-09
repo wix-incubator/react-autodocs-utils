@@ -404,6 +404,26 @@ describe('metadataParser()', () => {
         });
       });
     });
+
+    describe('with source containing decorators', () => {
+      it('should not fail parsing', () => {
+        fs.__setFS({
+          'index.js':
+            `import React from 'react';
+            /** jsx component */
+            @Inject('formState')
+            @Observer
+            class ILikeTurtles extends React.Component {}
+            export default ILikeTurtles;`
+        });
+
+        return expect(metadataParser('index.js')).resolves.toEqual({
+          ...rootMock,
+          description: 'jsx component',
+          displayName: 'ILikeTurtles'
+        });
+      });
+    });
   });
 
   describe('given component importing from other modules', () => {
