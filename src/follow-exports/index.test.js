@@ -84,6 +84,92 @@ describe('followExports()', () => {
           path: 'node_modules/wix-ui-core/Component.js'
         });
       });
+
+      // TODO: this would be a helpful feature, leaving skipped test for future reference
+      describe.skip('with props interface which is in same file', () => {
+        it('should add additional `composedProps` property with parsed interface', () => {
+          const source = `
+            import { Component as CoreComponent } from 'wix-ui-core/Component';
+            import {withStylable} from 'wix-ui-core';
+
+            export interface AdditionalProps {
+              /** font size of the text */
+              size?: Size;
+
+              /** is the text type is secondary. Affects the font color */
+              secondary?: boolean;
+
+              /** skin color of the text */
+              skin?: Skin;
+
+              /** is the text has dark or light skin */
+              light?: boolean;
+
+              /** is the text bold */
+              bold?: boolean;
+            }
+
+            export const Component = withStylable<CoreComponentProps, AdditionalProps>(
+              CoreComponent,
+              {},
+              i => i,
+              {}
+            );
+          `;
+
+          fs.__setFS({
+            'index.ts': source,
+
+            node_modules: {
+              'wix-ui-core': {
+                'Component.js': 'hello'
+              }
+            }
+          });
+
+          return expect(followExports(source, '')).resolves.toEqual({
+            source: 'hello',
+            path: 'node_modules/wix-ui-core/Component.js',
+            composedProps: {
+              size: {
+                name: 'size',
+                required: false,
+                type: { name: 'Size' },
+                description: 'font size of the text',
+                defaultValue: undefined
+              },
+              skin: {
+                name: 'skin',
+                required: false,
+                type: { name: 'string' },
+                description: 'skin color of the text',
+                defaultValue: undefined
+              },
+              secondary: {
+                name: 'secondary',
+                required: false,
+                type: { name: 'boolean' },
+                description: 'is the text type is secondary. Affects the font color',
+                defaultValue: undefined
+              },
+              light: {
+                name: 'light',
+                required: false,
+                type: { name: 'boolean' },
+                description: 'is the text has dark or light skin',
+                defaultValue: undefined
+              },
+              bold: {
+                name: 'bold',
+                required: false,
+                type: { name: 'boolean' },
+                description: 'is the text bold',
+                defaultValue: undefined
+              }
+            }
+          });
+        });
+      });
     });
 
     describe('which has `createHOC` HOC', () => {

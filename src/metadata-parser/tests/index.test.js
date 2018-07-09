@@ -12,10 +12,6 @@ const rootMock = {
 };
 
 describe('metadataParser()', () => {
-  it('should be a function', () => {
-    expect(typeof metadataParser).toBe('function');
-  });
-
   describe('when called without parameters', () => {
     it('should reject with error', () =>
       expect(metadataParser())
@@ -393,7 +389,7 @@ describe('metadataParser()', () => {
     });
 
     describe('with non `index.js` entry', () => {
-      it('should resolve entry file corrrectly', () => {
+      it('should resolve entry file correctly', () => {
         fs.__setFS({
           'index.js': 'export {default} from \'./Component\'',
           'Component.jsx':
