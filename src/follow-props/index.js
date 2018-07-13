@@ -100,7 +100,7 @@ const followProps = ({source, path}) =>
     .catch(parsed =>
       followComposedProps(parsed, path)
     )
-    .catch(e => console.log('ERROR: Unable to handle composed props', e));
+    .catch(e => console.log(`ERROR: Unable to handle composed props for Component at ${path}`, e));
 
 
 module.exports = followProps;
