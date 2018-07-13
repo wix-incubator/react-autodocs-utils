@@ -45,8 +45,9 @@ const readEntryFile = path =>
     .catch(isDirError =>
       tryReadWithExtension(path)
         .then(({ path }) => path)
-        .catch(e =>
-          new Error(`ERROR: Unable to read component entry file at "${path}". ${e} ${isDirError}`)
+        .catch(e => {
+            throw new Error(`ERROR: Unable to read component entry file at "${path}". ${e} ${isDirError}`);
+          }
         )
     )
 
