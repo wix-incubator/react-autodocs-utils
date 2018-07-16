@@ -52,7 +52,10 @@ const followComposedProps = (parsed, currentPath) =>
     .then(composedSourcesAndPaths =>
       Promise.all(
         composedSourcesAndPaths.map(({ source, path }) =>
-          reactDocgenParse({ source, path })
+          ({
+            parsed: reactDocgenParse({ source, path }),
+            path
+          })
         )
       ))
 
@@ -62,12 +65,12 @@ const followComposedProps = (parsed, currentPath) =>
       // components, in which case we followProps again recursively
 
       const withComposed = parsedComponents
-        .filter(parsed => parsed.composes)
-        .map(parsed => followComposedProps(parsed, currentPath));
+        .filter(({parsed}) => parsed.composes)
+        .map(({parsed, path}) => followComposedProps(parsed, path));
 
       const withoutComposed = parsedComponents
-        .filter(parsed => !parsed.composes)
-        .map(parsed => Promise.resolve(parsed));
+        .filter(({parsed}) => !parsed.composes)
+        .map(({parsed}) => Promise.resolve(parsed));
 
       return Promise.all([
         Promise.all(withComposed),
