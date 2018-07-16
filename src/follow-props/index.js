@@ -34,7 +34,7 @@ const followComposedProps = (parsed, currentPath) =>
       const readablePathPromise =
           composedPath.startsWith('.')
             ? Promise.resolve(pathJoin(pathDirname(currentPath), composedPath))
-            : resolveNodeModules(currentPath, composedPath);
+            : resolveNodeModules(currentPath, composedPath.replace('dist/', ''));
 
       return readablePathPromise
         .then(readFile);

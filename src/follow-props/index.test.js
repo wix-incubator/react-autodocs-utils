@@ -91,4 +91,59 @@ describe('followProps()', () => {
       });
     });
   });
+
+  describe('given component that spreads props from absolute node_modules dist path', () => {
+    it('should remove `dist/` from path', () => {
+      const entrySource = `
+        import PropTypes from 'prop-types';
+        import React from 'react';
+        import OtherComponent from 'wix-ui-backoffice/dist/src/Component';
+
+        export default class EntryComponent extends React.Component {
+          static propTypes = {
+            ...OtherComponent.propTypes
+          };
+
+          render() {
+            return <div/>;
+          }
+        }`;
+
+      fs.__setFS({
+        index: entrySource,
+        node_modules: {
+          'wix-ui-backoffice': {
+            src: {
+              'Component.js': `
+                import PropTypes from 'prop-types';
+                import React from 'react';
+
+                export default class Component extends React.Component {
+                  static propTypes = {
+                    theThing: PropTypes.bool.isRequired
+                  };
+
+                  render() {
+                    return <div/>;
+                  }
+                }`
+            }
+          }
+        }
+      });
+
+      return expect(followProps({ source: entrySource, path: '' })).resolves.toEqual({
+        description: '',
+        displayName: 'EntryComponent',
+        methods: [],
+        props: {
+          theThing: {
+            description: '',
+            required: true,
+            type: { name: 'bool' }
+          }
+        }
+      });
+    });
+  });
 });
