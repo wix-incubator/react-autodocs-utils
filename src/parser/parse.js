@@ -1,8 +1,14 @@
-const babylon = require('babylon');
+const babelParser = require('@babel/parser');
 
 const parse = source =>
-  babylon.parse(source, {
-    plugins: ['decorators', 'jsx', 'typescript', 'classProperties', 'objectRestSpread'],
+  babelParser.parse(source, {
+    plugins: [
+      ['decorators', { decoratorsBeforeExport: true }],
+      'jsx',
+      'typescript',
+      'classProperties',
+      'objectRestSpread'
+    ],
     sourceType: 'module'
   });
 
