@@ -16,7 +16,11 @@ describe('given component written in typescript', () => {
           defaultValue: null,
           required: false,
           description: 'this is a text prop',
-          type: { name: 'string' }
+          type: { name: 'string' },
+          parent: {
+            fileName: fixturePath('simple.ts'),
+            name: 'Props'
+          },
         }
       }
     })
@@ -32,14 +36,22 @@ describe('given component written in typescript', () => {
           defaultValue: { value: 'dark' },
           required: false,
           description: 'skin color of the heading',
-          type: { name: 'Skin' }
+          type: { name: 'Skin' },
+          parent: {
+            fileName: fixturePath('heading.tsx'),
+            name: 'Props'
+          },
         },
         appearance: {
           name: 'appearance',
           defaultValue: { value: 'H1' },
           required: false,
           description: 'typography of the heading',
-          type: { name: 'Appearance' }
+          type: { name: 'Appearance' },
+          parent: {
+            fileName: fixturePath('heading.tsx'),
+            name: 'Props'
+          },
         }
       }
     })
