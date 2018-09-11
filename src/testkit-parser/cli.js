@@ -4,16 +4,44 @@
 
 const path = require('path');
 const fs = require('fs');
-const [, script, dir] = process.argv;
-const isDirectory = path =>
-  fs.existsSync(path) && fs.statSync(path).isDirectory();
+const getDefaultExport = require('./get-default-export');
 
-if (!isDirectory(dir)) {
-  console.log(`Usage ./${path.basename(script)} <dir>`);
-  process.exit(0);
+const main = () => {
+  const [, script, target] = process.argv;
+  const stat = fs.existsSync(target) && fs.statSync(target);
+  const isDirectory = stat && stat.isDirectory();
+  const isFile = stat && stat.isFile();
+
+  if (!isDirectory && !isFile) {
+    console.log(`Usage ./${path.basename(script)} <dir | file>`);
+    process.exit(0);
+  }
+
+  return isDirectory ? scanDir(target) : scanFile(target);
+};
+
+function scanDir(dir) {
+  getFiles(dir, path => path.endsWith('.driver.js')).forEach(file => {
+    const source = fs.readFileSync(file, 'utf8');
+    getDefaultExport(source).then(() => ok(file), err => fail(file, err));
+  });
 }
 
-const getFiles = (dir, predicate = () => true) => {
+function scanFile(file) {
+  const source = fs.readFileSync(file, 'utf8');
+  getDefaultExport(source).then(
+    () => {
+      ok(file);
+      process.exit(0);
+    },
+    err => {
+      fail(file, err);
+      process.exit(1);
+    }
+  );
+}
+
+function getFiles(dir, predicate = () => true) {
   const results = [];
   fs.readdirSync(dir).forEach(file => {
     const newPath = path.join(dir, file);
@@ -27,13 +55,22 @@ const getFiles = (dir, predicate = () => true) => {
     }
   });
   return results;
-};
+}
 
-const getDefaultExport = require('./get-default-export');
-const fail = file => console.log('\x1b[31m', 'FAIL', '\x1b[0m', file);
-const ok = file => console.log('\x1b[32m', 'OK', '\x1b[0m', file);
+function fail(file, error) {
+  console.log(
+    '\x1b[31m',
+    'FAIL',
+    '\x1b[0m',
+    file,
+    '\x1b[31m',
+    error,
+    '\x1b[0m'
+  );
+}
 
-getFiles(dir, path => path.endsWith('.driver.js')).forEach(file => {
-  const source = fs.readFileSync(file, 'utf8');
-  getDefaultExport(source).then(() => ok(file), () => fail(file));
-});
+function ok(file) {
+  console.log('\x1b[32m', 'OK', '\x1b[0m', file);
+}
+
+main();
