@@ -69,9 +69,12 @@ const getNodeDescriptor = ({ node, ast }) => {
 
   const name = node.key.name;
   return { name, ...descriptor, ...comments }
-}
+};
 
-const getObjectMethods = ({ node, ast }) =>
-  flatten(node.properties.map(property => getNodeDescriptor({ node: property, ast })));
+const getObjectMethods = ({ node, ast }) => {
+  const objectNode = types.isIdentifier(node) ? findIdentifierNode({ name: node.name, ast }) : node;
+  return flatten(objectNode.properties.map(property => getNodeDescriptor({ node: property, ast })));
+};
+
 
 module.exports = getObjectMethods;

@@ -54,6 +54,17 @@ describe('get default export', () => {
       };
       export default driver;
       `
+    },
+    { spec: 'returned identifier',
+      code: `
+      function driver() {
+        const a = {
+          method: function() {}
+        }; 
+        return a;
+      };
+      export default driver;
+      `
     }
   ];
 
