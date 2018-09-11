@@ -105,6 +105,26 @@ describe('get object methods', () => {
       expected: [
         { name: 'method', type: 'function', args: [{ name: 'arg' }]}
       ]
+    },
+    { spec: 'non-function keys',
+      code: `
+      export default () => ({
+        notMethod: true,
+        number: 1
+      })`,
+      expected: [
+        { name: 'notMethod', type: 'value'},
+        { name: 'number', type: 'value'}
+      ]
+    },
+    { spec: 'constructor arg as key',
+      code: `
+      export default ({ arg }) => ({
+        arg
+      })`,
+      expected: [
+        { name: 'arg', type: 'unknown'},
+      ]
     }
   ];
 

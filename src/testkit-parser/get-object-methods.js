@@ -42,19 +42,35 @@ const isFunction = node => [
     types.isFunctionExpression
   ].some(checker => checker(node));
 
+const isValue = node => [
+    types.isBooleanLiteral,
+    types.isNumericLiteral
+  ].some(checker => checker(node));
+
 const resolveArguments = ({ node, ast }) => {
   if (isFunction(node)) {
     const args = getArguments(node);
     const type = 'function';
     return { args, type };
   } else if (types.isIdentifier(node)) {
-    const resolvedIdentifier = findIdentifierNode({ name: node.name, ast })
-    return resolveArguments({ node: resolvedIdentifier, ast });
+    try {
+      const resolvedIdentifier = findIdentifierNode({ name: node.name, ast })
+      return resolveArguments({ node: resolvedIdentifier, ast });
+    } catch (e) {
+      // identifier is not declared - probably a function argument
+      return {
+        type: 'unknown'
+      }
+    }
   } else if (types.isObjectExpression(node)) {
     return {
       type: 'object',
       props: getObjectMethods({ node })
     }
+  } else if (isValue(node)) {
+    return {
+      type: 'value'
+    };
   }
   throw `Cannot resolve arguments for ${node.type}`;
 };
