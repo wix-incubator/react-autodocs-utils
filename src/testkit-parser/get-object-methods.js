@@ -1,5 +1,7 @@
 const types = require('@babel/types');
 
+const findIdentifierNode = require('./utils/find-identifier-node');
+const getComments = require('./get-comments');
 const notSupported = context => `not supported: ${context}`;
 
 const getArgument = param => {
@@ -29,11 +31,18 @@ const getArguments = declaration => {
   return declaration.params.map(getArgument);
 };
 
-const getObjectMethods = node => {
+const getObjectMethods = ({ nodes, node }) => {
   return node.properties.map(property => {
+
+    if (types.isSpreadElement(property)) {
+      const spreadIdentifier = property.argument;
+      const identifierNode = findIdentifierNode({ nodes, name: spreadIdentifier.name });
+      return getObjectMethods({ nodes, node: identifierNode });
+    }
+
     const name = property.key.name;
     const value = property.value;
-    let args = []
+    let args = []; 
     switch (value.type) {
       case 'ArrowFunctionExpression':
       case 'FunctionDeclaration':
@@ -41,12 +50,22 @@ const getObjectMethods = node => {
         args = getArguments(value);
         break;
 
+      case 'Identifier':
+        const identifierNode = findIdentifierNode({ nodes, name: value.name })
+        args = getArguments(identifierNode);
+        break;
+
       default:
         throw `getObjectMethods -> default :: not implemented for ${value.type}`;
 
     }
-    return {name, args}
-  })
+
+    const comments = getComments(property);
+
+    return { name, args, ...comments }
+  }).reduce((acc, x) => {
+    return acc.concat(x);
+  }, [])
 };
 
 module.exports = getObjectMethods;

@@ -1,33 +1,7 @@
 const parse = require('../parser/parse');
 const types = require('@babel/types');
-const getObjectMethods = require('./get-object-methods')
-
-const findNodeByName = ({ nodes, name }) => {
-  const node = nodes.find(n => n.id && n.id.name === name);
-  if (!node) {
-    throw `node with name "${name}" not found`;
-  }
-  return node.init ? node.init : node;
-};
-
-
-const flattenVariableDeclarations = nodes => {
-  return nodes.filter(types.isVariableDeclaration).reduce((acc, x) => {
-    acc.push(...x.declarations);
-    return acc;
-  }, []);
-};
-
-const findIdentifierNode = ({ nodes, name }) => {
-  try {
-    return findNodeByName({ nodes, name });
-  } catch (e) {
-    // ignore not found error
-  }
-  return findNodeByName({ nodes: flattenVariableDeclarations(nodes), name });
-};
-
-
+const findIdentifierNode = require('./utils/find-identifier-node');
+const getObjectMethods = require('./get-object-methods');
 
 const findReturnStatementInFunctionBody = node => {
   const blockStatement = node.body;
@@ -38,7 +12,7 @@ const findReturnStatementInFunctionBody = node => {
   }
   const returnArgument = returnStatement.argument;
   return returnArgument;
-}
+};
 
 const getReturnValue = (ast, node) => {
   switch(node.type) {
@@ -56,15 +30,15 @@ const getReturnValue = (ast, node) => {
     default:
       throw 'getReturnValue -> default :: not implemented';
   }
-}
+};
 
 module.exports = async code => {
   const ast = await parse(code);
-  
+
   const defaultExport = ast.program.body.find(types.isExportDefaultDeclaration);
   if (!defaultExport) {
     throw 'default export not found';
   }
   const returnValue = getReturnValue(ast, defaultExport.declaration);
-  return getObjectMethods(returnValue)
+  return getObjectMethods({ nodes: ast.program.body, node: returnValue });
 };
