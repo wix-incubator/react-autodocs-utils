@@ -15,7 +15,11 @@ const getArgument = param => {
     return { name: param.name };
   }
 
-  throw notSupported(`getArgument ${param}`);
+  if (types.isAssignmentPattern(param)) {
+    return { name: param.left.name };
+  }
+
+  throw notSupported(`getArgument ${param.type}`);
 };
 
 const getArguments = declaration => {

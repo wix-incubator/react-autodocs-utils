@@ -96,6 +96,15 @@ describe('get object methods', () => {
         { name: 'methodB', type: 'function', args: [] },
         { name: 'methodC', type: 'function', args: [{ name: 'arg1' }, { name: 'arg2' }]}
       ]
+    },
+    { spec: 'assignment pattern',
+      code: `
+      export default () => ({
+        method: (arg = 1) => {}
+      })`,
+      expected: [
+        { name: 'method', type: 'function', args: [{ name: 'arg' }]}
+      ]
     }
   ];
 
