@@ -25,7 +25,7 @@ const getReturnValue = (ast, node) => {
     case 'FunctionDeclaration':
       return findReturnStatementInFunctionBody(node);
     case 'Identifier':
-      const identifierNode = findIdentifierNode({ nodes: ast.program.body, name: node.name });
+      const identifierNode = findIdentifierNode({ name: node.name, ast });
       return getReturnValue(ast, identifierNode)
     default:
       throw 'getReturnValue -> default :: not implemented';
@@ -40,5 +40,5 @@ module.exports = async code => {
     throw 'default export not found';
   }
   const returnValue = getReturnValue(ast, defaultExport.declaration);
-  return getObjectMethods({ nodes: ast.program.body, node: returnValue });
+  return getObjectMethods({ nodes: ast.program.body, node: returnValue, ast });
 };

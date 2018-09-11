@@ -1,28 +1,22 @@
 const types = require('@babel/types');
-const flatten = require('./flatten');
+const visit = require('../../parser/visit');
 
-const findNodeByName = ({ nodes, name }) => {
-  const node = nodes.find(n => n.id && n.id.name === name);
+const findIdentifierNode = ({ name, ast }) => {
+  let node;
+  visit(ast)({
+    enter(path) {
+      if (path.node.id && path.node.id.name === name) {
+        node = path.node;
+        path.stop();
+      }
+    }
+  });
+
   if (!node) {
-    throw `node with name "${name}" not found`;
+    throw `Node with id ${name} not found`;
   }
-  return node.init ? node.init : node;
-};
 
-const flattenVariableDeclarations = nodes =>
-  flatten(
-    nodes
-      .filter(types.isVariableDeclaration)
-      .map(node => node.declarations)
-  );
-
-const findIdentifierNode = ({ nodes, name }) => {
-  try {
-    return findNodeByName({ nodes, name });
-  } catch (e) {
-    // ignore not found error
-  }
-  return findNodeByName({ nodes: flattenVariableDeclarations(nodes), name });
+  return node.init || node;
 };
 
 module.exports = findIdentifierNode;

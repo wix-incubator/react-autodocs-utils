@@ -38,35 +38,40 @@ const isFunction = node => [
     types.isFunctionExpression
   ].some(checker => checker(node));
 
-const resolveArguments = ({ nodes, node }) => {
+const resolveArguments = ({ node, ast }) => {
   if (isFunction(node)) {
     const args = getArguments(node);
     const type = 'function';
     return { args, type };
   } else if (types.isIdentifier(node)) {
-    const resolvedIdentifier = findIdentifierNode({ nodes, name: node.name })
-    return resolveArguments({ nodes, node: resolvedIdentifier });
+    const resolvedIdentifier = findIdentifierNode({ name: node.name, ast })
+    return resolveArguments({ node: resolvedIdentifier, ast });
+  } else if (types.isObjectExpression(node)) {
+    return {
+      type: 'object',
+      props: getObjectMethods({ node })
+    }
   }
   throw `Cannot resolve arguments for ${node.type}`;
 };
 
-const getNodeDescriptor = ({ nodes, node }) => {
+const getNodeDescriptor = ({ node, ast }) => {
   if (types.isSpreadElement(node)) {
     const spreadIdentifier = node.argument;
-    const identifierNode = findIdentifierNode({ nodes, name: spreadIdentifier.name });
-    return getObjectMethods({ nodes, node: identifierNode });
+    const identifierNode = findIdentifierNode({ name: spreadIdentifier.name, ast });
+    return getObjectMethods({ node: identifierNode, ast });
   }
 
   const value = node.value;
 
-  const { args, type } = resolveArguments({ nodes, node: value });
+  const descriptor = resolveArguments({ node: value, ast });
   const comments = getComments(node);
 
   const name = node.key.name;
-  return { name, type, args, ...comments }
+  return { name, ...descriptor, ...comments }
 }
 
-const getObjectMethods = ({ nodes, node }) =>
-  flatten(node.properties.map(property => getNodeDescriptor({ nodes, node: property })));
+const getObjectMethods = ({ node, ast }) =>
+  flatten(node.properties.map(property => getNodeDescriptor({ node: property, ast })));
 
 module.exports = getObjectMethods;
