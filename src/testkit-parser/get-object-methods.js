@@ -2,6 +2,7 @@ const types = require('@babel/types');
 
 const findIdentifierNode = require('./utils/find-identifier-node');
 const getComments = require('./get-comments');
+const flatten = require('./utils/flatten');
 const notSupported = context => `not supported: ${context}`;
 
 const getArgument = param => {
@@ -31,8 +32,8 @@ const getArguments = declaration => {
   return declaration.params.map(getArgument);
 };
 
-const getObjectMethods = ({ nodes, node }) => {
-  return node.properties.map(property => {
+const getObjectMethods = ({ nodes, node }) =>
+  flatten(node.properties.map(property => {
 
     if (types.isSpreadElement(property)) {
       const spreadIdentifier = property.argument;
@@ -42,7 +43,7 @@ const getObjectMethods = ({ nodes, node }) => {
 
     const name = property.key.name;
     const value = property.value;
-    let args = []; 
+    let args = [];
     switch (value.type) {
       case 'ArrowFunctionExpression':
       case 'FunctionDeclaration':
@@ -63,9 +64,6 @@ const getObjectMethods = ({ nodes, node }) => {
     const comments = getComments(property);
 
     return { name, args, ...comments }
-  }).reduce((acc, x) => {
-    return acc.concat(x);
-  }, [])
-};
+  }));
 
 module.exports = getObjectMethods;
