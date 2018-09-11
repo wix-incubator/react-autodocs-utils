@@ -32,38 +32,41 @@ const getArguments = declaration => {
   return declaration.params.map(getArgument);
 };
 
+const isFunction = node => [
+    types.isArrowFunctionExpression,
+    types.isFunctionDeclaration,
+    types.isFunctionExpression
+  ].some(checker => checker(node));
+
+const resolveArguments = ({ nodes, node }) => {
+  if (isFunction(node)) {
+    const args = getArguments(node);
+    const type = 'function';
+    return { args, type };
+  } else if (types.isIdentifier(node)) {
+    const resolvedIdentifier = findIdentifierNode({ nodes, name: node.name })
+    return resolveArguments({ nodes, node: resolvedIdentifier });
+  }
+  throw `Cannot resolve arguments for ${node.type}`;
+};
+
+const getNodeDescriptor = ({ nodes, node }) => {
+  if (types.isSpreadElement(node)) {
+    const spreadIdentifier = node.argument;
+    const identifierNode = findIdentifierNode({ nodes, name: spreadIdentifier.name });
+    return getObjectMethods({ nodes, node: identifierNode });
+  }
+
+  const value = node.value;
+
+  const { args, type } = resolveArguments({ nodes, node: value });
+  const comments = getComments(node);
+
+  const name = node.key.name;
+  return { name, type, args, ...comments }
+}
+
 const getObjectMethods = ({ nodes, node }) =>
-  flatten(node.properties.map(property => {
-
-    if (types.isSpreadElement(property)) {
-      const spreadIdentifier = property.argument;
-      const identifierNode = findIdentifierNode({ nodes, name: spreadIdentifier.name });
-      return getObjectMethods({ nodes, node: identifierNode });
-    }
-
-    const name = property.key.name;
-    const value = property.value;
-    let args = [];
-    switch (value.type) {
-      case 'ArrowFunctionExpression':
-      case 'FunctionDeclaration':
-      case 'FunctionExpression':
-        args = getArguments(value);
-        break;
-
-      case 'Identifier':
-        const identifierNode = findIdentifierNode({ nodes, name: value.name })
-        args = getArguments(identifierNode);
-        break;
-
-      default:
-        throw `getObjectMethods -> default :: not implemented for ${value.type}`;
-
-    }
-
-    const comments = getComments(property);
-
-    return { name, args, ...comments }
-  }));
+  flatten(node.properties.map(property => getNodeDescriptor({ nodes, node: property })));
 
 module.exports = getObjectMethods;

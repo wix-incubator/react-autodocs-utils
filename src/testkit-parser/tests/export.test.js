@@ -58,7 +58,7 @@ describe('get default export', () => {
   ];
 
   const expected = [
-    { name: 'method', args: []},
+    { name: 'method', type: 'function', args: [] }
   ];
 
   testCases.forEach(({spec, code}) => {

@@ -9,7 +9,7 @@ describe('get method comments', () => {
         method: () => {}
       })`,
       expected: [
-        { name: 'method', args: [], description: 'method description within single line' }
+        { name: 'method', type: 'function', args: [], description: 'method description within single line' }
       ]
     },
     { spec: 'block comment',
@@ -19,7 +19,7 @@ describe('get method comments', () => {
         method: () => {}
       })`,
       expected: [
-        { name: 'method', args: [], description: 'method description within block' }
+        { name: 'method', type: 'function', args: [], description: 'method description within block' }
       ]
     },
     { spec: 'multi-line block comment',
@@ -31,7 +31,7 @@ describe('get method comments', () => {
         method: () => {}
       })`,
       expected: [
-        { name: 'method', args: [], description: 'method description within block' }
+        { name: 'method', type: 'function', args: [], description: 'method description within block' }
       ]
     },
     { spec: 'multiple comments',
@@ -44,6 +44,7 @@ describe('get method comments', () => {
       expected: [
         {
           name: 'method',
+          type: 'function',
           args: [],
           description: `method description
 within multiple comments`
@@ -60,7 +61,7 @@ within multiple comments`
         method: () => {}
       })`,
       expected: [
-        { name: 'method', args: [], description: 'Focus related testing is done in e2e tests only.', isDeprecated: true }
+        { name: 'method', type: 'function', args: [], description: 'Focus related testing is done in e2e tests only.', isDeprecated: true }
       ]
     }
   ];

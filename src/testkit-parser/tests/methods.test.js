@@ -9,8 +9,8 @@ describe('get object methods', () => {
         methodB: () => {}
       })`,
       expected: [
-        { name: 'methodA', args: [] },
-        { name: 'methodB', args: [] }
+        { name: 'methodA', type: 'function', args: [] },
+        { name: 'methodB', type: 'function', args: [] }
       ]
     },
     { spec: 'one arg',
@@ -20,8 +20,8 @@ describe('get object methods', () => {
         methodB: (arg) => {}
       })`,
       expected: [
-        { name: 'methodA', args: [ {name: 'arg' }]},
-        { name: 'methodB', args: [ {name: 'arg' }]}
+        { name: 'methodA', type: 'function', args: [ {name: 'arg' }]},
+        { name: 'methodB', type: 'function', args: [ {name: 'arg' }]}
       ]
     },
     { spec: 'multiple args',
@@ -30,7 +30,7 @@ describe('get object methods', () => {
         methodA: (arg1, arg2) => {}
       })`,
       expected: [
-        { name: 'methodA', args: [ {name: 'arg1' }, {name: 'arg2' }]}
+        { name: 'methodA', type: 'function', args: [ {name: 'arg1' }, {name: 'arg2' }]}
       ]
     },
     { spec: 'function declaration',
@@ -39,7 +39,7 @@ describe('get object methods', () => {
         methodA: function (arg1, arg2) {}
       })`,
       expected: [
-        { name: 'methodA', args: [ {name: 'arg1' }, {name: 'arg2' }]}
+        { name: 'methodA', type: 'function', args: [ {name: 'arg1' }, {name: 'arg2' }]}
       ]
     },
     { spec: 'object destructuring',
@@ -48,7 +48,7 @@ describe('get object methods', () => {
         methodA: ({ arg1, arg2 }, arg3) => {}
       })`,
       expected: [
-        { name: 'methodA', args: [ {name: '{arg1, arg2}' }, {name: 'arg3' }]}
+        { name: 'methodA', type: 'function', args: [ {name: '{arg1, arg2}' }, {name: 'arg3' }]}
       ]
     },
     { spec: 'arrow function identifier',
@@ -58,7 +58,7 @@ describe('get object methods', () => {
         methodA
       })`,
       expected: [
-        { name: 'methodA', args: [ {name: '{arg1, arg2}' }]}
+        { name: 'methodA', type: 'function', args: [ {name: '{arg1, arg2}' }]}
       ]
     },
     { spec: 'function identifier',
@@ -68,7 +68,7 @@ describe('get object methods', () => {
         methodA
       })`,
       expected: [
-        { name: 'methodA', args: [ {name: '{arg1, arg2}' }]}
+        { name: 'methodA', type: 'function', args: [ {name: '{arg1, arg2}' }]}
       ]
     },
     { spec: 'function declaration',
@@ -78,7 +78,7 @@ describe('get object methods', () => {
         methodA
       })`,
       expected: [
-        { name: 'methodA', args: [ {name: '{arg1, arg2}' }]}
+        { name: 'methodA', type: 'function', args: [ {name: '{arg1, arg2}' }]}
       ]
     },
     { spec: 'object spread',
@@ -92,9 +92,9 @@ describe('get object methods', () => {
         ...subDriver
       })`,
       expected: [
-        { name: 'methodA', args: [] },
-        { name: 'methodB', args: [] },
-        { name: 'methodC', args: [{ name: 'arg1' }, { name: 'arg2' }]}
+        { name: 'methodA', type: 'function', args: [] },
+        { name: 'methodB', type: 'function', args: [] },
+        { name: 'methodC', type: 'function', args: [{ name: 'arg1' }, { name: 'arg2' }]}
       ]
     }
   ];
