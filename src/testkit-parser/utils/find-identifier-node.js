@@ -2,6 +2,7 @@ const types = require('@babel/types');
 const visit = require('../../parser/visit');
 const readFile = require('../../read-file');
 const path = require('path');
+const { optimizeSource } = require('./optimizations');
 
 const findNodeOrImport = ({ ast, name }) => {
   return new Promise((resolve, reject) => {
@@ -39,7 +40,7 @@ const findIdentifierNode = async ({ name, ast, cwd }) => {
   const result = await findNodeOrImport({ast, name});
   if (result.isImport) {
     const { source } = await readFile(cwd ? path.join(cwd, result.srcPath) : result.srcPath);
-    return require('../get-export')(source, result.isDefaultExport ? undefined : name, cwd);
+    return require('../get-export')(optimizeSource(source), result.isDefaultExport ? undefined : name, cwd);
   } else {
     return result.node.init ||  result.node;
   }
