@@ -1,4 +1,4 @@
-const getDefaultExport = require('../get-default-export');
+const getExport = require('../get-export');
 
 describe('get default export', () => {
   const testCases = [
@@ -74,7 +74,7 @@ describe('get default export', () => {
 
   testCases.forEach(({spec, code}) => {
     it(`should parse ${spec}`, async () => {
-      const result = await getDefaultExport(code);
+      const result = await getExport(code);
       expect(result).toEqual(expected);
     });
   });

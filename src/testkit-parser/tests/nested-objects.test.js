@@ -1,4 +1,4 @@
-const getDefaultExport = require('../get-default-export');
+const getExport = require('../get-export');
 
 describe('nested object parsing', () => {
   const testCases = [
@@ -88,7 +88,7 @@ describe('nested object parsing', () => {
 
   testCases.slice(testCases.length-1).forEach(({spec, code, expected}) => {
     it(`should parse ${spec}`, async () => {
-      const result = await getDefaultExport(code);
+      const result = await getExport(code);
       expect(result).toEqual(expected);
     });
   });

@@ -47,25 +47,31 @@ const isValue = node => [
     types.isNumericLiteral
   ].some(checker => checker(node));
 
-const resolveArguments = ({ node, ast }) => {
+const resolveArguments = async ({ node, ast }) => {
   if (isFunction(node)) {
     const args = getArguments(node);
     const type = 'function';
     return { args, type };
   } else if (types.isIdentifier(node)) {
     try {
-      const resolvedIdentifier = findIdentifierNode({ name: node.name, ast })
+      const resolvedIdentifier = await findIdentifierNode({ name: node.name, ast });
+      if (Array.isArray(resolvedIdentifier)) {
+        return { type: 'object', props: resolvedIdentifier };
+      }
       return resolveArguments({ node: resolvedIdentifier, ast });
     } catch (e) {
-      // identifier is not declared - probably a function argument
-      return {
-        type: 'unknown'
+      if (e instanceof ReferenceError) {
+        // identifier is not declared - probably a function argument
+        return {
+          type: 'unknown'
+        }
       }
+      throw e;
     }
   } else if (types.isObjectExpression(node)) {
     return {
       type: 'object',
-      props: getObjectMethods({ node })
+      props: await getObjectMethods({ node })
     }
   } else if (isValue(node)) {
     return {
@@ -75,25 +81,26 @@ const resolveArguments = ({ node, ast }) => {
   throw `Cannot resolve arguments for ${node.type}`;
 };
 
-const getNodeDescriptor = ({ node, ast }) => {
+const getNodeDescriptor = async ({ node, ast }) => {
   if (types.isSpreadElement(node)) {
     const spreadIdentifier = node.argument;
-    const identifierNode = findIdentifierNode({ name: spreadIdentifier.name, ast });
+    const identifierNode = await findIdentifierNode({ name: spreadIdentifier.name, ast });
     return getObjectMethods({ node: identifierNode, ast });
   }
 
   const value = node.value;
 
-  const descriptor = resolveArguments({ node: value, ast });
+  const descriptor = await resolveArguments({ node: value, ast });
   const comments = getComments(node);
 
   const name = node.key.name;
   return { name, ...descriptor, ...comments }
 };
 
-const getObjectMethods = ({ node, ast }) => {
-  const objectNode = types.isIdentifier(node) ? findIdentifierNode({ name: node.name, ast }) : node;
-  return flatten(objectNode.properties.map(property => getNodeDescriptor({ node: property, ast })));
+const getObjectMethods = async ({ node, ast }) => {
+  const objectNode = types.isIdentifier(node) ? await findIdentifierNode({ name: node.name, ast }) : node;
+  const methodPromises = objectNode.properties.map(property => getNodeDescriptor({ node: property, ast }));
+  return flatten(await Promise.all(methodPromises));
 };
 
 

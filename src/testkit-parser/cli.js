@@ -4,7 +4,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const getDefaultExport = require('./get-default-export');
+const getDefaultExport = require('./get-export');
 
 const main = () => {
   const [, script, target] = process.argv;

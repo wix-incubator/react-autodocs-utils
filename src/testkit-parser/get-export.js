@@ -3,6 +3,8 @@ const types = require('@babel/types');
 const findIdentifierNode = require('./utils/find-identifier-node');
 const getObjectMethods = require('./get-object-methods');
 
+const DEFAULT_EXPORT = 'default';
+
 const findReturnStatementInFunctionBody = node => {
   const blockStatement = node.body;
   const blockNodes = blockStatement.body;
@@ -14,7 +16,7 @@ const findReturnStatementInFunctionBody = node => {
   return returnArgument;
 };
 
-const getReturnValue = (ast, node) => {
+const getReturnValue = async (ast, node) => {
   switch(node.type) {
     case 'ArrowFunctionExpression':
       if (types.isObjectExpression(node.body)) {
@@ -25,20 +27,39 @@ const getReturnValue = (ast, node) => {
     case 'FunctionDeclaration':
       return findReturnStatementInFunctionBody(node);
     case 'Identifier':
-      const identifierNode = findIdentifierNode({ name: node.name, ast });
+      const identifierNode = await findIdentifierNode({ name: node.name, ast });
       return getReturnValue(ast, identifierNode)
     default:
       throw 'getReturnValue -> default :: not implemented';
   }
 };
 
-module.exports = async code => {
-  const ast = await parse(code);
+module.exports = async (code, exportName = DEFAULT_EXPORT) => {
+  const ast = parse(code);
 
-  const defaultExport = ast.program.body.find(types.isExportDefaultDeclaration);
-  if (!defaultExport) {
-    throw 'default export not found';
+  let exportedNode;
+  if (exportName === DEFAULT_EXPORT) {
+    const exportNode = ast.program.body.find(types.isExportDefaultDeclaration);
+    if (exportNode) {
+      exportedNode = exportNode.declaration;
+    }
+  } else {
+    ast.program.body.forEach(node => {
+      if (types.isExportNamedDeclaration(node)) {
+        node.declaration.declarations.forEach(node => {
+          if( node.id && node.id.name === exportName) {
+            exportedNode = node.id;
+          }
+        })
+      }
+    });
   }
-  const returnValue = getReturnValue(ast, defaultExport.declaration);
+
+
+  if (!exportedNode) {
+    throw `export "${exportName}" not found`;
+  }
+
+  const returnValue = await getReturnValue(ast, exportedNode);
   return getObjectMethods({ nodes: ast.program.body, node: returnValue, ast });
 };
