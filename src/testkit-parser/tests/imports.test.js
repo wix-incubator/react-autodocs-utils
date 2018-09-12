@@ -61,6 +61,21 @@ describe('import parsing', () => {
             anotherMethod: () => {}
           })`
       }
+    },
+    { spec: 'factory function',
+      code: `
+      import driverFactory from './driver.js';
+      const driver = driverFactory();
+      export default () => ({
+        driver
+      })`,
+      files: {
+        './driver.js': `
+          export default () => ({
+            method: arg => {}
+          })`
+      }
+
     }
   ];
 

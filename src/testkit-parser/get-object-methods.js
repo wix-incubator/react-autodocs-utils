@@ -3,6 +3,7 @@ const types = require('@babel/types');
 const findIdentifierNode = require('./utils/find-identifier-node');
 const getComments = require('./get-comments');
 const flatten = require('./utils/flatten');
+const getReturnValue = require('./utils/get-return-value');
 const notSupported = context => `not supported: ${context}`;
 
 const getArgument = param => {
@@ -76,6 +77,11 @@ const resolveArguments = async ({ node, ast }) => {
   } else if (isValue(node)) {
     return {
       type: 'value'
+    };
+  } else if (types.isCallExpression(node)) {
+    return {
+      type: 'object',
+      props: await getReturnValue(ast, node.callee)
     };
   }
   throw `Cannot resolve arguments for ${node.type}`;
