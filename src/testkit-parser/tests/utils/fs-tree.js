@@ -14,7 +14,7 @@ module.exports = flatTree =>
         break;
       }
 
-      const currentSegment = {};
+      const currentSegment = previousSegment[nextSegmentName] || {};
       previousSegment[nextSegmentName] = currentSegment;
       previousSegment = currentSegment;
       nextSegmentName = path.shift();

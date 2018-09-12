@@ -35,6 +35,34 @@ describe('fs tree', () => {
           }
         }
       }
+    },
+    {
+      spec: 'add multiple entries to same level',
+      input: {
+        './file': 'hello',
+        './another-file': 'world'
+      },
+      expected: {
+        '.': {
+          file: 'hello',
+          'another-file': 'world'
+        }
+      }
+    },
+    {
+      spec: 'add multiple entries to same deep level',
+      input: {
+        './dir/file': 'hello',
+        './dir/another-file': 'world'
+      },
+      expected: {
+        '.': {
+          dir: {
+            file: 'hello',
+            'another-file': 'world'
+          }
+        }
+      }
     }
   ];
 
