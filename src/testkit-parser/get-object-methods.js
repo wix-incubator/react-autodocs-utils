@@ -91,6 +91,8 @@ const resolveArguments = async ({ node, ast, cwd }) => {
       type: 'object',
       props: returnedObjectMember.props
     };
+  } else if (types.isLogicalExpression(node)) {
+    return await resolveArguments({ node: node.right, ast, cwd });
   }
   throw `Cannot resolve arguments for ${node.type}`;
 };

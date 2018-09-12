@@ -125,6 +125,20 @@ describe('get object methods', () => {
       expected: [
         { name: 'arg', type: 'unknown'},
       ]
+    },
+    { spec: 'logical expression',
+      code: `
+      export default ({ arg }) => {
+        const driver = arg && { method: () => {} }
+        return {
+          driver
+        }
+      }`,
+      expected: [
+        { name: 'driver', type: 'object', props: [
+          { name: 'method', type: 'function', args: []}
+        ]}
+      ]
     }
   ];
 
