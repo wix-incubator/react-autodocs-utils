@@ -104,7 +104,13 @@ const getNodeDescriptor = async ({ node, ast, cwd}) => {
       const identifierNode = await findIdentifierNode({ name: spreadNode.name, ast, cwd });
       return getObjectMethods({ node: identifierNode, ast, cwd });
     } else if (types.isCallExpression(spreadNode)) {
-      return getObjectMethods({ node: spreadNode.callee, ast, cwd})
+      const callee = spreadNode.callee;
+      if (types.isIdentifier(callee)) {
+        return getObjectMethods({ node: callee, ast, cwd})
+      } else if (types.isArrowFunctionExpression(callee)) {
+        return getObjectMethods({ node: getReturnValue(ast, callee, cwd), ast, cwd });
+      }
+      throw 'getNodeDescriptor -> CallExpression :: not implemented';
     }
   }
 
@@ -118,9 +124,12 @@ const getNodeDescriptor = async ({ node, ast, cwd}) => {
 };
 
 const getObjectMethods = async ({ node, ast, cwd }) => {
-  const objectNode = types.isIdentifier(node) ? await findIdentifierNode({ name: node.name, ast, cwd }) : node;
+  let objectNode = types.isIdentifier(node) ? await findIdentifierNode({ name: node.name, ast, cwd }) : node;
   if (Array.isArray(objectNode)) {
     return objectNode;
+  }
+  if (types.isArrowFunctionExpression(objectNode)) {
+    objectNode = await getReturnValue(ast, objectNode, cwd)
   }
   const methodPromises = objectNode.properties.map(property => getNodeDescriptor({ node: property, ast, cwd }));
   return flatten(await Promise.all(methodPromises));

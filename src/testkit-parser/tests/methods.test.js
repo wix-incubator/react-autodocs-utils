@@ -139,6 +139,26 @@ describe('get object methods', () => {
           { name: 'method', type: 'function', args: []}
         ]}
       ]
+    },
+    { spec: 'object spread on function call',
+      code: `
+        const factory = () => ({
+          driver: {
+            method: () => {}
+          }
+        });
+        
+        export default () => {
+          return {
+            ...factory()
+          }
+        };
+      `,
+      expected: [
+        { name: 'driver', type: 'object', props: [
+          { name: 'method', type: 'function', args: []}
+        ]}
+      ]
     }
   ];
 
