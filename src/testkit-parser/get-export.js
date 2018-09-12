@@ -2,12 +2,13 @@ const parse = require('../parser/parse');
 const types = require('@babel/types');
 const getObjectMethods = require('./get-object-methods');
 const getReturnValue = require('./utils/get-return-value');
-const { optimizeSource } = require('./utils/optimizations');
+const { optimizeSource, optimizeAST } = require('./utils/optimizations');
+const visit = require('../parser/visit');
 
 const DEFAULT_EXPORT = 'default';
 
 module.exports = async (code, exportName = DEFAULT_EXPORT, cwd) => {
-  const ast = parse(optimizeSource(code));
+  const ast = optimizeAST(parse(optimizeSource(code)));
 
   let exportedNode;
   if (exportName === DEFAULT_EXPORT) {

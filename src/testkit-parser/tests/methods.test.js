@@ -188,6 +188,30 @@ describe('get object methods', () => {
           { name: 'arg' }
         ]}
       ]
+    },
+    {
+      spec: 'object assign',
+      code: `
+        const composedDriverFactory = () => {
+          const driver = () => ({ 
+            method: () => {}
+          });
+        
+          const composedDriver = Object.assign(driver, {
+            anotherMethod: arg => {}
+          });
+          
+          return { driver: composedDriver };
+        };
+        
+        export default composedDriverFactory;
+      `,
+      expected: [
+        { name: 'driver', type: 'object', props: [
+          { name: 'method', type: 'function', args: [] },
+          { name: 'anotherMethod', type: 'function', args: [{ name: 'arg' }]}
+        ]}
+      ]
     }
   ];
 

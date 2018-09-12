@@ -68,7 +68,7 @@ const resolveArguments = async ({ node, ast, cwd }) => {
   } else if (types.isObjectExpression(node)) {
     return {
       type: 'object',
-      props: await getObjectMethods({ node })
+      props: await getObjectMethods({ node, ast, cwd })
     };
   } else if (isValue(node)) {
     return {
@@ -107,7 +107,10 @@ const getNodeDescriptor = async ({ node, ast, cwd}) => {
         return getObjectMethods({ node: getReturnValue(ast, callee, cwd), ast, cwd });
       }
       throw 'getNodeDescriptor -> CallExpression :: not implemented';
+    } else if (types.isObjectExpression(spreadNode)) {
+      return getObjectMethods({ node: spreadNode, ast, cwd });
     }
+    throw `getNodeDescriptor -> SpreadElement :: not implemented for ${node.type}`
   }
 
   const nodeValue = types.isObjectMethod(node) ? node : node.value
