@@ -24,12 +24,7 @@ const getArgument = param => {
 };
 
 const getArguments = declaration => {
-  const isSupported = [
-    types.isArrowFunctionExpression,
-    types.isFunctionDeclaration,
-    types.isFunctionExpression
-  ].some(typeChecker => typeChecker(declaration));
-
+  const isSupported = isFunction(declaration)
   if (!isSupported) {
     throw notSupported(`getArguments ${declaration.type}`);
   }
@@ -40,7 +35,8 @@ const getArguments = declaration => {
 const isFunction = node => [
   types.isArrowFunctionExpression,
   types.isFunctionDeclaration,
-  types.isFunctionExpression
+  types.isFunctionExpression,
+  types.isObjectMethod
 ].some(checker => checker(node));
 
 const isValue = node => [
@@ -114,9 +110,8 @@ const getNodeDescriptor = async ({ node, ast, cwd}) => {
     }
   }
 
-  const value = node.value;
-
-  const descriptor = await resolveArguments({ node: value, ast, cwd });
+  const nodeValue = types.isObjectMethod(node) ? node : node.value
+  const descriptor = await resolveArguments({ node: nodeValue, ast, cwd });
   const comments = getComments(node);
 
   const name = node.key.name;

@@ -63,6 +63,18 @@ within multiple comments`
       expected: [
         { name: 'method', type: 'function', args: [], description: 'Focus related testing is done in e2e tests only.', isDeprecated: true }
       ]
+    },
+    { spec: 'object method comment',
+      code: `
+      export default () => ({
+        // comment
+        method() {
+        
+        }
+      })`,
+      expected: [
+        { name: 'method', type: 'function', args: [], description: 'comment' }
+      ]
     }
   ];
 

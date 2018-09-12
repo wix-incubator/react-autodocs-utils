@@ -159,6 +159,18 @@ describe('get object methods', () => {
           { name: 'method', type: 'function', args: []}
         ]}
       ]
+    },
+    { spec: 'object method',
+      code: `
+        export default () => ({
+          method(arg) { }
+        });
+      `,
+      expected: [
+        { name: 'method', type: 'function', args: [
+          { name: 'arg' }
+        ]}
+      ]
     }
   ];
 
