@@ -171,6 +171,23 @@ describe('get object methods', () => {
           { name: 'arg' }
         ]}
       ]
+    },
+    {
+      spec: 'object spread on call expression',
+      code: `
+      const driverFactory = () => ({
+        method: arg => {}
+      });
+      export default () => {
+        const driver = driverFactory();
+        return { ...driver }
+      }
+      `,
+      expected: [
+        { name: 'method', type: 'function', args: [
+          { name: 'arg' }
+        ]}
+      ]
     }
   ];
 

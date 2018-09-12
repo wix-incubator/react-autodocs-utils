@@ -126,6 +126,9 @@ const getObjectMethods = async ({ node, ast, cwd }) => {
   if (types.isArrowFunctionExpression(objectNode)) {
     objectNode = await getReturnValue(ast, objectNode, cwd)
   }
+  if (types.isCallExpression(objectNode)) {
+    return getObjectMethods({ node: objectNode.callee, ast, cwd });
+  }
   const methodPromises = objectNode.properties.map(property => getNodeDescriptor({ node: property, ast, cwd }));
   return flatten(await Promise.all(methodPromises));
 };
