@@ -38,34 +38,34 @@ const getArguments = declaration => {
 };
 
 const isFunction = node => [
-    types.isArrowFunctionExpression,
-    types.isFunctionDeclaration,
-    types.isFunctionExpression
-  ].some(checker => checker(node));
+  types.isArrowFunctionExpression,
+  types.isFunctionDeclaration,
+  types.isFunctionExpression
+].some(checker => checker(node));
 
 const isValue = node => [
-    types.isBooleanLiteral,
-    types.isNumericLiteral
-  ].some(checker => checker(node));
+  types.isBooleanLiteral,
+  types.isNumericLiteral
+].some(checker => checker(node));
 
-const resolveArguments = async ({ node, ast }) => {
+const resolveArguments = async ({ node, ast, cwd }) => {
   if (isFunction(node)) {
     const args = getArguments(node);
     const type = 'function';
     return { args, type };
   } else if (types.isIdentifier(node)) {
     try {
-      const resolvedIdentifier = await findIdentifierNode({ name: node.name, ast });
+      const resolvedIdentifier = await findIdentifierNode({ name: node.name, ast, cwd });
       if (Array.isArray(resolvedIdentifier)) {
         return { type: 'object', props: resolvedIdentifier };
       }
-      return resolveArguments({ node: resolvedIdentifier, ast });
+      return resolveArguments({ node: resolvedIdentifier, ast, cwd });
     } catch (e) {
       if (e instanceof ReferenceError) {
         // identifier is not declared - probably a function argument
         return {
           type: 'unknown'
-        }
+        };
       }
       throw e;
     }
@@ -73,7 +73,7 @@ const resolveArguments = async ({ node, ast }) => {
     return {
       type: 'object',
       props: await getObjectMethods({ node })
-    }
+    };
   } else if (isValue(node)) {
     return {
       type: 'value'
@@ -81,33 +81,32 @@ const resolveArguments = async ({ node, ast }) => {
   } else if (types.isCallExpression(node)) {
     return {
       type: 'object',
-      props: await getReturnValue(ast, node.callee)
+      props: await getReturnValue(ast, node.callee, cwd)
     };
   }
   throw `Cannot resolve arguments for ${node.type}`;
 };
 
-const getNodeDescriptor = async ({ node, ast }) => {
+const getNodeDescriptor = async ({ node, ast, cwd}) => {
   if (types.isSpreadElement(node)) {
     const spreadIdentifier = node.argument;
-    const identifierNode = await findIdentifierNode({ name: spreadIdentifier.name, ast });
+    const identifierNode = await findIdentifierNode({ name: spreadIdentifier.name, ast, cwd });
     return getObjectMethods({ node: identifierNode, ast });
   }
 
   const value = node.value;
 
-  const descriptor = await resolveArguments({ node: value, ast });
+  const descriptor = await resolveArguments({ node: value, ast, cwd });
   const comments = getComments(node);
 
   const name = node.key.name;
-  return { name, ...descriptor, ...comments }
+  return { name, ...descriptor, ...comments };
 };
 
-const getObjectMethods = async ({ node, ast }) => {
-  const objectNode = types.isIdentifier(node) ? await findIdentifierNode({ name: node.name, ast }) : node;
+const getObjectMethods = async ({ node, ast, cwd }) => {
+  const objectNode = types.isIdentifier(node) ? await findIdentifierNode({ name: node.name, ast, cwd }) : node;
   const methodPromises = objectNode.properties.map(property => getNodeDescriptor({ node: property, ast }));
   return flatten(await Promise.all(methodPromises));
 };
-
 
 module.exports = getObjectMethods;

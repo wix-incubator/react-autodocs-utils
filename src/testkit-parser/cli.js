@@ -4,7 +4,7 @@
 
 const path = require('path');
 const fs = require('fs');
-const getDefaultExport = require('./get-export');
+const getExport = require('./get-export');
 
 const main = () => {
   const [, script, target] = process.argv;
@@ -23,13 +23,13 @@ const main = () => {
 function scanDir(dir) {
   getFiles(dir, path => path.endsWith('.driver.js')).forEach(file => {
     const source = fs.readFileSync(file, 'utf8');
-    getDefaultExport(source).then(() => ok(file), err => fail(file, err));
+    getExport(source, undefined, path.dirname(file)).then(() => ok(file), err => fail(file, err));
   });
 }
 
 function scanFile(file) {
   const source = fs.readFileSync(file, 'utf8');
-  getDefaultExport(source).then(
+  getExport(source, undefined, path.dirname(file)).then(
     () => {
       ok(file);
       process.exit(0);

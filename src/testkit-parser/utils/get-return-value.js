@@ -4,7 +4,7 @@ const findIdentifierNode = require('./find-identifier-node');
 const findReturnStatementInFunctionBody = node => {
   const blockStatement = node.body;
   const blockNodes = blockStatement.body;
-  const returnStatement = blockNodes.find(types.isReturnStatement)
+  const returnStatement = blockNodes.find(types.isReturnStatement);
   if (!returnStatement) {
     throw 'getReturnValue -> FunctionDeclaration -> Block Declaration :: no body';
   }
@@ -12,24 +12,25 @@ const findReturnStatementInFunctionBody = node => {
   return returnArgument;
 };
 
-const getReturnValue = async (ast, node) => {
+const getReturnValue = async (ast, node, cwd) => {
   switch(node.type) {
-    case 'ArrowFunctionExpression':
-      if (types.isObjectExpression(node.body)) {
-        return node.body;
-      }
-      return findReturnStatementInFunctionBody(node);
+  case 'ArrowFunctionExpression':
+    if (types.isObjectExpression(node.body)) {
+      return node.body;
+    }
+    return findReturnStatementInFunctionBody(node);
 
-    case 'FunctionDeclaration':
-      return findReturnStatementInFunctionBody(node);
-    case 'Identifier':
-      const identifierNode = await findIdentifierNode({ name: node.name, ast });
-      if (Array.isArray(identifierNode)) {
-        return identifierNode;
-      }
-      return getReturnValue(ast, identifierNode)
-    default:
-      throw `getReturnValue not implemented for ${node.type}`;
+  case 'FunctionDeclaration':
+    return findReturnStatementInFunctionBody(node);
+  case 'Identifier': {
+    const identifierNode = await findIdentifierNode({ name: node.name, ast, cwd });
+    if (Array.isArray(identifierNode)) {
+      return identifierNode;
+    }
+    return getReturnValue(ast, identifierNode, cwd);
+  }
+  default:
+    throw `getReturnValue not implemented for ${node.type}`;
   }
 };
 

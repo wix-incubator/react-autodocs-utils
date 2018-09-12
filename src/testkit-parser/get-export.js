@@ -5,7 +5,7 @@ const getReturnValue = require('./utils/get-return-value');
 
 const DEFAULT_EXPORT = 'default';
 
-module.exports = async (code, exportName = DEFAULT_EXPORT) => {
+module.exports = async (code, exportName = DEFAULT_EXPORT, cwd) => {
   const ast = parse(code);
 
   let exportedNode;
@@ -21,16 +21,15 @@ module.exports = async (code, exportName = DEFAULT_EXPORT) => {
           if( node.id && node.id.name === exportName) {
             exportedNode = node.id;
           }
-        })
+        });
       }
     });
   }
-
 
   if (!exportedNode) {
     throw `export "${exportName}" not found`;
   }
 
-  const returnValue = await getReturnValue(ast, exportedNode);
-  return getObjectMethods({ nodes: ast.program.body, node: returnValue, ast });
+  const returnValue = await getReturnValue(ast, exportedNode, cwd);
+  return getObjectMethods({ nodes: ast.program.body, node: returnValue, ast, cwd });
 };
