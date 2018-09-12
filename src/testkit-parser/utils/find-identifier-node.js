@@ -39,7 +39,7 @@ const findIdentifierNode = async ({ name, ast, cwd }) => {
   const result = await findNodeOrImport({ast, name});
   if (result.isImport) {
     const { source } = await readFile(cwd ? path.join(cwd, result.srcPath) : result.srcPath);
-    return require('../get-export')(source, result.isDefaultExport ? undefined : name);
+    return require('../get-export')(source, result.isDefaultExport ? undefined : name, cwd);
   } else {
     return result.node.init ||  result.node;
   }

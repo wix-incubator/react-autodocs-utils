@@ -105,7 +105,7 @@ const getNodeDescriptor = async ({ node, ast, cwd}) => {
 
 const getObjectMethods = async ({ node, ast, cwd }) => {
   const objectNode = types.isIdentifier(node) ? await findIdentifierNode({ name: node.name, ast, cwd }) : node;
-  const methodPromises = objectNode.properties.map(property => getNodeDescriptor({ node: property, ast }));
+  const methodPromises = objectNode.properties.map(property => getNodeDescriptor({ node: property, ast, cwd }));
   return flatten(await Promise.all(methodPromises));
 };
 
