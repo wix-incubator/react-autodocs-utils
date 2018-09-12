@@ -75,7 +75,38 @@ describe('import parsing', () => {
             method: arg => {}
           })`
       }
-
+    },
+    { spec: 'member expression',
+      code: `
+      import driverFactory from './driver.js';
+      export default () => ({
+        driver: driverFactory().anotherDriver
+      })`,
+      files: {
+        './driver.js': `
+          export default () => ({
+            anotherDriver: {
+              method: arg => {}
+            }
+          })`
+      }
+    },
+    { spec: 'object spread on factory function',
+      code: `
+      import driverFactory from './driver.js';
+      export default () => ({
+        ...driverFactory()
+      })
+      `,
+      files: {
+        './driver.js': `
+          export default () => ({
+            driver: {
+              method: arg => {}
+            }
+          })
+        `
+      }
     }
   ];
 
