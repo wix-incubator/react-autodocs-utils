@@ -93,11 +93,20 @@ describe('get default export', () => {
 describe('get named export', () => {
   const testCases = [
     {
-      spec: 'DriverFactory pattern',
+      spec: 'const DriverFactory pattern',
       code: `
         export const myDriverFactory = () => ({
           method: function() {}
         });
+      `,
+    },
+    {
+      spec: 'identifier DriverFactory pattern',
+      code: `
+        const myDriverFactory = () => ({
+          method: function() {}
+        });
+        export { myDriverFactory as driver }
       `,
     },
   ];
