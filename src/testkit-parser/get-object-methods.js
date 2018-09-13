@@ -75,9 +75,15 @@ const resolveArguments = async ({ node, ast, cwd }) => {
       type: 'value'
     };
   } else if (types.isCallExpression(node)) {
+    const returnValue = await getReturnValue(ast, node.callee, cwd);
+    if (types.isArrowFunctionExpression(returnValue)) {
+      return {
+        type: 'function',
+        args: getArguments(returnValue)};
+    }
     return {
       type: 'object',
-      props: await getReturnValue(ast, node.callee, cwd)
+      props: returnValue
     };
   } else if (types.isMemberExpression(node)) {
     const callExpression = node.object;

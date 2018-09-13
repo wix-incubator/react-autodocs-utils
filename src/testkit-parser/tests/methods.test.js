@@ -212,6 +212,23 @@ describe('get object methods', () => {
           { name: 'anotherMethod', type: 'function', args: [{ name: 'arg' }]}
         ]}
       ]
+    },
+    {
+      spec: 'method factory',
+      code: `
+        const driver = () => {
+          const methodFactory = type => arg => ({})
+        
+          return {
+            method: methodFactory('value'),
+          };
+        };
+        
+        export default driver;
+      `,
+      expected: [
+        { name: 'method', type: 'function', args: [{ name: 'arg' }]}
+      ]
     }
   ];
 
