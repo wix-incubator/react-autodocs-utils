@@ -107,6 +107,18 @@ describe('import parsing', () => {
           })
         `
       }
+    },
+    { spec: 'export {x as y, a as b} from z',
+      code: `
+        export { internalDriver as driverFactory } from './driver.js';
+      `,
+      files: {
+        './driver.js': `
+          export const internalDriver () => ({
+            method: arg => {}
+          })
+        `
+      }
     }
   ];
 

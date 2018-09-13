@@ -1,8 +1,6 @@
 const types = require('@babel/types');
 const visit = require('../../parser/visit');
-const readFile = require('../../read-file');
-const path = require('path');
-const { optimizeSource } = require('./optimizations');
+const followImport = require('./follow-import');
 
 const findNodeOrImport = ({ ast, name }) => {
   return new Promise((resolve, reject) => {
@@ -24,7 +22,7 @@ const findNodeOrImport = ({ ast, name }) => {
           });
           if (isImportedIdentifier) {
             found = true;
-            resolve({ isImport: true, isDefaultExport, srcPath: path.node.source.value });
+            resolve({ isImport: true, isDefaultExport, sourcePath: path.node.source.value });
           }
         }
       }
@@ -37,13 +35,15 @@ const findNodeOrImport = ({ ast, name }) => {
 };
 
 const findIdentifierNode = async ({ name, ast, cwd }) => {
-  const result = await findNodeOrImport({ast, name});
-  if (result.isImport) {
-    const { source } = await readFile(cwd ? path.join(cwd, result.srcPath) : result.srcPath);
-    return require('../get-export')(optimizeSource(source), result.isDefaultExport ? undefined : name, cwd);
-  } else {
-    return result.node.init ||  result.node;
+  const { node, isImport, sourcePath, isDefaultExport } = await findNodeOrImport({ast, name});
+  if (isImport) {
+    return followImport({
+      sourcePath,
+      cwd,
+      exportName: isDefaultExport ? undefined : name
+    });
   }
+  return node.init ||  node;
 };
 
 module.exports = findIdentifierNode;

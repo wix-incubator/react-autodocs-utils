@@ -4,12 +4,13 @@ const types = require('@babel/types');
 const getObjectMethods = require('./get-object-methods');
 const getReturnValue = require('./utils/get-return-value');
 const { optimizeSource, optimizeAST } = require('./utils/optimizations');
+const followImport = require('./utils/follow-import');
 
 const DEFAULT_EXPORT = 'default';
 
-const byName = name => node => node.name === name;
+const byName = name => ({ node }) => node.name === name;
 
-const byPattern = regex => node => regex.test(node.name);
+const byPattern = regex => ({ node }) => regex.test(node.name);
 
 const findNamedExportDeclaration = (nodes, predicate) => {
   const exportedNode = nodes.find(predicate);
@@ -29,12 +30,13 @@ module.exports = async (code, exportName = DEFAULT_EXPORT, cwd) => {
       exportDefaultNode = path.node.declaration;
     },
     ExportNamedDeclaration(path) {
+      const exportSource = path.node.source;
       path.traverse({
         VariableDeclarator(path) {
-          exportNamedNodes.push(path.node.id);
+          exportNamedNodes.push({ node: path.node.id });
         },
         ExportSpecifier(path) {
-          exportNamedNodes.push(path.node.local);
+          exportNamedNodes.push({ node: path.node.local, source: exportSource });
         }
       });
     }
@@ -44,6 +46,14 @@ module.exports = async (code, exportName = DEFAULT_EXPORT, cwd) => {
     exportedNode = exportDefaultNode || findNamedExportDeclaration(exportNamedNodes, byPattern(/DriverFactory$/));
   } else {
     exportedNode = findNamedExportDeclaration(exportNamedNodes, byName(exportName));
+  }
+
+  if (exportedNode.node) {
+    if (exportedNode.source) {
+      // resolve
+      followImport({ cwd, sourcePath: exportedNode.source, exportName: exportedNode.name });
+    }
+    exportedNode = exportedNode.node;
   }
 
   if (!exportedNode) {
