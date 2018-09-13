@@ -20,6 +20,10 @@ const getArgument = param => {
     return { name: param.left.name };
   }
 
+  if (types.isRestElement(param)) {
+    return { name: `...${param.argument.name}` };
+  }
+
   throw notSupported(`getArgument ${param.type}`);
 };
 

@@ -275,6 +275,21 @@ describe('get object methods', () => {
           { name: 'method', type: 'function', args: [{ name: 'arg' }]}
         ]}
       ]
+    },
+    {
+      spec: 'rest argument',
+      code: `
+        export default () => ({
+          method: (arg1, arg2, ...args) => {}
+        })
+      `,
+      expected: [
+        { name: 'method', type: 'function', args: [
+          { name: 'arg1' },
+          { name: 'arg2' },
+          { name: '...args' }
+        ]}
+      ]
     }
   ];
 
