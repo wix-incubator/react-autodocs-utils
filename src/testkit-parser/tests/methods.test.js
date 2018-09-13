@@ -229,10 +229,31 @@ describe('get object methods', () => {
       expected: [
         { name: 'method', type: 'function', args: [{ name: 'arg' }]}
       ]
+    },
+    {
+      spec: 'runtime-dependant driver',
+      code: `
+        const driverFactory = (runtimeValue) => {
+          const driver = runtimeValue 
+            ? { anotherMethod: () => {}}
+            : {};
+            
+          return {
+            method: () => {},
+            ...driver
+          };
+        };
+        
+        export default driverFactory;
+      `,
+      expected: [
+        { name: 'method', type: 'function', args: []},
+        { name: 'driver', type: 'error' }
+      ]
     }
   ];
 
-  testCases.forEach(({spec, code, expected}) => {
+  testCases.slice(testCases.length-1).forEach(({spec, code, expected}) => {
     it(`should parse ${spec}`, async () => {
       const result = await getExport(code);
       expect(result).toEqual(expected);

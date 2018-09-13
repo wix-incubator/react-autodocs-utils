@@ -104,7 +104,15 @@ const getNodeDescriptor = async ({ node, ast, cwd}) => {
     const spreadNode = node.argument;
     if (types.isIdentifier(spreadNode)) {
       const identifierNode = await findIdentifierNode({ name: spreadNode.name, ast, cwd });
-      return getObjectMethods({ node: identifierNode, ast, cwd });
+      try {
+        return await getObjectMethods({ node: identifierNode, ast, cwd });
+      } catch (e) {
+        debugger;
+        return {
+          name: spreadNode.name,
+          type: 'error'
+        }
+      }
     } else if (types.isCallExpression(spreadNode)) {
       const callee = spreadNode.callee;
       if (types.isIdentifier(callee)) {
@@ -137,6 +145,10 @@ const getObjectMethods = async ({ node, ast, cwd }) => {
   }
   if (types.isCallExpression(objectNode)) {
     return getObjectMethods({ node: objectNode.callee, ast, cwd });
+  }
+  if (!objectNode.properties) {
+    debugger;
+    throw Error(`Cannot resolve properties for ${node.type}`);
   }
   const methodPromises = objectNode.properties.map(property => getNodeDescriptor({ node: property, ast, cwd }));
   return flatten(await Promise.all(methodPromises));
