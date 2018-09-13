@@ -123,8 +123,13 @@ const getNodeDescriptor = async ({ node, ast, cwd}) => {
       throw 'getNodeDescriptor -> CallExpression :: not implemented';
     } else if (types.isObjectExpression(spreadNode)) {
       return getObjectMethods({ node: spreadNode, ast, cwd });
+    } else if (types.isMemberExpression(spreadNode)) {
+      const memberObject = await findIdentifierNode({ name: spreadNode.object.name, ast, cwd })
+      const memberProperties = await getObjectMethods({ node: memberObject, ast, cwd });
+      const memberProperty = memberProperties.find(prop => prop.name === spreadNode.property.name);
+      return memberProperty.props;
     }
-    throw `getNodeDescriptor -> SpreadElement :: not implemented for ${node.type}`
+    throw `getNodeDescriptor -> SpreadElement :: not implemented for ${spreadNode.type}`
   }
 
   const nodeValue = types.isObjectMethod(node) ? node : node.value

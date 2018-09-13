@@ -250,10 +250,35 @@ describe('get object methods', () => {
         { name: 'method', type: 'function', args: []},
         { name: 'driver', type: 'error' }
       ]
+    },
+    {
+      spec: 'object spread on member expression',
+      code: `
+        const driver = () => {
+          const wrappedDriver = {
+            driver: {
+              method: arg => {}
+            }
+          }
+      
+          return {
+            driver: {
+              ...wrappedDriver.driver
+            }
+          };
+        };
+      
+        export default driver;
+      `,
+      expected: [
+        { name: 'driver', type: 'object', props: [
+          { name: 'method', type: 'function', args: [{ name: 'arg' }]}
+        ]}
+      ]
     }
   ];
 
-  testCases.slice(testCases.length-1).forEach(({spec, code, expected}) => {
+  testCases.forEach(({spec, code, expected}) => {
     it(`should parse ${spec}`, async () => {
       const result = await getExport(code);
       expect(result).toEqual(expected);
