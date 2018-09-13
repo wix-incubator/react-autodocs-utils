@@ -6,38 +6,54 @@ const path = require('path');
 const fs = require('fs');
 const getExport = require('./get-export');
 
-const main = () => {
-  const [, script, target] = process.argv;
+const main = async () => {
+  const [, script, ...argv] = process.argv;
+  const isDumpMode = argv.find(x => x === '--dump');
+  const target = argv.pop();
   const stat = fs.existsSync(target) && fs.statSync(target);
   const isDirectory = stat && stat.isDirectory();
   const isFile = stat && stat.isFile();
 
   if (!isDirectory && !isFile) {
-    console.log(`Usage ./${path.basename(script)} <dir | file>`);
+    usage(script);
     process.exit(0);
   }
 
-  return isDirectory ? scanDir(target) : scanFile(target);
+  scan({ target, isDirectory, isDumpMode });
 };
 
-function scanDir(dir) {
-  getFiles(dir, path => /\.driver\.(js|ts)x?$/.test(path)).forEach(file => {
-    const source = fs.readFileSync(file, 'utf8');
-    getExport(source, undefined, path.dirname(file)).then(() => ok(file), err => fail(file, err));
+async function scan({ target, isDirectory, isDumpMode }) {
+  // prettier-ignore
+  const result = isDirectory
+    ?  await scanDir(target, isDumpMode)
+    : [await scanFile(target, isDumpMode)];
+
+  if (isDumpMode) {
+    console.log(JSON.stringify(result));
+    return;
+  }
+
+  let hasError = false;
+  result.forEach(({ file, error }) => {
+    if (error) {
+      hasError = true;
+      return fail(file, error);
+    }
+    ok(file);
   });
+
+  process.exit(hasError ? 1 : 0);
 }
 
-function scanFile(file) {
+async function scanDir(dir) {
+  return Promise.all(getFiles(dir, path => /\.driver\.(js|ts)x?$/.test(path)).map(scanFile));
+}
+
+async function scanFile(file) {
   const source = fs.readFileSync(file, 'utf8');
-  getExport(source, undefined, path.dirname(file)).then(
-    () => {
-      ok(file);
-      process.exit(0);
-    },
-    err => {
-      fail(file, err);
-      process.exit(1);
-    }
+  return getExport(source, undefined, path.dirname(file)).then(
+    descriptor => ({ file, descriptor }),
+    error => ({ file, error: error.stack ? error.stack.toString() : error })
   );
 }
 
@@ -58,19 +74,18 @@ function getFiles(dir, predicate = () => true) {
 }
 
 function fail(file, error) {
-  console.log(
-    '\x1b[31m',
-    'FAIL',
-    '\x1b[0m',
-    file,
-    '\x1b[31m',
-    error,
-    '\x1b[0m'
-  );
+  console.log('\x1b[31m', 'FAIL', '\x1b[0m', file, '\x1b[31m', error, '\x1b[0m');
 }
 
 function ok(file) {
   console.log('\x1b[32m', 'OK', '\x1b[0m', file);
+}
+
+function usage(script) {
+  console.log(`Usage ./${path.basename(script)} [options] <dir | file>
+
+Options:
+  --dump          dump result to console`);
 }
 
 main();
