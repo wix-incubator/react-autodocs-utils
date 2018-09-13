@@ -107,7 +107,6 @@ const getNodeDescriptor = async ({ node, ast, cwd}) => {
       try {
         return await getObjectMethods({ node: identifierNode, ast, cwd });
       } catch (e) {
-        debugger;
         return {
           name: spreadNode.name,
           type: 'error'
@@ -152,7 +151,6 @@ const getObjectMethods = async ({ node, ast, cwd }) => {
     return getObjectMethods({ node: objectNode.callee, ast, cwd });
   }
   if (!objectNode.properties) {
-    debugger;
     throw Error(`Cannot resolve properties for ${node.type}`);
   }
   const methodPromises = objectNode.properties.map(property => getNodeDescriptor({ node: property, ast, cwd }));
