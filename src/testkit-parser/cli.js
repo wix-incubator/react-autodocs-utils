@@ -21,7 +21,7 @@ const main = () => {
 };
 
 function scanDir(dir) {
-  getFiles(dir, path => path.endsWith('.driver.js')).forEach(file => {
+  getFiles(dir, path => /\.driver\.(js|ts)x?$/.test(path)).forEach(file => {
     const source = fs.readFileSync(file, 'utf8');
     getExport(source, undefined, path.dirname(file)).then(() => ok(file), err => fail(file, err));
   });
