@@ -89,3 +89,23 @@ describe('get default export', () => {
     });
   });
 });
+
+describe('get named export', () => {
+  const testCases = [
+    {
+      spec: 'DriverFactory pattern',
+      code: `
+        export const myDriverFactory = () => ({
+          method: function() {}
+        });
+      `,
+    },
+  ];
+  const expected = [{ name: 'method', type: 'function', args: [] }];
+  testCases.forEach(({ spec, code }) => {
+    it(`shoud parse ${spec}`, async () => {
+      const result = await getExport(code);
+      expect(result).toEqual(expected);
+    });
+  });
+});

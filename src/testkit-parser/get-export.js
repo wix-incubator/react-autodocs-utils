@@ -3,29 +3,34 @@ const types = require('@babel/types');
 const getObjectMethods = require('./get-object-methods');
 const getReturnValue = require('./utils/get-return-value');
 const { optimizeSource, optimizeAST } = require('./utils/optimizations');
-const visit = require('../parser/visit');
 
 const DEFAULT_EXPORT = 'default';
 
+const byName = name => node => node.id && node.id.name === name;
+
+const byPattern = regex => node => node.id && regex.test(node.id.name);
+
+const findNamedExportDeclaration = (nodes, predicate) => {
+  for (const node of nodes) {
+    if (types.isExportNamedDeclaration(node)) {
+      const exportedNode = node.declaration.declarations.find(predicate);
+      if (exportedNode) {
+        return exportedNode.init || exportedNode;
+      }
+    }
+  }
+};
+
 module.exports = async (code, exportName = DEFAULT_EXPORT, cwd) => {
   const ast = optimizeAST(parse(optimizeSource(code)));
+  const body = ast.program.body;
 
   let exportedNode;
   if (exportName === DEFAULT_EXPORT) {
-    const exportNode = ast.program.body.find(types.isExportDefaultDeclaration);
-    if (exportNode) {
-      exportedNode = exportNode.declaration;
-    }
+    const exportNode = body.find(types.isExportDefaultDeclaration);
+    exportedNode = exportNode ? exportNode.declaration : findNamedExportDeclaration(body, byPattern(/DriverFactory$/));
   } else {
-    ast.program.body.forEach(node => {
-      if (types.isExportNamedDeclaration(node)) {
-        node.declaration.declarations.forEach(node => {
-          if( node.id && node.id.name === exportName) {
-            exportedNode = node.id;
-          }
-        });
-      }
-    });
+    exportedNode = findNamedExportDeclaration(body, byName(exportName));
   }
 
   if (!exportedNode) {
