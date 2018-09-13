@@ -108,15 +108,17 @@ describe('import parsing', () => {
         `
       }
     },
-    { spec: 'export {x as y, a as b} from z',
+    { spec: 'export { x as y } from z',
       code: `
         export { internalDriver as driverFactory } from './driver.js';
       `,
       files: {
         './driver.js': `
-          export const internalDriver () => ({
+        export const internalDriver = () => ({
+          driver: {
             method: arg => {}
-          })
+          }
+        });
         `
       }
     }
