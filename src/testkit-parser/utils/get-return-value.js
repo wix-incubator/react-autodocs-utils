@@ -12,7 +12,10 @@ const findReturnStatementInFunctionBody = node => {
     }
     const returnArgument = returnStatement.argument;
     return returnArgument;
-  } else if (types.isArrowFunctionExpression(blockStatement)) {
+  } else if ([
+      types.isArrowFunctionExpression,
+      types.isCallExpression
+    ].some(checker => checker(node))) {
     return blockStatement;
   }
   throw `findReturnStatementInFunctionBody :: not implemented for ${node.type}`;

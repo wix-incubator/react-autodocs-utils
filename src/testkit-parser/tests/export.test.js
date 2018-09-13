@@ -65,6 +65,16 @@ describe('get default export', () => {
       };
       export default driver;
       `
+    },
+    { spec: 'call expression in arrow function body',
+      code: `
+        const internalDriverFactory = () => ({ 
+          method: () => {}  
+        });
+        const driverFactory = () => internalDriverFactory();
+        
+        export default driverFactory;
+      `
     }
   ];
 
