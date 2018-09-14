@@ -43,7 +43,7 @@ const findIdentifierNode = async ({ name, ast, cwd }) => {
       exportName: isDefaultExport ? undefined : name
     });
   }
-  return node.init ||  node;
+  return node.init || node;
 };
 
 module.exports = findIdentifierNode;

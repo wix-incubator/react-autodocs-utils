@@ -46,6 +46,22 @@ describe('import parsing', () => {
         }`
       }
     },
+    { spec: 'identifier in imported file',
+      code: `
+      import driver from './driver.js';
+      export default () => ({
+        driver
+      })`,
+      files: {
+        './driver.js': `
+         const symbol = {
+           method: arg => {}
+         };
+         export default function() {
+           return symbol;
+         }`
+      }
+    },
     { spec: 'named arrow function',
       code: `
       import {driver} from './driver.js';
