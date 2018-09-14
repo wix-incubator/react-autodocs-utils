@@ -60,7 +60,8 @@ describe('gatherAll', () => {
           ...metadataMock,
           readme: readmeMock,
           readmeAccessibility: readmeAccessibilityMock,
-          readmeTestkit: readmeTestkitMock
+          readmeTestkit: readmeTestkitMock,
+          drivers: [],
         });
       });
     });
@@ -80,7 +81,8 @@ describe('gatherAll', () => {
           ...metadataMock,
           readme: readmeMock,
           readmeAccessibility: readmeAccessibilityMock,
-          readmeTestkit: readmeTestkitMock
+          readmeTestkit: readmeTestkitMock,
+          drivers: [],
         });
       });
     });
@@ -133,7 +135,8 @@ describe('gatherAll', () => {
           },
           readme: '',
           readmeAccessibility: '',
-          readmeTestkit: ''
+          readmeTestkit: '',
+          drivers: [],
         });
       });
     });
@@ -171,7 +174,8 @@ describe('gatherAll', () => {
           ...metadataMock,
           readme: readmeMock,
           readmeAccessibility: readmeAccessibilityMock,
-          readmeTestkit: readmeTestkitMock
+          readmeTestkit: readmeTestkitMock,
+          drivers: [],
         });
       });
 
@@ -259,7 +263,8 @@ describe('gatherAll', () => {
           },
           readme: readmeMock,
           readmeAccessibility: readmeAccessibilityMock,
-          readmeTestkit: readmeTestkitMock
+          readmeTestkit: readmeTestkitMock,
+          drivers: [],
         });
       });
     });
@@ -278,7 +283,8 @@ describe('gatherAll', () => {
           ...metadataMock,
           readme: readmeMock,
           readmeAccessibility: readmeAccessibilityMock,
-          readmeTestkit: readmeTestkitMock
+          readmeTestkit: readmeTestkitMock,
+          drivers: [],
         });
       });
     });

@@ -5,6 +5,7 @@ const dirname = require('../dirname');
 const readFolder = require('../read-folder');
 const readFile = require('../read-file');
 const metadataParser = require('../metadata-parser');
+const { scanFiles }= require('../testkit-parser/cli');
 
 // containsFile : List String -> Bool -> Promise
 const containsFile = files => name => {
@@ -46,28 +47,30 @@ const gatherAll = path =>
       ])
     )
 
-    .then(([metadata, files]) => {
+    .then(async ([metadata, files]) => {
       const readMarkdown = markdownPath =>
         containsFile(files)(markdownPath)
           .then(file => readFile(pathJoin(dirname(path), file)))
           .then(({source}) => source)
           .catch(() => Promise.resolve(''));
 
-
       const readme = readMarkdown('readme.md');
       const readmeAccessibility = readMarkdown('readme.accessibility.md');
       const readmeTestkit = readMarkdown('readme.testkit.md');
+      const drivers = scanFiles(files.map(file => pathJoin(dirname(path), file)), { basename: true });
 
       return Promise.all([
         metadata,
         readme,
         readmeAccessibility,
-        readmeTestkit
-      ]).then(([metadata, readme, readmeAccessibility, readmeTestkit]) => ({
+        readmeTestkit,
+        drivers
+      ]).then(([metadata, readme, readmeAccessibility, readmeTestkit, drivers]) => ({
         ...metadata,
         readme,
         readmeAccessibility,
-        readmeTestkit
+        readmeTestkit,
+        drivers,
       }));
     });
 

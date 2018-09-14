@@ -5,6 +5,7 @@
 const path = require('path');
 const fs = require('fs');
 const getExport = require('./get-export');
+const readFile = require('../read-file');
 
 const main = async () => {
   const [, script, ...argv] = process.argv;
@@ -25,8 +26,8 @@ const main = async () => {
 async function scan({ target, isDirectory, isDumpMode }) {
   // prettier-ignore
   const result = isDirectory
-    ?  await scanDir(target, isDumpMode)
-    : [await scanFile(target, isDumpMode)];
+    ?  await scanDir(target)
+    : [await scanFile(target)];
 
   if (isDumpMode) {
     console.log(JSON.stringify(result));
@@ -45,12 +46,17 @@ async function scan({ target, isDirectory, isDumpMode }) {
   process.exit(hasError ? 1 : 0);
 }
 
-async function scanDir(dir) {
-  return Promise.all(getFiles(dir, path => /\.driver\.(js|ts)x?$/.test(path)).map(scanFile));
+async function scanDir(dir, options) {
+  return Promise.all(getFiles(dir, isDriver).map(x => scanFile(x, options)));
 }
 
-async function scanFile(file) {
-  const source = fs.readFileSync(file, 'utf8');
+async function scanFiles(files, options) {
+  return Promise.all(files.filter(isDriver).map(x => scanFile(x, options)));
+}
+
+async function scanFile(filePath, { basename = false } = {}) {
+  const { source } = await readFile(filePath);
+  const file = basename ? path.basename(filePath) : filePath;
   return getExport(source, undefined, path.dirname(file)).then(
     descriptor => ({ file, descriptor }),
     error => ({ file, error: error.stack ? error.stack.toString() : error })
@@ -73,6 +79,10 @@ function getFiles(dir, predicate = () => true) {
   return results;
 }
 
+function isDriver(path) {
+  return /\.driver\.(js|ts)x?$/.test(path);
+}
+
 function fail(file, error) {
   console.log('\x1b[31m', 'FAIL', '\x1b[0m', file, '\x1b[31m', error, '\x1b[0m');
 }
@@ -88,4 +98,10 @@ Options:
   --dump          dump result to console`);
 }
 
-main();
+module.exports = {
+  scanFiles,
+};
+
+if (require.main === module) {
+  main();
+}
