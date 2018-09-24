@@ -78,7 +78,29 @@ export class Component extends React.PureComponent {
   "methods": [],
   "readme": "source of `./readme.md` if exists, otherwise empty string",
   "readmeAccessibility": "source of `./readme.accessibility.md` if exists, otherwise empty string",
-  "readmeTestkit": "source of `./readme.testkit.md` if exists, otherwise empty string"
+  "readmeTestkit": "source of `./readme.testkit.md` if exists, otherwise empty string",
+  "drivers": [ // metadata of exported methods in *.driver.js, *.protractor.driver.js or *.pupeteer.driver.js
+    {
+      "file": "component.driver.js",
+      "descriptor": [
+        {
+          "name": "click",
+          "args": [],
+          "type": "function"
+        }
+      ]
+    },
+    {
+      "file": "component.pupeteer.driver.js",
+      "descriptor": [
+        {
+          "name": "element",
+          "args": [],
+          "type": "function"
+        }
+      ]
+    }
+  ]
 }
 ```
 
