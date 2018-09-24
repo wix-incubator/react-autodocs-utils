@@ -23,10 +23,6 @@ describe('prepareStory', () => {
     it('should reject with error when exported config is not an object', () => {
       const source = `const something = "hello";
 export default something;`;
-      const expectation = `import story from "wix-storybook-utils/Story";
-import { storiesOf } from "@storybook/react";
-const something = "hello";
-export default something;`;
 
       return expect(prepareStory({})(source)).rejects.toMatch('ERROR');
     });

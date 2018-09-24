@@ -2,7 +2,7 @@
 
 const isTypescript = require('./');
 
-describe.only('isTypescript', () => {
+describe('isTypescript', () => {
   it('should be defined', () => {
     expect(typeof isTypescript).toBe('function');
   });
