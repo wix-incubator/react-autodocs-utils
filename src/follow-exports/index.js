@@ -72,7 +72,8 @@ const extractPath = source =>
           CallExpression(path) {
             const isWithHOC = [
               'withStylable',
-              'createHOC'
+              'createHOC',
+              'withFocusable'
             ].some(name => path.get('callee').isIdentifier({ name }));
 
             if (isWithHOC) {

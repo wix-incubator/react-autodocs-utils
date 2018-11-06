@@ -20,12 +20,12 @@ describe('followExports()', () => {
         const source = 'module.exports = require(\'./index.js\')';
 
         fs.__setFS({
-          'index.js': 'hello'
+          'index.js': 'hello',
         });
 
         return expect(followExports(source, '')).resolves.toEqual({
           source: 'hello',
-          path: 'index.js'
+          path: 'index.js',
         });
       });
 
@@ -39,15 +39,15 @@ describe('followExports()', () => {
 
           nested: {
             deep: {
-              'index.js': 'export {default} from \'../sibling.js\''
+              'index.js': 'export {default} from \'../sibling.js\'',
             },
-            'sibling.js': 'hello'
-          }
+            'sibling.js': 'hello',
+          },
         });
 
         return expect(followExports(source, 'node_modules')).resolves.toEqual({
           source: 'hello',
-          path: 'nested/sibling.js'
+          path: 'nested/sibling.js',
         });
       });
     });
@@ -74,14 +74,14 @@ describe('followExports()', () => {
 
           node_modules: {
             'wix-ui-core': {
-              'Component.js': 'hello'
-            }
-          }
+              'Component.js': 'hello',
+            },
+          },
         });
 
         return expect(followExports(source, '')).resolves.toEqual({
           source: 'hello',
-          path: 'node_modules/wix-ui-core/Component.js'
+          path: 'node_modules/wix-ui-core/Component.js',
         });
       });
 
@@ -122,9 +122,9 @@ describe('followExports()', () => {
 
             node_modules: {
               'wix-ui-core': {
-                'Component.js': 'hello'
-              }
-            }
+                'Component.js': 'hello',
+              },
+            },
           });
 
           return expect(followExports(source, '')).resolves.toEqual({
@@ -136,37 +136,37 @@ describe('followExports()', () => {
                 required: false,
                 type: { name: 'Size' },
                 description: 'font size of the text',
-                defaultValue: undefined
+                defaultValue: undefined,
               },
               skin: {
                 name: 'skin',
                 required: false,
                 type: { name: 'string' },
                 description: 'skin color of the text',
-                defaultValue: undefined
+                defaultValue: undefined,
               },
               secondary: {
                 name: 'secondary',
                 required: false,
                 type: { name: 'boolean' },
                 description: 'is the text type is secondary. Affects the font color',
-                defaultValue: undefined
+                defaultValue: undefined,
               },
               light: {
                 name: 'light',
                 required: false,
                 type: { name: 'boolean' },
                 description: 'is the text has dark or light skin',
-                defaultValue: undefined
+                defaultValue: undefined,
               },
               bold: {
                 name: 'bold',
                 required: false,
                 type: { name: 'boolean' },
                 description: 'is the text bold',
-                defaultValue: undefined
-              }
-            }
+                defaultValue: undefined,
+              },
+            },
           });
         });
       });
@@ -184,12 +184,31 @@ describe('followExports()', () => {
 
         fs.__setFS({
           'index.js': source,
-          'Label.js': 'hello'
+          'Label.js': 'hello',
         });
 
         return expect(followExports(source, '')).resolves.toEqual({
           source: 'hello',
-          path: 'Label.js'
+          path: 'Label.js',
+        });
+      });
+    });
+
+    describe('which has createHOC(withFocusable())', () => {
+      it('should resolve component', () => {
+        const source = `
+          import { Component as CoreComponent } from './Badge.js';
+          export const Label = createHOC(withFocusable(CoreComponent));
+        `;
+
+        fs.__setFS({
+          'index.js': source,
+          'Badge.js': 'hello',
+        });
+
+        return expect(followExports(source, '')).resolves.toEqual({
+          source: 'hello',
+          path: 'Badge.js',
         });
       });
     });
@@ -207,15 +226,15 @@ describe('followExports()', () => {
                 'index.js': `
                   import Component from './component.js';
                   export default withClasses(Component, styles)`,
-                'component.js': 'hello'
-              }
-            }
-          }
+                'component.js': 'hello',
+              },
+            },
+          },
         });
 
         return expect(followExports(source, '')).resolves.toEqual({
           source: 'hello',
-          path: 'src/components/component/component.js'
+          path: 'src/components/component/component.js',
         });
       });
     });
@@ -225,12 +244,12 @@ describe('followExports()', () => {
         const source = 'export {Component, AnythingElse} from \'./thing.js\'\n\'should ignore me\'';
 
         fs.__setFS({
-          'thing.js': 'hey!'
+          'thing.js': 'hey!',
         });
 
         return expect(followExports(source, '')).resolves.toEqual({
           source: 'hey!',
-          path: 'thing.js'
+          path: 'thing.js',
         });
       });
     });
@@ -244,13 +263,13 @@ describe('followExports()', () => {
 
         fs.__setFS({
           Component: {
-            'index.js': 'hello'
-          }
+            'index.js': 'hello',
+          },
         });
 
         return expect(followExports(source, '')).resolves.toEqual({
           path: 'Component/index.js',
-          source: 'hello'
+          source: 'hello',
         });
       });
     });
