@@ -31,8 +31,8 @@ describe('followProps()', () => {
         src: {
           Backoffice: {
             Component: {
-              'index.js': entrySource
-            }
+              'index.js': entrySource,
+            },
           },
 
           OtherComponent: {
@@ -41,7 +41,7 @@ describe('followProps()', () => {
               import PropTypes from 'prop-types';
               import OneUpComponent from '../OneUpComponent';
 
-              export default class extends React.Component {
+              export default class Component extends React.Component {
                 static propTypes = {
                   ...OneUpComponent.propTypes,
                   link: PropTypes.string
@@ -50,7 +50,7 @@ describe('followProps()', () => {
                 render() {
                   return (<div/>);
                 }
-              }`
+              }`,
           },
 
           OneUpComponent: {
@@ -62,9 +62,9 @@ describe('followProps()', () => {
                 veryDeep: PropTypes.bool.isRequired
               }
               export default component;
-            `
-          }
-        }
+            `,
+          },
+        },
       });
 
       return expect(followProps({ source: entrySource, path: 'src/Backoffice/Component/index.js' })).resolves.toEqual({
@@ -75,19 +75,19 @@ describe('followProps()', () => {
           disabled: {
             description: '',
             required: false,
-            type: { name: 'bool' }
+            type: { name: 'bool' },
           },
           link: {
             description: '',
             required: false,
-            type: { name: 'string' }
+            type: { name: 'string' },
           },
           veryDeep: {
             description: '',
             required: true,
-            type: { name: 'bool' }
-          }
-        }
+            type: { name: 'bool' },
+          },
+        },
       });
     });
   });
@@ -126,10 +126,10 @@ describe('followProps()', () => {
                   render() {
                     return <div/>;
                   }
-                }`
-            }
-          }
-        }
+                }`,
+            },
+          },
+        },
       });
 
       return expect(followProps({ source: entrySource, path: '' })).resolves.toEqual({
@@ -140,9 +140,9 @@ describe('followProps()', () => {
           theThing: {
             description: '',
             required: true,
-            type: { name: 'bool' }
-          }
-        }
+            type: { name: 'bool' },
+          },
+        },
       });
     });
   });

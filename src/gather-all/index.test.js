@@ -20,10 +20,10 @@ const metadataMock = {
       description: '',
       required: true,
       type: {
-        name: 'string'
-      }
-    }
-  }
+        name: 'string',
+      },
+    },
+  },
 };
 
 const readmeMock = '# Hello readme!';
@@ -35,13 +35,12 @@ describe('gatherAll', () => {
     describe('which is empty folder', () => {
       it('should reject with error', () => {
         fs.__setFS({
-          'some-path': {}
+          'some-path': {},
         });
 
-        return gatherAll('some-path')
-          .catch(({ message }) => {
-            expect(message).toMatch('Unable to parse component in path "some-path", reason:');
-          });
+        return gatherAll('some-path').catch(({ message }) => {
+          expect(message).toMatch('Unable to parse component in path "some-path", reason:');
+        });
       });
     });
 
@@ -52,12 +51,13 @@ describe('gatherAll', () => {
             'index.js': componentSourceMock,
             'readme.md': readmeMock,
             'readme.accessibility.md': readmeAccessibilityMock,
-            'readme.testkit.md': readmeTestkitMock
-          }
+            'readme.testkit.md': readmeTestkitMock,
+          },
         });
 
         return expect(gatherAll('component-folder')).resolves.toEqual({
           ...metadataMock,
+          displayName: 'component',
           readme: readmeMock,
           readmeAccessibility: readmeAccessibilityMock,
           readmeTestkit: readmeTestkitMock,
@@ -73,12 +73,13 @@ describe('gatherAll', () => {
             'index.js': componentSourceMock,
             'README.md': readmeMock,
             'readme.accessibility.md': readmeAccessibilityMock,
-            'README.testkit.md': readmeTestkitMock
-          }
+            'README.testkit.md': readmeTestkitMock,
+          },
         });
 
         return expect(gatherAll('component-folder')).resolves.toEqual({
           ...metadataMock,
+          displayName: 'component',
           readme: readmeMock,
           readmeAccessibility: readmeAccessibilityMock,
           readmeTestkit: readmeTestkitMock,
@@ -93,17 +94,16 @@ describe('gatherAll', () => {
           src: {
             components: {
               Badge: {
-                'index.js':
-                  `import * as React from 'react';
+                'index.js': `import * as React from 'react';
                   import {Badge as CoreBadge} from 'wix-ui-core/Badge';
                   const component = () => <div/>;
                   component.propTypes = {
                     ...CoreBadge.propTypes,
                   };
                   export default component;
-                  `
-              }
-            }
+                  `,
+              },
+            },
           },
 
           node_modules: {
@@ -113,25 +113,26 @@ describe('gatherAll', () => {
               src: {
                 components: {
                   Badge: {
-                    'index.js': componentSourceMock
-                  }
-                }
-              }
-            }
-          }
+                    'index.js': componentSourceMock,
+                  },
+                },
+              },
+            },
+          },
         });
 
         return expect(gatherAll('src/components/Badge')).resolves.toEqual({
           description: '',
           methods: [],
+          displayName: 'component',
           props: {
             test: {
               description: '',
               required: true,
               type: {
-                name: 'string'
-              }
-            }
+                name: 'string',
+              },
+            },
           },
           readme: '',
           readmeAccessibility: '',
@@ -155,7 +156,7 @@ describe('gatherAll', () => {
 
             'readme.md': readmeMock,
             'readme.accessibility.md': readmeAccessibilityMock,
-            'readme.testkit.md': readmeTestkitMock
+            'readme.testkit.md': readmeTestkitMock,
           },
 
           node_modules: {
@@ -165,13 +166,14 @@ describe('gatherAll', () => {
               const component = () => <div/>;
               component.propTypes = { test: PropTypes.string.isRequired };
               export default component;
-              `
-            }
-          }
+              `,
+            },
+          },
         });
 
         return expect(gatherAll('folder')).resolves.toEqual({
           ...metadataMock,
+          displayName: 'component',
           readme: readmeMock,
           readmeAccessibility: readmeAccessibilityMock,
           readmeTestkit: readmeTestkitMock,
@@ -184,8 +186,7 @@ describe('gatherAll', () => {
           src: {
             components: {
               Badge: {
-                'index.js':
-                  `import * as React from 'react';
+                'index.js': `import * as React from 'react';
                   import {oneOf} from 'prop-types';
                   import {Badge as CoreBadge} from 'wix-ui-core/Badge';
                   export class Badge extends React.PureComponent {
@@ -201,9 +202,9 @@ describe('gatherAll', () => {
 
                 'readme.md': readmeMock,
                 'readme.accessibility.md': readmeAccessibilityMock,
-                'readme.testkit.md': readmeTestkitMock
-              }
-            }
+                'readme.testkit.md': readmeTestkitMock,
+              },
+            },
           },
 
           node_modules: {
@@ -213,28 +214,26 @@ describe('gatherAll', () => {
               src: {
                 components: {
                   Badge: {
-                    'index.js':
-                      `import * as React from 'react';
+                    'index.js': `import * as React from 'react';
                       import BadgeComponent from './Badge';
                       import {withClasses} from 'wix-ui-jss';
                       import {styles} from './styles';
                       export default withClasses(BadgeComponent, styles)
                       `,
 
-                    'Badge.jsx':
-                      `import * as React from 'react';
+                    'Badge.jsx': `import * as React from 'react';
                       import {string} from 'prop-types';
                       const Badge = () => <div/>;
                       Badge.propTypes = {
                         children: string
                       }
                       export default Badge;
-                      `
-                  }
-                }
-              }
-            }
-          }
+                      `,
+                  },
+                },
+              },
+            },
+          },
         });
 
         return expect(gatherAll('src/components/Badge')).resolves.toEqual({
@@ -246,20 +245,17 @@ describe('gatherAll', () => {
               description: '',
               type: {
                 name: 'enum',
-                value: [
-                  { computed: false, value: "'red'" },
-                  { computed: false, value: "'blue'" }
-                ]
+                value: [{ computed: false, value: '\'red\'' }, { computed: false, value: '\'blue\'' }],
               },
-              required: false
+              required: false,
             },
             children: {
               type: {
-                name: 'string'
+                name: 'string',
               },
               description: '',
-              required: false
-            }
+              required: false,
+            },
           },
           readme: readmeMock,
           readmeAccessibility: readmeAccessibilityMock,
@@ -275,12 +271,12 @@ describe('gatherAll', () => {
           'index.js': componentSourceMock,
           'readme.md': readmeMock,
           'readme.accessibility.md': readmeAccessibilityMock,
-          'readme.testkit.md': readmeTestkitMock
-
+          'readme.testkit.md': readmeTestkitMock,
         });
 
         return expect(gatherAll('index.js')).resolves.toEqual({
           ...metadataMock,
+          displayName: 'component',
           readme: readmeMock,
           readmeAccessibility: readmeAccessibilityMock,
           readmeTestkit: readmeTestkitMock,
@@ -292,9 +288,6 @@ describe('gatherAll', () => {
 
   describe('when called without path', () => {
     it('should reject promise with error', () =>
-      expect(gatherAll()).rejects.toEqual(
-        'Error: gatherAll is missing required `path` argument'
-      )
-    );
+      expect(gatherAll()).rejects.toEqual('Error: gatherAll is missing required `path` argument'));
   });
 });
