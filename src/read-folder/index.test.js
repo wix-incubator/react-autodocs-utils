@@ -11,8 +11,8 @@ describe('readFolder', () => {
       fs.__setFS({
         'folder-name': {
           'file.js': '',
-          folder: {}
-        }
+          folder: {},
+        },
       });
 
       return expect(readFolder('folder-name')).resolves.toEqual(['file.js', 'folder']);
@@ -25,8 +25,8 @@ describe('readFolder', () => {
         folder: {
           'index.js': '',
           'some-file': '',
-          another_folder: {}
-        }
+          another_folder: {},
+        },
       });
 
       return expect(readFolder('folder/index.js')).resolves.toEqual(['index.js', 'some-file', 'another_folder']);
@@ -34,8 +34,6 @@ describe('readFolder', () => {
   });
 
   describe('given non existing path', () => {
-    it('should reject promise', () =>
-      expect(readFolder('you-dont-exist')).rejects.toBeDefined()
-    );
+    it('should reject promise', () => expect(readFolder('you-dont-exist')).rejects.toBeDefined());
   });
 });

@@ -108,7 +108,7 @@ describe('gatherAll', () => {
 
           node_modules: {
             'wix-ui-core': {
-              'Badge.js': 'module.exports = require(\'./dist/src/components/Badge\');',
+              'Badge.js': "module.exports = require('./dist/src/components/Badge');",
 
               src: {
                 components: {
@@ -209,7 +209,7 @@ describe('gatherAll', () => {
 
           node_modules: {
             'wix-ui-core': {
-              'Badge.js': 'module.exports = require(\'./dist/src/components/Badge\');',
+              'Badge.js': "module.exports = require('./dist/src/components/Badge');",
 
               src: {
                 components: {
@@ -245,7 +245,7 @@ describe('gatherAll', () => {
               description: '',
               type: {
                 name: 'enum',
-                value: [{ computed: false, value: '\'red\'' }, { computed: false, value: '\'blue\'' }],
+                value: [{ computed: false, value: "'red'" }, { computed: false, value: "'blue'" }],
               },
               required: false,
             },

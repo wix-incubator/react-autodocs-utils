@@ -6,8 +6,8 @@ const visitors = {
   FunctionDeclaration: ({ node }) => node.body,
   Identifier: ({ node, ast, cwd }) => findIdentifierNode({ name: node.name, ast, cwd }),
   BlockStatement: ({ node }) => node.body.find(types.isReturnStatement),
-  CallExpression: ({ node }) => node.callee
-}
+  CallExpression: ({ node }) => node.callee,
+};
 
 const getReturnValue = async ({ node, ast, cwd }) => {
   if (types.isArrowFunctionExpression(node) && !Array.isArray(node.body)) {
@@ -18,7 +18,7 @@ const getReturnValue = async ({ node, ast, cwd }) => {
     return node.argument;
   }
 
-  const visitor  = visitors[node.type];
+  const visitor = visitors[node.type];
   if (!visitor) {
     return node;
   }
@@ -26,7 +26,7 @@ const getReturnValue = async ({ node, ast, cwd }) => {
   return await getReturnValue({
     ast,
     node: await visitor({ node, ast, cwd }),
-    cwd
+    cwd,
   });
 };
 

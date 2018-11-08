@@ -2,86 +2,80 @@ const getExport = require('../get-export');
 
 describe('get object methods', () => {
   const testCases = [
-    { spec: 'no args',
+    {
+      spec: 'no args',
       code: `
       export default () => ({
         methodA: () => {},
         methodB: () => {}
       })`,
-      expected: [
-        { name: 'methodA', type: 'function', args: [] },
-        { name: 'methodB', type: 'function', args: [] }
-      ]
+      expected: [{ name: 'methodA', type: 'function', args: [] }, { name: 'methodB', type: 'function', args: [] }],
     },
-    { spec: 'one arg',
+    {
+      spec: 'one arg',
       code: `
       export default () => ({
         methodA: arg => {},
         methodB: (arg) => {}
       })`,
       expected: [
-        { name: 'methodA', type: 'function', args: [ {name: 'arg' }]},
-        { name: 'methodB', type: 'function', args: [ {name: 'arg' }]}
-      ]
+        { name: 'methodA', type: 'function', args: [{ name: 'arg' }] },
+        { name: 'methodB', type: 'function', args: [{ name: 'arg' }] },
+      ],
     },
-    { spec: 'multiple args',
+    {
+      spec: 'multiple args',
       code: `
       export default () => ({
         methodA: (arg1, arg2) => {}
       })`,
-      expected: [
-        { name: 'methodA', type: 'function', args: [ {name: 'arg1' }, {name: 'arg2' }]}
-      ]
+      expected: [{ name: 'methodA', type: 'function', args: [{ name: 'arg1' }, { name: 'arg2' }] }],
     },
-    { spec: 'function declaration',
+    {
+      spec: 'function declaration',
       code: `
       export default () => ({
         methodA: function (arg1, arg2) {}
       })`,
-      expected: [
-        { name: 'methodA', type: 'function', args: [ {name: 'arg1' }, {name: 'arg2' }]}
-      ]
+      expected: [{ name: 'methodA', type: 'function', args: [{ name: 'arg1' }, { name: 'arg2' }] }],
     },
-    { spec: 'object destructuring',
+    {
+      spec: 'object destructuring',
       code: `
       export default () => ({
         methodA: ({ arg1, arg2 }, arg3) => {}
       })`,
-      expected: [
-        { name: 'methodA', type: 'function', args: [ {name: '{arg1, arg2}' }, {name: 'arg3' }]}
-      ]
+      expected: [{ name: 'methodA', type: 'function', args: [{ name: '{arg1, arg2}' }, { name: 'arg3' }] }],
     },
-    { spec: 'arrow function identifier',
+    {
+      spec: 'arrow function identifier',
       code: `
       const methodA = ({ arg1, arg2 }) => {}
       export default () => ({
         methodA
       })`,
-      expected: [
-        { name: 'methodA', type: 'function', args: [ {name: '{arg1, arg2}' }]}
-      ]
+      expected: [{ name: 'methodA', type: 'function', args: [{ name: '{arg1, arg2}' }] }],
     },
-    { spec: 'function identifier',
+    {
+      spec: 'function identifier',
       code: `
       const methodA = function({ arg1, arg2 }) {}
       export default () => ({
         methodA
       })`,
-      expected: [
-        { name: 'methodA', type: 'function', args: [ {name: '{arg1, arg2}' }]}
-      ]
+      expected: [{ name: 'methodA', type: 'function', args: [{ name: '{arg1, arg2}' }] }],
     },
-    { spec: 'function declaration',
+    {
+      spec: 'function declaration',
       code: `
       function methodA({ arg1, arg2 }) { };
       export default () => ({
         methodA
       })`,
-      expected: [
-        { name: 'methodA', type: 'function', args: [ {name: '{arg1, arg2}' }]}
-      ]
+      expected: [{ name: 'methodA', type: 'function', args: [{ name: '{arg1, arg2}' }] }],
     },
-    { spec: 'object spread',
+    {
+      spec: 'object spread',
       code: `
       const subDriver = { 
         methodB: () => {},
@@ -94,39 +88,36 @@ describe('get object methods', () => {
       expected: [
         { name: 'methodA', type: 'function', args: [] },
         { name: 'methodB', type: 'function', args: [] },
-        { name: 'methodC', type: 'function', args: [{ name: 'arg1' }, { name: 'arg2' }]}
-      ]
+        { name: 'methodC', type: 'function', args: [{ name: 'arg1' }, { name: 'arg2' }] },
+      ],
     },
-    { spec: 'assignment pattern',
+    {
+      spec: 'assignment pattern',
       code: `
       export default () => ({
         method: (arg = 1) => {}
       })`,
-      expected: [
-        { name: 'method', type: 'function', args: [{ name: 'arg' }]}
-      ]
+      expected: [{ name: 'method', type: 'function', args: [{ name: 'arg' }] }],
     },
-    { spec: 'non-function keys',
+    {
+      spec: 'non-function keys',
       code: `
       export default () => ({
         notMethod: true,
         number: 1
       })`,
-      expected: [
-        { name: 'notMethod', type: 'value'},
-        { name: 'number', type: 'value'}
-      ]
+      expected: [{ name: 'notMethod', type: 'value' }, { name: 'number', type: 'value' }],
     },
-    { spec: 'constructor arg as key',
+    {
+      spec: 'constructor arg as key',
       code: `
       export default ({ arg }) => ({
         arg
       })`,
-      expected: [
-        { name: 'arg', type: 'unknown'},
-      ]
+      expected: [{ name: 'arg', type: 'unknown' }],
     },
-    { spec: 'logical expression',
+    {
+      spec: 'logical expression',
       code: `
       export default ({ arg }) => {
         const driver = arg && { method: () => {} }
@@ -135,12 +126,15 @@ describe('get object methods', () => {
         }
       }`,
       expected: [
-        { name: 'driver', type: 'object', props: [
-          { name: 'method', type: 'function', args: []}
-        ]}
-      ]
+        {
+          name: 'driver',
+          type: 'object',
+          props: [{ name: 'method', type: 'function', args: [] }],
+        },
+      ],
     },
-    { spec: 'object spread on function call',
+    {
+      spec: 'object spread on function call',
       code: `
         const factory = () => ({
           driver: {
@@ -155,22 +149,27 @@ describe('get object methods', () => {
         };
       `,
       expected: [
-        { name: 'driver', type: 'object', props: [
-          { name: 'method', type: 'function', args: []}
-        ]}
-      ]
+        {
+          name: 'driver',
+          type: 'object',
+          props: [{ name: 'method', type: 'function', args: [] }],
+        },
+      ],
     },
-    { spec: 'object method',
+    {
+      spec: 'object method',
       code: `
         export default () => ({
           method(arg) { }
         });
       `,
       expected: [
-        { name: 'method', type: 'function', args: [
-          { name: 'arg' }
-        ]}
-      ]
+        {
+          name: 'method',
+          type: 'function',
+          args: [{ name: 'arg' }],
+        },
+      ],
     },
     {
       spec: 'object spread on call expression',
@@ -184,10 +183,12 @@ describe('get object methods', () => {
       }
       `,
       expected: [
-        { name: 'method', type: 'function', args: [
-          { name: 'arg' }
-        ]}
-      ]
+        {
+          name: 'method',
+          type: 'function',
+          args: [{ name: 'arg' }],
+        },
+      ],
     },
     {
       spec: 'object assign',
@@ -207,11 +208,15 @@ describe('get object methods', () => {
         export default composedDriverFactory;
       `,
       expected: [
-        { name: 'driver', type: 'object', props: [
-          { name: 'method', type: 'function', args: [] },
-          { name: 'anotherMethod', type: 'function', args: [{ name: 'arg' }]}
-        ]}
-      ]
+        {
+          name: 'driver',
+          type: 'object',
+          props: [
+            { name: 'method', type: 'function', args: [] },
+            { name: 'anotherMethod', type: 'function', args: [{ name: 'arg' }] },
+          ],
+        },
+      ],
     },
     {
       spec: 'method factory',
@@ -226,9 +231,7 @@ describe('get object methods', () => {
         
         export default driver;
       `,
-      expected: [
-        { name: 'method', type: 'function', args: [{ name: 'arg' }]}
-      ]
+      expected: [{ name: 'method', type: 'function', args: [{ name: 'arg' }] }],
     },
     {
       spec: 'runtime-dependant driver',
@@ -246,10 +249,7 @@ describe('get object methods', () => {
         
         export default driverFactory;
       `,
-      expected: [
-        { name: 'method', type: 'function', args: []},
-        { name: 'driver', type: 'error' }
-      ]
+      expected: [{ name: 'method', type: 'function', args: [] }, { name: 'driver', type: 'error' }],
     },
     {
       spec: 'object spread on member expression',
@@ -271,10 +271,12 @@ describe('get object methods', () => {
         export default driver;
       `,
       expected: [
-        { name: 'driver', type: 'object', props: [
-          { name: 'method', type: 'function', args: [{ name: 'arg' }]}
-        ]}
-      ]
+        {
+          name: 'driver',
+          type: 'object',
+          props: [{ name: 'method', type: 'function', args: [{ name: 'arg' }] }],
+        },
+      ],
     },
     {
       spec: 'rest argument',
@@ -284,16 +286,16 @@ describe('get object methods', () => {
         })
       `,
       expected: [
-        { name: 'method', type: 'function', args: [
-          { name: 'arg1' },
-          { name: 'arg2' },
-          { name: '...args' }
-        ]}
-      ]
-    }
+        {
+          name: 'method',
+          type: 'function',
+          args: [{ name: 'arg1' }, { name: 'arg2' }, { name: '...args' }],
+        },
+      ],
+    },
   ];
 
-  testCases.forEach(({spec, code, expected}) => {
+  testCases.forEach(({ spec, code, expected }) => {
     it(`should parse ${spec}`, async () => {
       const result = await getExport(code);
       expect(result).toEqual(expected);

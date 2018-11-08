@@ -13,13 +13,13 @@ export interface Props {
 
 const defaultProps: Props = {
   appearance: 'H1',
-  skin: 'dark'
+  skin: 'dark',
 };
 
 export class Heading extends React.PureComponent<Props> {
   static defaultProps: Props = defaultProps;
 
   render() {
-    return <div/>;
+    return <div />;
   }
 }

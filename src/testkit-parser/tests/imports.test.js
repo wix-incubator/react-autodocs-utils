@@ -6,7 +6,8 @@ const fs = require('fs');
 
 describe('import parsing', () => {
   const testCases = [
-    { spec: 'default arrow function without block statement',
+    {
+      spec: 'default arrow function without block statement',
       code: `
       import driver from './driver.js';
       export default () => ({
@@ -15,10 +16,11 @@ describe('import parsing', () => {
       files: {
         './driver.js': `export default () => ({
           method: arg => {}
-        })`
-      }
+        })`,
+      },
     },
-    { spec: 'default arrow function with block statement',
+    {
+      spec: 'default arrow function with block statement',
       code: `
       import driver from './driver.js';
       export default () => ({
@@ -29,10 +31,11 @@ describe('import parsing', () => {
            return {
              method: arg => {}
            }
-        }`
-      }
+        }`,
+      },
     },
-    { spec: 'default function',
+    {
+      spec: 'default function',
       code: `
       import driver from './driver.js';
       export default () => ({
@@ -43,10 +46,11 @@ describe('import parsing', () => {
            return {
              method: arg => {}
            }
-        }`
-      }
+        }`,
+      },
     },
-    { spec: 'identifier in imported file',
+    {
+      spec: 'identifier in imported file',
       code: `
       import driver from './driver.js';
       export default () => ({
@@ -59,10 +63,11 @@ describe('import parsing', () => {
          };
          export default function() {
            return symbol;
-         }`
-      }
+         }`,
+      },
     },
-    { spec: 'named arrow function',
+    {
+      spec: 'named arrow function',
       code: `
       import {driver} from './driver.js';
       export default () => ({
@@ -75,10 +80,11 @@ describe('import parsing', () => {
           });
           export default () => ({
             anotherMethod: () => {}
-          })`
-      }
+          })`,
+      },
     },
-    { spec: 'factory function',
+    {
+      spec: 'factory function',
       code: `
       import driverFactory from './driver.js';
       const driver = driverFactory();
@@ -89,10 +95,11 @@ describe('import parsing', () => {
         './driver.js': `
           export default () => ({
             method: arg => {}
-          })`
-      }
+          })`,
+      },
     },
-    { spec: 'member expression',
+    {
+      spec: 'member expression',
       code: `
       import driverFactory from './driver.js';
       export default () => ({
@@ -104,10 +111,11 @@ describe('import parsing', () => {
             anotherDriver: {
               method: arg => {}
             }
-          })`
-      }
+          })`,
+      },
     },
-    { spec: 'object spread on factory function',
+    {
+      spec: 'object spread on factory function',
       code: `
       import driverFactory from './driver.js';
       export default () => ({
@@ -121,10 +129,11 @@ describe('import parsing', () => {
               method: arg => {}
             }
           })
-        `
-      }
+        `,
+      },
     },
-    { spec: 'export { x as y } from z',
+    {
+      spec: 'export { x as y } from z',
       code: `
         export { internalDriver as driverFactory } from './driver.js';
       `,
@@ -135,18 +144,20 @@ describe('import parsing', () => {
             method: arg => {}
           }
         });
-        `
-      }
-    }
+        `,
+      },
+    },
   ];
 
   const expected = [
-    { name: 'driver', type: 'object', props: [
-      { name: 'method', type: 'function', args: [{ name: 'arg' }]}
-    ]}
+    {
+      name: 'driver',
+      type: 'object',
+      props: [{ name: 'method', type: 'function', args: [{ name: 'arg' }] }],
+    },
   ];
 
-  testCases.forEach(({spec, code, files}) => {
+  testCases.forEach(({ spec, code, files }) => {
     it(`should parse ${spec}`, async () => {
       fs.__setFS(fsTree(files));
       const result = await getExport(code);

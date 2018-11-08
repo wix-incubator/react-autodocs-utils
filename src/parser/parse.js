@@ -7,9 +7,9 @@ const parse = source =>
       'jsx',
       'typescript',
       'classProperties',
-      'objectRestSpread'
+      'objectRestSpread',
     ],
-    sourceType: 'module'
+    sourceType: 'module',
   });
 
 module.exports = parse;

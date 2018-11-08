@@ -7,7 +7,6 @@ const readFile = require('../read-file');
 const followExports = require('../follow-exports');
 const resolveNodeModules = require('../resolve-node-modules');
 
-
 const parseDocgen = (source, path) =>
   new Promise((resolve, reject) => {
     const parsed = reactDocgenParse({ source, path });
@@ -17,47 +16,38 @@ const parseDocgen = (source, path) =>
       : resolve(parsed);
   });
 
-
 const mergeComponentProps = components =>
   components.reduce(
     (acc, component) => ({
       ...component.props,
-      ...acc
+      ...acc,
     }),
     {}
   );
 
-
 const followComposedProps = (parsed, currentPath) =>
   Promise.all(
     parsed.composes.map(composedPath => {
-      const readablePathPromise =
-          composedPath.startsWith('.')
-            ? Promise.resolve(pathJoin(pathDirname(currentPath), composedPath))
-            : resolveNodeModules(currentPath, composedPath.replace('dist/', ''));
+      const readablePathPromise = composedPath.startsWith('.')
+        ? Promise.resolve(pathJoin(pathDirname(currentPath), composedPath))
+        : resolveNodeModules(currentPath, composedPath.replace('dist/', ''));
 
-      return readablePathPromise
-        .then(readFile);
+      return readablePathPromise.then(readFile);
     })
   )
 
     .then(composedSourcesAndPaths =>
-      Promise.all(
-        composedSourcesAndPaths.map(({ source, path }) =>
-          followExports(source, path)
-        )
-      )
+      Promise.all(composedSourcesAndPaths.map(({ source, path }) => followExports(source, path)))
     )
 
     .then(composedSourcesAndPaths =>
       Promise.all(
-        composedSourcesAndPaths.map(({ source, path }) =>
-          ({
-            parsed: reactDocgenParse({ source, path }),
-            path
-          })
-        )
-      ))
+        composedSourcesAndPaths.map(({ source, path }) => ({
+          parsed: reactDocgenParse({ source, path }),
+          path,
+        }))
+      )
+    )
 
     .then(parsedComponents => {
       // here we receive list of object containing parsed component
@@ -65,29 +55,25 @@ const followComposedProps = (parsed, currentPath) =>
       // components, in which case we followProps again recursively
 
       const withComposed = parsedComponents
-        .filter(({parsed}) => parsed.composes)
-        .map(({parsed, path}) => followComposedProps(parsed, path));
+        .filter(({ parsed }) => parsed.composes)
+        .map(({ parsed, path }) => followComposedProps(parsed, path));
 
       const withoutComposed = parsedComponents
-        .filter(({parsed}) => !parsed.composes)
-        .map(({parsed}) => Promise.resolve(parsed));
+        .filter(({ parsed }) => !parsed.composes)
+        .map(({ parsed }) => Promise.resolve(parsed));
 
-      return Promise.all([
-        Promise.all(withComposed),
-        Promise.all(withoutComposed)
-      ])
-        .then(([ withComposed, withoutComposed ]) =>
-          [...withComposed, ...withoutComposed]
-        );
+      return Promise.all([Promise.all(withComposed), Promise.all(withoutComposed)]).then(
+        ([withComposed, withoutComposed]) => [...withComposed, ...withoutComposed]
+      );
     })
 
     .then(mergeComponentProps)
 
     .then(composedProps => {
-      const allProps = ({
+      const allProps = {
         ...parsed,
-        props: { ...parsed.props, ...composedProps }
-      });
+        props: { ...parsed.props, ...composedProps },
+      };
 
       // eslint-disable-next-line no-unused-vars
       const { composes, ...otherProps } = allProps;
@@ -95,15 +81,11 @@ const followComposedProps = (parsed, currentPath) =>
       return otherProps;
     });
 
-
-const followProps = ({source, path}) =>
+const followProps = ({ source, path }) =>
   parseDocgen(source, path)
     // if resolved, no need to follow props, no need for .then
     // if rejected, need to follow props
-    .catch(parsed =>
-      followComposedProps(parsed, path)
-    )
+    .catch(parsed => followComposedProps(parsed, path))
     .catch(e => console.log(`ERROR: Unable to handle composed props for Component at ${path}`, e));
-
 
 module.exports = followProps;

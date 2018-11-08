@@ -1,5 +1,5 @@
 const recast = require('recast');
-const {utils} = require('react-docgen');
+const { utils } = require('react-docgen');
 
 const {
   isExportsOrModuleAssignment,
@@ -8,13 +8,12 @@ const {
   isStatelessComponent,
   normalizeClassDefinition,
   resolveExportDeclaration,
-  resolveToValue
+  resolveToValue,
 } = utils;
 
 const n = recast.types.namedTypes;
 
-const ERROR_MULTIPLE_DEFINITIONS =
-  'Multiple exported component definitions found.';
+const ERROR_MULTIPLE_DEFINITIONS = 'Multiple exported component definitions found.';
 
 const isReactComponentExtendedClass = path => {
   const node = path.node;
@@ -28,17 +27,18 @@ const isReactComponentExtendedClass = path => {
   }
 
   // eslint-disable-next-line
-  console.warn(`<AutoDocs/> Warning: ${node.id.name} extends ${node.superClass.name} instead of React.Component. Auto generated documentation may be incomplete!`);
+  console.warn(
+    `<AutoDocs/> Warning: ${node.id.name} extends ${
+      node.superClass.name
+    } instead of React.Component. Auto generated documentation may be incomplete!`
+  );
   return true;
 };
 
 const isComponentDefinition = path =>
-  [
-    isReactCreateClassCall,
-    isReactComponentClass,
-    isReactComponentExtendedClass,
-    isStatelessComponent
-  ].some(fn => fn(path));
+  [isReactCreateClassCall, isReactComponentClass, isReactComponentExtendedClass, isStatelessComponent].some(fn =>
+    fn(path)
+  );
 
 const resolveHOC = path => {
   const node = path.node;
@@ -73,19 +73,18 @@ const componentResolver = (ast, recast) => {
   let definition;
 
   const exportDeclaration = path => {
-    const definitions = resolveExportDeclaration(path)
-      .reduce((acc, definition) => {
-        if (isComponentDefinition(definition)) {
-          acc.push(definition);
-        } else {
-          const resolved = resolveToValue(resolveHOC(definition));
-          if (isComponentDefinition(resolved)) {
-            acc.push(resolved);
-          }
+    const definitions = resolveExportDeclaration(path).reduce((acc, definition) => {
+      if (isComponentDefinition(definition)) {
+        acc.push(definition);
+      } else {
+        const resolved = resolveToValue(resolveHOC(definition));
+        if (isComponentDefinition(resolved)) {
+          acc.push(resolved);
         }
+      }
 
-        return acc;
-      }, []);
+      return acc;
+    }, []);
 
     if (definitions.length === 0) {
       return false;
@@ -131,7 +130,7 @@ const componentResolver = (ast, recast) => {
       definition = resolveDefinition(path);
 
       return false;
-    }
+    },
   });
 
   return definition;

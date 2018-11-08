@@ -13,13 +13,13 @@ describe('pathFinder()', () => {
         componentPath: '${path}'
       };
       export default config;
-      `
+      `,
     ];
 
     sourceTestCases.map(source =>
       it('should resolve promise with value of `componentPath`', () =>
-        expect(pathFinder(source)).resolves.toEqual(path)
-      ));
+        expect(pathFinder(source)).resolves.toEqual(path))
+    );
   });
 
   describe('given `component` without `componentPath`', () => {
@@ -54,13 +54,12 @@ describe('pathFinder()', () => {
         `import defaultExport, {Component as ComponentAlias} from '${path}'
         export default {
           component: ComponentAlias
-        }`
+        }`,
       ];
 
       sourceTestCases.map(source =>
-        it('should resolve promise with path to component', () =>
-          expect(pathFinder(source)).resolves.toEqual(path)
-        ));
+        it('should resolve promise with path to component', () => expect(pathFinder(source)).resolves.toEqual(path))
+      );
     });
   });
 });

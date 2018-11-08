@@ -10,7 +10,7 @@ const findNodeOrImport = ({ ast, name }) => {
         if (path.node.id && path.node.id.name === name) {
           path.stop();
           found = true;
-          resolve({node: path.node});
+          resolve({ node: path.node });
         } else if (types.isImportDeclaration(path.node)) {
           let isDefaultExport = false;
           let isImportedIdentifier = path.node.specifiers.some(specifier => {
@@ -25,7 +25,7 @@ const findNodeOrImport = ({ ast, name }) => {
             resolve({ isImport: true, isDefaultExport, sourcePath: path.node.source.value });
           }
         }
-      }
+      },
     });
 
     if (!found) {
@@ -35,12 +35,12 @@ const findNodeOrImport = ({ ast, name }) => {
 };
 
 const findIdentifierNode = async ({ name, ast, cwd }) => {
-  const { node, isImport, sourcePath, isDefaultExport } = await findNodeOrImport({ast, name});
+  const { node, isImport, sourcePath, isDefaultExport } = await findNodeOrImport({ ast, name });
   if (isImport) {
     return followImport({
       sourcePath,
       cwd,
-      exportName: isDefaultExport ? undefined : name
+      exportName: isDefaultExport ? undefined : name,
     });
   }
   return node.init || node;

@@ -1,6 +1,6 @@
 const getNodeDescriptor = require('./get-object-descriptor');
-const parseDriver = require('./utils/parse-driver')
-const getExportedNode = require('./utils/get-exported-node')
+const parseDriver = require('./utils/parse-driver');
+const getExportedNode = require('./utils/get-exported-node');
 
 module.exports = async (code, exportName, cwd) => {
   const ast = parseDriver(code);

@@ -5,31 +5,29 @@ const visit = require('../parser/visit');
 const parse = require('../parser/parse');
 const print = require('../parser/print');
 
-
-const buildImportDeclaration = (specifier, path) => types.importDeclaration(
-  [ specifier ],
-  types.stringLiteral(path)
-);
+const buildImportDeclaration = (specifier, path) => types.importDeclaration([specifier], types.stringLiteral(path));
 
 const prepareStory = storyConfig => source =>
-  new Promise((resolve, reject) =>
-    source && !!storyConfig
-      ? resolve(source)
-      : reject('ERROR: unable to prepare story, both `storyConfig` and `source` must be provided')
+  new Promise(
+    (resolve, reject) =>
+      source && !!storyConfig
+        ? resolve(source)
+        : reject('ERROR: unable to prepare story, both `storyConfig` and `source` must be provided')
   )
 
     .then(parse)
 
     .then(ast => {
-      ast.program.body.unshift(buildImportDeclaration(
-        types.importSpecifier(types.identifier('storiesOf'), types.identifier('storiesOf')),
-        '@storybook/react'
-      ));
+      ast.program.body.unshift(
+        buildImportDeclaration(
+          types.importSpecifier(types.identifier('storiesOf'), types.identifier('storiesOf')),
+          '@storybook/react'
+        )
+      );
 
-      ast.program.body.unshift(buildImportDeclaration(
-        types.importDefaultSpecifier(types.identifier('story')),
-        'wix-storybook-utils/Story'
-      ));
+      ast.program.body.unshift(
+        buildImportDeclaration(types.importDefaultSpecifier(types.identifier('story')), 'wix-storybook-utils/Story')
+      );
 
       return ast;
     })
@@ -59,7 +57,7 @@ const prepareStory = storyConfig => source =>
 
               configProperties = path.node.properties;
               return false;
-            }
+            },
           });
 
           if (exportsReference) {
@@ -72,44 +70,30 @@ const prepareStory = storyConfig => source =>
             }
 
             configObject.properties.push(
-              types.objectProperty(
-                types.identifier('_config'),
-                types.objectExpression(configProperties)
-              )
+              types.objectProperty(types.identifier('_config'), types.objectExpression(configProperties))
             );
 
-            path.node.declaration = types.callExpression(
-              types.identifier('story'),
-              [ path.node.declaration ]
-            );
+            path.node.declaration = types.callExpression(types.identifier('story'), [path.node.declaration]);
           }
-
 
           if (exportsObject) {
             const configObject = path.node.declaration;
 
             configObject.properties.push(
-              types.objectProperty(
-                types.identifier('_config'),
-                types.objectExpression(configProperties)
-              )
+              types.objectProperty(types.identifier('_config'), types.objectExpression(configProperties))
             );
 
             // wrap exported object with `story()`
-            path.node.declaration = types.callExpression(
-              types.identifier('story'),
-              [ configObject ]
-            );
+            path.node.declaration = types.callExpression(types.identifier('story'), [configObject]);
           }
 
           return false;
-        }
+        },
       });
 
       return error ? Promise.reject(error) : ast;
     })
 
     .then(print);
-
 
 module.exports = prepareStory;

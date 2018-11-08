@@ -12,9 +12,9 @@ describe('get()', () => {
       const object = {
         nested: {
           deeply: {
-            array: [ 'first', { second: 'hello' } ]
-          }
-        }
+            array: ['first', { second: 'hello' }],
+          },
+        },
       };
 
       const path = 'nested.deeply.array.1.second';
@@ -26,8 +26,8 @@ describe('get()', () => {
     it('should return null', () => {
       const object = {
         nested: {
-          deeply: 'hello'
-        }
+          deeply: 'hello',
+        },
       };
 
       const path = 'are.you.still.there.?';

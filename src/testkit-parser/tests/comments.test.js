@@ -2,27 +2,26 @@ const getExport = require('../get-export');
 
 describe('get method comments', () => {
   const testCases = [
-    { spec: 'line comment',
+    {
+      spec: 'line comment',
       code: `
       export default () => ({
         // method description within single line
         method: () => {}
       })`,
-      expected: [
-        { name: 'method', type: 'function', args: [], description: 'method description within single line' }
-      ]
+      expected: [{ name: 'method', type: 'function', args: [], description: 'method description within single line' }],
     },
-    { spec: 'block comment',
+    {
+      spec: 'block comment',
       code: `
       export default () => ({
         /** method description within block */
         method: () => {}
       })`,
-      expected: [
-        { name: 'method', type: 'function', args: [], description: 'method description within block' }
-      ]
+      expected: [{ name: 'method', type: 'function', args: [], description: 'method description within block' }],
     },
-    { spec: 'multi-line block comment',
+    {
+      spec: 'multi-line block comment',
       code: `
       export default () => ({
         /** 
@@ -30,11 +29,10 @@ describe('get method comments', () => {
          */
         method: () => {}
       })`,
-      expected: [
-        { name: 'method', type: 'function', args: [], description: 'method description within block' }
-      ]
+      expected: [{ name: 'method', type: 'function', args: [], description: 'method description within block' }],
     },
-    { spec: 'multiple comments',
+    {
+      spec: 'multiple comments',
       code: `
       export default () => ({
         // method description
@@ -47,11 +45,12 @@ describe('get method comments', () => {
           type: 'function',
           args: [],
           description: `method description
-within multiple comments`
-        }
-      ]
+within multiple comments`,
+        },
+      ],
     },
-    { spec: 'annotation: deprecated',
+    {
+      spec: 'annotation: deprecated',
       code: `
       export default () => ({
         /**
@@ -61,10 +60,17 @@ within multiple comments`
         method: () => {}
       })`,
       expected: [
-        { name: 'method', type: 'function', args: [], description: 'Focus related testing is done in e2e tests only.', isDeprecated: true }
-      ]
+        {
+          name: 'method',
+          type: 'function',
+          args: [],
+          description: 'Focus related testing is done in e2e tests only.',
+          isDeprecated: true,
+        },
+      ],
     },
-    { spec: 'object method comment',
+    {
+      spec: 'object method comment',
       code: `
       export default () => ({
         // comment
@@ -72,13 +78,11 @@ within multiple comments`
         
         }
       })`,
-      expected: [
-        { name: 'method', type: 'function', args: [], description: 'comment' }
-      ]
-    }
+      expected: [{ name: 'method', type: 'function', args: [], description: 'comment' }],
+    },
   ];
 
-  testCases.forEach(({spec, code, expected}) => {
+  testCases.forEach(({ spec, code, expected }) => {
     it(`should parse ${spec}`, async () => {
       const result = await getExport(code);
       expect(result).toEqual(expected);

@@ -17,7 +17,7 @@ describe('followExports()', () => {
 
     describe('which has module.exports', () => {
       it('should return source of that export', () => {
-        const source = 'module.exports = require(\'./index.js\')';
+        const source = "module.exports = require('./index.js')";
 
         fs.__setFS({
           'index.js': 'hello',
@@ -30,16 +30,16 @@ describe('followExports()', () => {
       });
 
       it('should return source of resolved file without exports', () => {
-        const source = 'export {default} from \'./file.js\'';
+        const source = "export {default} from './file.js'";
 
         fs.__setFS({
           node_modules: {
-            'file.js': 'export {default} from \'../nested/deep/index.js\'',
+            'file.js': "export {default} from '../nested/deep/index.js'",
           },
 
           nested: {
             deep: {
-              'index.js': 'export {default} from \'../sibling.js\'',
+              'index.js': "export {default} from '../sibling.js'",
             },
             'sibling.js': 'hello',
           },
@@ -215,7 +215,7 @@ describe('followExports()', () => {
 
     describe('which exports with `withClasses` hoc', () => {
       it('should return source of component', () => {
-        const source = 'module.exports = require(\'./dist/src/components/component\');';
+        const source = "module.exports = require('./dist/src/components/component');";
 
         fs.__setFS({
           'index.js': source,
@@ -241,7 +241,7 @@ describe('followExports()', () => {
 
     describe('which has a single non default export', () => {
       it('should return source of component', () => {
-        const source = 'export {Component, AnythingElse} from \'./thing.js\'\n\'should ignore me\'';
+        const source = "export {Component, AnythingElse} from './thing.js'\n'should ignore me'";
 
         fs.__setFS({
           'thing.js': 'hey!',

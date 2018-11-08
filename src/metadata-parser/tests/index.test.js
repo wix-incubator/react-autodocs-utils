@@ -87,7 +87,7 @@ describe('metadataParser()', () => {
                 required: false,
                 type: {
                   name: 'enum',
-                  value: [{ computed: false, value: '\'deez\'' }, { computed: false, value: '\'deeez\'' }],
+                  value: [{ computed: false, value: "'deez'" }, { computed: false, value: "'deeez'" }],
                 },
               },
             },
@@ -141,7 +141,7 @@ describe('metadataParser()', () => {
                 required: false,
                 type: {
                   name: 'enum',
-                  value: [{ computed: false, value: '\'deez\'' }, { computed: false, value: '\'deeez\'' }],
+                  value: [{ computed: false, value: "'deez'" }, { computed: false, value: "'deeez'" }],
                 },
               },
             },
@@ -250,7 +250,7 @@ describe('metadataParser()', () => {
     describe('with `export default from ...`', () => {
       it('should follow that export', () => {
         fs.__setFS({
-          'index.js': 'export {default} from \'./component.js\';',
+          'index.js': "export {default} from './component.js';",
 
           'component.js': `/** I am the one who props */
              const component = () => <div/>;
@@ -266,13 +266,13 @@ describe('metadataParser()', () => {
 
       it('should follow many nested exports', () => {
         fs.__setFS({
-          'index.js': 'export {default} from \'./sibling.js\'',
+          'index.js': "export {default} from './sibling.js'",
 
-          'sibling.js': 'export {default} from \'./nested/deep/component.js\'',
+          'sibling.js': "export {default} from './nested/deep/component.js'",
 
           nested: {
             deep: {
-              'component.js': 'export {default} from \'../component.js\'',
+              'component.js': "export {default} from '../component.js'",
             },
             'component.js': `/** You got me */
               const component = () => <div/>;
@@ -290,7 +290,7 @@ describe('metadataParser()', () => {
       it('should follow a mix of proxy modules and components', () => {
         fs.__setFS({
           MyComponent: {
-            'index.js': 'export {default} from \'./implementation\';',
+            'index.js': "export {default} from './implementation';",
             'implementation.js': `import React from 'react';
               import Proxied from '../AnotherComponent/implementation';
               export default class MyComponent extends React.Component {
@@ -331,10 +331,10 @@ describe('metadataParser()', () => {
       });
     });
 
-    describe('with `module.exports = require(\'path\')`', () => {
+    describe("with `module.exports = require('path')`", () => {
       it('should follow that export', () => {
         fs.__setFS({
-          'index.js': 'module.exports = require(\'./component\')',
+          'index.js': "module.exports = require('./component')",
           'component.js': `
           import React from 'react';
           /** i'm looking for you */
@@ -346,14 +346,14 @@ describe('metadataParser()', () => {
         return expect(metadataParser('index.js')).resolves.toEqual({
           ...rootMock,
           displayName: 'component',
-          description: 'i\'m looking for you',
+          description: "i'm looking for you",
         });
       });
 
       it('should remove `dist/` from path', () => {
         // TODO: yeah well removing `dist` is quite an assumption
         fs.__setFS({
-          'index.js': 'module.exports = require(\'./dist/src/component\')',
+          'index.js': "module.exports = require('./dist/src/component')",
 
           src: {
             'component.jsx': `
@@ -376,7 +376,7 @@ describe('metadataParser()', () => {
     describe('with non `index.js` entry', () => {
       it('should resolve entry file correctly', () => {
         fs.__setFS({
-          'index.js': 'export {default} from \'./Component\'',
+          'index.js': "export {default} from './Component'",
           'Component.jsx': `import React from 'react';
             /** jsx component */
             export default () => <div/>;`,
@@ -413,13 +413,13 @@ describe('metadataParser()', () => {
     it('should resolve node_modules path', () => {
       fs.__setFS({
         MyComponent: {
-          'index.js': 'export {default} from \'wix-ui-backoffice/Component\'',
+          'index.js': "export {default} from 'wix-ui-backoffice/Component'",
         },
 
         node_modules: {
           'wix-ui-backoffice': {
             Component: {
-              'index.js': 'export {default} from \'./Component.js\'',
+              'index.js': "export {default} from './Component.js'",
 
               'Component.js': `import React from 'react';
                 /** backoffice component */
@@ -438,13 +438,13 @@ describe('metadataParser()', () => {
     it('should resolve deep node_modules path', () => {
       fs.__setFS({
         MyComponent: {
-          'index.js': 'export {default} from \'wix-ui-backoffice/Component\'',
+          'index.js': "export {default} from 'wix-ui-backoffice/Component'",
         },
 
         node_modules: {
           'wix-ui-backoffice': {
             Component: {
-              'index.js': 'export {default} from \'../src/components/Component\'',
+              'index.js': "export {default} from '../src/components/Component'",
             },
 
             src: {

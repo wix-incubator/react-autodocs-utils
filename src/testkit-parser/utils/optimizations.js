@@ -6,33 +6,25 @@ const mergeDriversToSpread = sourceCode => {
   return sourceCode.replace(regexMergeDrivers, '{...$1, ...$2}');
 };
 
-const optimizeSource = sourceCode =>
-  mergeDriversToSpread(sourceCode);
+const optimizeSource = sourceCode => mergeDriversToSpread(sourceCode);
 
 const isObjectAssign = node =>
-  types.isMemberExpression(node)
-  && node.object.name === 'Object'
-  && node.property.name === 'assign';
+  types.isMemberExpression(node) && node.object.name === 'Object' && node.property.name === 'assign';
 
 const replaceObjectAssignWithSpread = ast => {
   visit(ast)({
     CallExpression(path) {
       if (isObjectAssign(path.node.callee)) {
-        path.replaceWith(
-          types.objectExpression(
-            path.node.arguments.map(arg => types.spreadElement(arg))
-          )
-        )
+        path.replaceWith(types.objectExpression(path.node.arguments.map(arg => types.spreadElement(arg))));
       }
-    }
+    },
   });
   return ast;
-}
+};
 
-const optimizeAST = ast =>
-  replaceObjectAssignWithSpread(ast);
+const optimizeAST = ast => replaceObjectAssignWithSpread(ast);
 
 module.exports = {
   optimizeSource,
-  optimizeAST
+  optimizeAST,
 };

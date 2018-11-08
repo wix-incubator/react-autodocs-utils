@@ -1,7 +1,8 @@
 import * as React from 'react';
 export interface Props {
   /** this is a text prop */
-  text?: string;
+  text?: 'first' | 'second' | 'third';
+  number?: 1 | 2 | 3;
 }
 
 /** This is the component */

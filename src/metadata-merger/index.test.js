@@ -9,10 +9,9 @@ describe('metadataMerger', () => {
 
   describe('when erroneous input given', () => {
     it('should reject promise with message', () =>
-      expect(metadataMerger()())
-        .rejects
-        .toEqual('ERROR: unable to merge `metadata` into exported story config, ensure `source` & `metadata` are defined')
-    );
+      expect(metadataMerger()()).rejects.toEqual(
+        'ERROR: unable to merge `metadata` into exported story config, ensure `source` & `metadata` are defined'
+      ));
   });
 
   describe('with 2 curried calls', () => {

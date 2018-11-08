@@ -1,7 +1,7 @@
 const flatten = require('./utils/flatten');
 
 const supportedAnnotations = {
-  '@deprecated': 'isDeprecated'
+  '@deprecated': 'isDeprecated',
 };
 
 const normalizeLine = line =>
@@ -10,30 +10,23 @@ const normalizeLine = line =>
     .replace(/(\s*\*\s*)$/, '')
     .trim();
 
-const convertCommentNodesToLines = nodes =>
-  flatten(nodes.map(({ value }) =>
-    value.split('\n').map(normalizeLine)
-  ));
+const convertCommentNodesToLines = nodes => flatten(nodes.map(({ value }) => value.split('\n').map(normalizeLine)));
 
 const extractAnnotations = lines => {
   const defaultMetadata = { description: '', annotations: {} };
   return lines.reduce((methodMetadata, commentLine) => {
-
     if (supportedAnnotations[commentLine]) {
       // line matches annotation: do not add it to description and set annotation key to object metadata
       const annotationKey = supportedAnnotations[commentLine];
       return {
         ...methodMetadata,
-        annotations: { ...methodMetadata.annotations, [annotationKey]: true }
+        annotations: { ...methodMetadata.annotations, [annotationKey]: true },
       };
     }
 
-    const description = [methodMetadata.description, commentLine]
-      .filter(Boolean)
-      .join('\n');
+    const description = [methodMetadata.description, commentLine].filter(Boolean).join('\n');
 
     return { ...methodMetadata, description };
-
   }, defaultMetadata);
 };
 

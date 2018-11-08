@@ -28,14 +28,15 @@ const pathFinder = (source = '') => {
 
             visit(ast)({
               ImportDeclaration(path) {
-                const componentPath = get(path)('node.specifiers')
-                  .find(({ local: { name } }) => name === componentReference);
+                const componentPath = get(path)('node.specifiers').find(
+                  ({ local: { name } }) => name === componentReference
+                );
 
                 if (componentPath) {
                   resolve(get(path)('node.source.value'));
                   return false;
                 }
-              }
+              },
             });
 
             resolve(componentReference);
@@ -49,20 +50,18 @@ const pathFinder = (source = '') => {
             visit(ast)({
               VariableDeclarator(path) {
                 if (types.isIdentifier(binding.identifier, { name: binding.identifier.name })) {
-                  const componentPath =
-                    extractKeyFromObject(path.node.init)('componentPath').value.value;
+                  const componentPath = extractKeyFromObject(path.node.init)('componentPath').value.value;
                   resolve(componentPath);
                 }
-              }
+              },
             });
           }
         }
-      }
+      },
     });
 
     reject(new Error('ERROR: Unable to resolve path to component'));
   });
 };
-
 
 module.exports = pathFinder;

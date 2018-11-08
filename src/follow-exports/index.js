@@ -10,40 +10,32 @@ const readFile = require('../read-file');
 const resolveNodeModulesPath = require('../resolve-node-modules');
 const get = require('../get');
 
-
 /**
-  * resolvePath is used to resolve relative and/or real path to
-  * node_modules
-  */
+ * resolvePath is used to resolve relative and/or real path to
+ * node_modules
+ */
 // resolvePath : (cwd: string, relativePath: string) -> Promise<path: string>
 const resolvePath = (cwd, relativePath) => {
   const desiredPath = relativePath.replace('dist/', '');
 
   return relativePath.startsWith('.')
-    ? Promise.resolve(pathJoin(
-      dirname(cwd),
-      desiredPath
-    ))
+    ? Promise.resolve(pathJoin(dirname(cwd), desiredPath))
     : resolveNodeModulesPath(cwd, desiredPath);
 };
 
-
 /**
-  * extractPath is used to take exported path from source
-  */
+ * extractPath is used to take exported path from source
+ */
 // extractPath : (source: string, path: string) -> Promise<path>
 const extractPath = source =>
   new Promise(resolve => {
     const ast = parse(source);
 
-    const exportDeclarations =
-      ast.program.body
-        .filter(node =>
-          [ 'ExportDeclaration',
-            'ExportNamedDeclaration',
-            'ExportAllDeclaration'
-          ].some(checker => namedTypes[checker].check(node))
-        );
+    const exportDeclarations = ast.program.body.filter(node =>
+      ['ExportDeclaration', 'ExportNamedDeclaration', 'ExportAllDeclaration'].some(checker =>
+        namedTypes[checker].check(node)
+      )
+    );
 
     if (exportDeclarations.length === 1) {
       const [node] = exportDeclarations;
@@ -58,8 +50,7 @@ const extractPath = source =>
     visit(ast)({
       // export {default} from 'path';
       ExportNamedDeclaration(path) {
-        const isSpecifierDefault =
-          path.node.specifiers.some(({ exported }) => exported.name === 'default');
+        const isSpecifierDefault = path.node.specifiers.some(({ exported }) => exported.name === 'default');
 
         if (isSpecifierDefault) {
           resolve(path.node.source.value);
@@ -70,28 +61,27 @@ const extractPath = source =>
         // export const Component = createHOC(Component)
         path.traverse({
           CallExpression(path) {
-            const isWithHOC = [
-              'withStylable',
-              'createHOC',
-              'withFocusable'
-            ].some(name => path.get('callee').isIdentifier({ name }));
+            const isWithHOC = ['withStylable', 'createHOC', 'withFocusable'].some(name =>
+              path.get('callee').isIdentifier({ name })
+            );
 
             if (isWithHOC) {
               const componentName = path.get('arguments')[0].node.name;
 
               visit(ast)({
                 ImportDeclaration(path) {
-                  const componentImportSpecifier =
-                    path.node.specifiers.find(({ local: { name } }) => name === componentName);
+                  const componentImportSpecifier = path.node.specifiers.find(
+                    ({ local: { name } }) => name === componentName
+                  );
 
                   if (componentImportSpecifier) {
                     resolve(path.node.source.value);
                     return false;
                   }
-                }
+                },
               });
             }
-          }
+          },
         });
       },
 
@@ -115,12 +105,10 @@ const extractPath = source =>
         // TODO: refactor multiple into generic HOC resolution
         const isWithClasses = [
           path.get('declaration').isCallExpression(),
-          path.get('declaration.callee').isIdentifier({ name: 'withClasses' })
+          path.get('declaration.callee').isIdentifier({ name: 'withClasses' }),
         ].every(i => i);
 
-        const componentName = isWithClasses
-          ? getter('declaration.arguments.0.name')
-          : getter('declaration.name');
+        const componentName = isWithClasses ? getter('declaration.arguments.0.name') : getter('declaration.name');
 
         visit(ast)({
           ImportDeclaration(path) {
@@ -129,9 +117,9 @@ const extractPath = source =>
             if (componentImport) {
               resolve(path.node.source.value);
             }
-          }
+          },
         });
-      }
+      },
     });
 
     // when unable to extract path, we assume that there's no more export and
@@ -139,20 +127,17 @@ const extractPath = source =>
     resolve(null);
   });
 
-
 // followExports (source: string, path: string) => Promise<{source: String, path: String}>
 const followExports = (source, path = '') =>
-  extractPath(source, path)
-    .then(extractedPath =>
+  extractPath(source, path).then(
+    extractedPath =>
       extractedPath
-        ? resolvePath(path, extractedPath)
-          .then(resolvedPath =>
+        ? resolvePath(path, extractedPath).then(resolvedPath =>
             readFile(resolvedPath)
               .then(({ source, path }) => followExports(source, path))
               .catch(e => console.log(`ERROR: unable to read ${resolvedPath}`, e))
           )
-        : ({ source, path })
-    );
-
+        : { source, path }
+  );
 
 module.exports = followExports;

@@ -9,10 +9,9 @@ describe('prepareStory', () => {
 
   describe('when erroneous input given', () => {
     it('should reject promise with message', () =>
-      expect(prepareStory()())
-        .rejects
-        .toEqual('ERROR: unable to prepare story, both `storyConfig` and `source` must be provided')
-    );
+      expect(prepareStory()()).rejects.toEqual(
+        'ERROR: unable to prepare story, both `storyConfig` and `source` must be provided'
+      ));
   });
 
   describe('with 2 curried calls', () => {

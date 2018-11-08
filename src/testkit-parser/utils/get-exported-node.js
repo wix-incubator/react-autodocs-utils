@@ -59,5 +59,5 @@ module.exports = async ({ ast, exportName = DEFAULT_EXPORT, cwd }) => {
     throw Error(`export "${exportName}" not found`);
   }
 
-  return await reduceToObject({node: exportedNode, ast, cwd });
+  return await reduceToObject({ node: exportedNode, ast, cwd });
 };

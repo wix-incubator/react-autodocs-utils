@@ -2,7 +2,8 @@ const getExport = require('../get-export');
 
 describe('nested object parsing', () => {
   const testCases = [
-    { spec: 'inline',
+    {
+      spec: 'inline',
       code: `
       export default () => ({
         driver: {
@@ -10,12 +11,15 @@ describe('nested object parsing', () => {
         }
       })`,
       expected: [
-        { name: 'driver', type: 'object', props: [
-          { name: 'method', type: 'function', args: [] }
-        ]}
-      ]
+        {
+          name: 'driver',
+          type: 'object',
+          props: [{ name: 'method', type: 'function', args: [] }],
+        },
+      ],
     },
-    { spec: 'symbol',
+    {
+      spec: 'symbol',
       code: `
       const driver = {
         method: () => {}
@@ -24,12 +28,15 @@ describe('nested object parsing', () => {
         driver
       })`,
       expected: [
-        { name: 'driver', type: 'object', props: [
-          { name: 'method', type: 'function', args: [] }
-        ]}
-      ]
+        {
+          name: 'driver',
+          type: 'object',
+          props: [{ name: 'method', type: 'function', args: [] }],
+        },
+      ],
     },
-    { spec: 'mixed inline & symbol',
+    {
+      spec: 'mixed inline & symbol',
       code: `
       const driver = {
         method: () => {}
@@ -40,14 +47,21 @@ describe('nested object parsing', () => {
         }
       })`,
       expected: [
-        { name: 'wrapper', type: 'object', props: [
-          { name: 'driver', type: 'object', props: [
-            { name: 'method', type: 'function', args: [] }
-          ] }
-        ]}
-      ]
+        {
+          name: 'wrapper',
+          type: 'object',
+          props: [
+            {
+              name: 'driver',
+              type: 'object',
+              props: [{ name: 'method', type: 'function', args: [] }],
+            },
+          ],
+        },
+      ],
     },
-    { spec: 'mixed inline & symbol with spreading',
+    {
+      spec: 'mixed inline & symbol with spreading',
       code: `
       const anotherDriver = {
         method: () => {}
@@ -61,14 +75,21 @@ describe('nested object parsing', () => {
         }
       })`,
       expected: [
-        { name: 'wrapper', type: 'object', props: [
-          { name: 'driver', type: 'object', props: [
-            { name: 'method', type: 'function', args: [] }
-          ] }
-        ]}
-      ]
+        {
+          name: 'wrapper',
+          type: 'object',
+          props: [
+            {
+              name: 'driver',
+              type: 'object',
+              props: [{ name: 'method', type: 'function', args: [] }],
+            },
+          ],
+        },
+      ],
     },
-    { spec: 'identifier in function scope',
+    {
+      spec: 'identifier in function scope',
       code: `
       export default () => {
         const driver = {
@@ -79,14 +100,16 @@ describe('nested object parsing', () => {
         }
       }`,
       expected: [
-        { name: 'driver', type: 'object', props: [
-          { name: 'method', type: 'function', args: [] }
-        ]}
-      ]
-    }
+        {
+          name: 'driver',
+          type: 'object',
+          props: [{ name: 'method', type: 'function', args: [] }],
+        },
+      ],
+    },
   ];
 
-  testCases.slice(testCases.length-1).forEach(({spec, code, expected}) => {
+  testCases.slice(testCases.length - 1).forEach(({ spec, code, expected }) => {
     it(`should parse ${spec}`, async () => {
       const result = await getExport(code);
       expect(result).toEqual(expected);
