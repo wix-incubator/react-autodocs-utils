@@ -24,7 +24,15 @@ const pathFinder = (source = '') => {
             resolve(componentPath.value.value);
             return false;
           } else {
-            const componentReference = extractKeyFromObject(declaration)('component').value.name;
+            const componentReference = get(extractKeyFromObject(declaration)('component'))('value.name');
+
+            if (!componentReference) {
+              return reject(
+                new Error(
+                  'ERROR: unable to resolve component path. Ensure exported story config has `componentPath` property with correct relative path to component implementation'
+                )
+              );
+            }
 
             visit(ast)({
               ImportDeclaration(path) {
