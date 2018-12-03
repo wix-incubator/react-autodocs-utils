@@ -165,6 +165,38 @@ describe('import parsing', () => {
         }
       }
     },
+    {
+      spec: 'Multi-level imports',
+      code: `
+        export {
+          buttonNextDriverFactory as textButtonDriverFactory,
+        } from 'libraryA/dist/driver';
+      `,
+      files: {
+        node_modules: {
+          libraryA: {
+            'driver.ts': `
+              import { baseUniDriverFactory } from 'libraryB/driver';
+
+              export const buttonNextDriverFactory = (base: any): any => {
+                return {
+                  driver: {...baseUniDriverFactory(base)}
+                };
+              };
+            `
+          },
+          libraryB: {
+            'driver.js': `
+              export const baseUniDriverFactory = (base: any): any => {
+                return {
+                  method: (arg) => {}
+                };
+              };
+            `
+          }
+        }
+      }
+    }
   ];
 
   const expected = [
