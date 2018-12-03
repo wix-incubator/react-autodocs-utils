@@ -1,5 +1,4 @@
 const getExport = require('../get-export');
-const fsTree = require('./utils/fs-tree');
 
 jest.mock('fs');
 const fs = require('fs');
@@ -14,9 +13,9 @@ describe('import parsing', () => {
         driver
       })`,
       files: {
-        './driver.js': `export default () => ({
+        'driver.js': `export default () => ({
           method: arg => {}
-        })`,
+        })`
       },
     },
     {
@@ -27,7 +26,7 @@ describe('import parsing', () => {
         driver
       })`,
       files: {
-        './driver.js': `export default () => {
+        'driver.js': `export default () => {
            return {
              method: arg => {}
            }
@@ -42,7 +41,7 @@ describe('import parsing', () => {
         driver
       })`,
       files: {
-        './driver.js': `export default function() {
+        'driver.js': `export default function() {
            return {
              method: arg => {}
            }
@@ -57,7 +56,7 @@ describe('import parsing', () => {
         driver
       })`,
       files: {
-        './driver.js': `
+        'driver.js': `
          const symbol = {
            method: arg => {}
          };
@@ -74,7 +73,7 @@ describe('import parsing', () => {
         driver
       })`,
       files: {
-        './driver.js': `
+        'driver.js': `
           export const driver = () => ({
             method: arg => {}
           });
@@ -92,7 +91,7 @@ describe('import parsing', () => {
         driver
       })`,
       files: {
-        './driver.js': `
+        'driver.js': `
           export default () => ({
             method: arg => {}
           })`,
@@ -106,7 +105,7 @@ describe('import parsing', () => {
         driver: driverFactory().anotherDriver
       })`,
       files: {
-        './driver.js': `
+        'driver.js': `
           export default () => ({
             anotherDriver: {
               method: arg => {}
@@ -123,7 +122,7 @@ describe('import parsing', () => {
       })
       `,
       files: {
-        './driver.js': `
+        'driver.js': `
           export default () => ({
             driver: {
               method: arg => {}
@@ -138,7 +137,7 @@ describe('import parsing', () => {
         export { internalDriver as driverFactory } from './driver.js';
       `,
       files: {
-        './driver.js': `
+        'driver.js': `
         export const internalDriver = () => ({
           driver: {
             method: arg => {}
@@ -150,16 +149,20 @@ describe('import parsing', () => {
     {
       spec: 'export { x as y } from node_modules/z',
       code: `
-        export { internalDriver as driverFactory } from 'wix-ui-core/dist/src/components/button-next/driver.js';
+        export { internalDriver as driverFactory } from 'library/dist/driver.js';
       `,
       files: {
-        'node_modules/wix-ui-core/dist/src/components/button-next/driver.js': `
-        export const internalDriver = () => ({
-          driver: {
-            method: arg => {}
+        node_modules: {
+          library: {
+            'driver.js':`
+            export const internalDriver = () => ({
+              driver: {
+                method: arg => {}
+              }
+            });
+            `
           }
-        });
-        `,
+        }
       }
     },
   ];
@@ -174,7 +177,7 @@ describe('import parsing', () => {
 
   testCases.forEach(({ spec, code, files }) => {
     it(`should parse ${spec}`, async () => {
-      fs.__setFS(fsTree(files));
+      fs.__setFS(files);
       const result = await getExport(code);
       expect(result).toEqual(expected);
     });
