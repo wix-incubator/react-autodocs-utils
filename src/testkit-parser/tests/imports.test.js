@@ -147,6 +147,21 @@ describe('import parsing', () => {
         `,
       },
     },
+    {
+      spec: 'export { x as y } from node_modules/z',
+      code: `
+        export { internalDriver as driverFactory } from 'wix-ui-core/dist/src/components/button-next/driver.js';
+      `,
+      files: {
+        'node_modules/wix-ui-core/dist/src/components/button-next/driver.js': `
+        export const internalDriver = () => ({
+          driver: {
+            method: arg => {}
+          }
+        });
+        `,
+      }
+    },
   ];
 
   const expected = [
