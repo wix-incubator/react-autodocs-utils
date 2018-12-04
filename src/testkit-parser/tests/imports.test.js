@@ -196,6 +196,28 @@ describe('import parsing', () => {
           }
         }
       }
+    },
+    {
+      spec: 'relative path in node_modules',
+      code: `
+        export { buttonNextDriverFactory } from 'library/dist/driver';
+      `,
+      files: {
+        node_modules: {
+          library: {
+            'driver.ts': `
+              export { buttonNextDriverFactory } from './dist/src/driverFactory';
+            `,
+            src: {
+              'driverFactory.ts': `export const buttonNextDriverFactory = (base: any): any => ({
+                driver: {
+                  method: (arg) => {}
+                }
+              });`
+            }
+          }
+        }
+      }
     }
   ];
 
