@@ -12,7 +12,7 @@ const resolveNodeModulesPath = (cwd, modulePath) => {
         ? path.join(checkPath, 'node_modules', modulePath)
         : checkPath !== '.'
           ? resolveNodeModulesPath(checkPath, modulePath)
-          : Promise.reject('ERROR: Unable to resolve node_modules path in "${modulePath}"')
+          : Promise.reject(`ERROR: Unable to resolve node_modules path in "${modulePath}"`)
   );
 };
 

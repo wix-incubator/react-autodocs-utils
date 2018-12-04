@@ -1,27 +1,12 @@
 /* global Promise */
 
-const { join: pathJoin } = require('path');
 const namedTypes = require('recast').types.namedTypes;
 
 const parse = require('../parser/parse');
-const dirname = require('../dirname');
 const visit = require('../parser/visit');
 const readFile = require('../read-file');
-const resolveNodeModulesPath = require('../resolve-node-modules');
 const get = require('../get');
-
-/**
- * resolvePath is used to resolve relative and/or real path to
- * node_modules
- */
-// resolvePath : (cwd: string, relativePath: string) -> Promise<path: string>
-const resolvePath = (cwd, relativePath) => {
-  const desiredPath = relativePath.replace('dist/', '');
-
-  return relativePath.startsWith('.')
-    ? Promise.resolve(pathJoin(dirname(cwd), desiredPath))
-    : resolveNodeModulesPath(cwd, desiredPath);
-};
+const resolvePath = require('../resolve-path');
 
 /**
  * extractPath is used to take exported path from source

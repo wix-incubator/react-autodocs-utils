@@ -1,4 +1,3 @@
-const parse = require('../../parser/parse');
 const visit = require('../../parser/visit');
 const reduceToObject = require('./reduce-to-object');
 const followImport = require('./follow-import');
@@ -15,6 +14,12 @@ const findNamedExportDeclaration = (nodes, predicate) => {
     return exportedNode.init || exportedNode;
   }
 };
+
+const isCommonJsExport = (node) =>
+  node.type === 'MemberExpression' && node.object.name === 'module' && node.property.name === 'exports';
+
+const isCommonJsImport = (node) =>
+  node.type === 'CallExpression' && node.callee.name === 'require';
 
 module.exports = async ({ ast, exportName = DEFAULT_EXPORT, cwd }) => {
   let exportedNode;
@@ -39,6 +44,16 @@ module.exports = async ({ ast, exportName = DEFAULT_EXPORT, cwd }) => {
         },
       });
     },
+    AssignmentExpression({node}) {
+      if (isCommonJsExport(node.left) && isCommonJsImport(node.right)) {
+        const source = node.right.arguments[0].value;
+        exportNamedNodes.push({
+          source,
+          local: { name: exportName },
+          node: { name: exportName }
+        });
+      }
+    }
   });
 
   if (exportName === DEFAULT_EXPORT) {
@@ -47,17 +62,15 @@ module.exports = async ({ ast, exportName = DEFAULT_EXPORT, cwd }) => {
     exportedNode = findNamedExportDeclaration(exportNamedNodes, byName(exportName));
   }
 
-  if (exportedNode.node) {
-    if (exportedNode.source) {
-      exportedNode = await followImport({ cwd, sourcePath: exportedNode.source, exportName: exportedNode.local.name });
-    } else {
-      exportedNode = exportedNode.node;
-    }
+  if (exportedNode.source) {
+    exportedNode = await followImport({ cwd, sourcePath: exportedNode.source, exportName: exportedNode.local.name });
+  } else if (exportedNode.node) {
+    exportedNode = exportedNode.node;
   }
 
   if (!exportedNode) {
     throw Error(`export "${exportName}" not found`);
   }
 
-  return await reduceToObject({ node: exportedNode, ast, cwd });
+  return await reduceToObject({ node: exportedNode, ast: exportedNode.ast || ast, cwd });
 };
