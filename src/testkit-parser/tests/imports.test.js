@@ -240,6 +240,23 @@ describe('import parsing', () => {
           }
         }
       }
+    },
+    {
+      spec: 're-exported default as ExportNamedDeclaration',
+      code: `
+        export {
+          default,
+        } from './component';
+      `,
+      files: {
+        'component.js': `
+          export default (base: any): any => ({
+            driver: {
+              method: (arg) => {}
+            }
+          });
+        `
+      }
     }
   ];
 
