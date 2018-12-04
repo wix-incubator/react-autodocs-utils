@@ -218,6 +218,28 @@ describe('import parsing', () => {
           }
         }
       }
+    },
+    {
+      spec: 're-exported identifier',
+      code: `
+        export { buttonNextDriverFactory } from 'library/dist/driver';
+      `,
+      files: {
+        node_modules: {
+          library: {
+            'driver.ts': `
+              module.exports = require('./dist/src/driverFactory');
+            `,
+            src: {
+              'driverFactory.ts': `export const buttonNextDriverFactory = (base: any): any => ({
+                driver: {
+                  method: (arg) => {}
+                }
+              });`
+            }
+          }
+        }
+      }
     }
   ];
 
