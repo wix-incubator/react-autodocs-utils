@@ -115,6 +115,15 @@ describe('get named export', () => {
         export { myDriverFactory as driver }
       `,
     },
+    {
+      spec: 'single named export',
+      code: `
+        const myFactory = () => ({
+          method: function() {}
+        });
+        export { myFactory }
+      `,
+    },
   ];
   const expected = [{ name: 'method', type: 'function', args: [] }];
   testCases.forEach(({ spec, code }) => {
@@ -122,5 +131,17 @@ describe('get named export', () => {
       const result = await getExport(code);
       expect(result).toEqual(expected);
     });
+  });
+
+  it('shoud fail parsing given multiple named exports without DriverFactory pattern', async () => {
+    const code = `
+    const myFactory = () => ({
+      method: function() {}
+    });
+    const anotherFactory = () => ({ })
+    export { myFactory, anotherFactory }
+    `
+    
+    await expect(getExport(code)).rejects.toEqual(Error('export "default" not found'));
   });
 });

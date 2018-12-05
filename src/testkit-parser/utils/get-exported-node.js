@@ -15,6 +15,9 @@ const findNamedExportDeclaration = (nodes, predicate) => {
   }
 };
 
+const getFirstExportIfOnlyOneExists = nodes =>
+  nodes.length === 1 && nodes[0]
+
 const isCommonJsExport = (node) =>
   node.type === 'MemberExpression' && node.object.name === 'module' && node.property.name === 'exports';
 
@@ -65,7 +68,10 @@ module.exports = async ({ ast, exportName = DEFAULT_EXPORT, cwd }) => {
   });
 
   if (exportName === DEFAULT_EXPORT) {
-    exportedNode = exportDefaultNode || findNamedExportDeclaration(exportNamedNodes, byPattern(/DriverFactory$/i));
+    exportedNode = 
+      exportDefaultNode || 
+      findNamedExportDeclaration(exportNamedNodes, byPattern(/DriverFactory$/i)) ||
+      getFirstExportIfOnlyOneExists(exportNamedNodes);
   } else {
     exportedNode = findNamedExportDeclaration(exportNamedNodes, byName(exportName));
   }
