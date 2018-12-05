@@ -137,11 +137,13 @@ const getSpreadDescriptor = async ({ node, ast, cwd }) => {
 };
 
 const getObjectDescriptor = async ({ node, ast, cwd }) => {
+  const scopedAst =  node.ast || ast;
+  const scopedCwd = node.cwd || cwd;
   const methodPromises = node.properties.map(
     node =>
       types.isSpreadElement(node)
-        ? getSpreadDescriptor({ node: node.argument, ast, cwd })
-        : getPropertyDescriptor({ node: node, ast, cwd })
+        ? getSpreadDescriptor({ node: node.argument, ast: scopedAst, cwd: scopedCwd })
+        : getPropertyDescriptor({ node: node, ast: scopedAst, cwd: scopedCwd })
   );
   return flatten(await Promise.all(methodPromises));
 };

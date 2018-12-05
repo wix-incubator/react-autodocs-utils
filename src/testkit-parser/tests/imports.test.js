@@ -257,6 +257,32 @@ describe('import parsing', () => {
           });
         `
       }
+    },
+    {
+      spec: 'imported identifiers in spread element',
+      code: `
+        import internalDriverFactory from './folder/internal.js';
+        export default () => ({
+          ...internalDriverFactory()
+        });
+      `,
+      files: {
+        folder: {
+          'internal.js': `
+            import anotherDriverFactory from './another-internal.js';
+            export default () => ({
+              ...anotherDriverFactory()
+            });
+          `,
+          'another-internal.js': `
+            export default () => ({
+              driver: {
+                method: (arg) => {}
+              }
+            });
+          `
+        }
+      }
     }
   ];
 
