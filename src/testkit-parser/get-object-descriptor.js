@@ -82,11 +82,7 @@ const createDescriptor = async ({ node, ast, cwd }) => {
 
     case types.isMemberExpression(node):
       const memberProperty = await getMemberProperty({ node: node, ast, cwd });
-      const propertyDescriptor = await createDescriptor({ node: memberProperty, ast, cwd });
-      return {
-        type: 'object',
-        props: propertyDescriptor.props,
-      };
+      return createDescriptor({ node: memberProperty, ast, cwd });
 
     case types.isLogicalExpression(node):
       return await createDescriptor({ node: node.right, ast, cwd });

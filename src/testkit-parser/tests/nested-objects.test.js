@@ -107,6 +107,28 @@ describe('nested object parsing', () => {
         },
       ],
     },
+    {
+      spec: 'member expression function',
+      code: `
+        const driver = {
+          method: () => {}
+        };
+        export default () => {
+          return {
+            driver: {
+              method: driver.method
+            }
+          }
+        };
+      `,
+      expected: [
+        {
+          name: 'driver',
+          type: 'object',
+          props: [{ name: 'method', type: 'function', args: [] }],
+        }
+      ]
+    }
   ];
 
   testCases.slice(testCases.length - 1).forEach(({ spec, code, expected }) => {
