@@ -43,7 +43,12 @@ const readEntryFile = path =>
     .then(
       path =>
         pathExtname(path)
-          ? fsReadFile(path, 'utf8').then(source => ({ source, path, isTypescript: isTypescript(path) }))
+          ? fsReadFile(path, 'utf8')
+              .then(source => ({ source, path, isTypescript: isTypescript(path) }))
+              .catch(() => 
+                tryReadWithExtension(path)
+                  .then(({ path, source }) => ({ source, path, isTypescript: isTypescript(path) }))
+              )
           : tryReadWithExtension(path)
     );
 

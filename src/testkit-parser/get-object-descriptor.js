@@ -35,9 +35,26 @@ const isFunction = node =>
 
 const isValue = node => [types.isBooleanLiteral, types.isNumericLiteral].some(checker => checker(node));
 
+const getObjectProperties = async ({ node, ast, cwd }) => {
+  const properties = await Promise.all(node.properties.map(async property => {
+    if (property.type === 'SpreadElement') {
+      const object = await reduceToObject({ 
+        ast: node.ast || ast,
+        cwd: node.cwd || cwd,
+        node: property.argument
+      });
+      return object.properties;
+    } else {
+      return property;
+    }
+  }));
+  return flatten(properties);
+}
+
 const getMemberProperty = async ({ node, ast, cwd }) => {
   const object = await reduceToObject({ node: node.object, ast, cwd });
-  const property = object.properties.find(property => property.key.name === node.property.name);
+  const properties = await getObjectProperties({ node: object, ast, cwd });
+  const property = properties.find(property => property.key.name === node.property.name);
   return property.value;
 };
 
@@ -82,11 +99,7 @@ const createDescriptor = async ({ node, ast, cwd }) => {
 
     case types.isMemberExpression(node):
       const memberProperty = await getMemberProperty({ node: node, ast, cwd });
-      const propertyDescriptor = await createDescriptor({ node: memberProperty, ast, cwd });
-      return {
-        type: 'object',
-        props: propertyDescriptor.props,
-      };
+      return createDescriptor({ node: memberProperty, ast, cwd });
 
     case types.isLogicalExpression(node):
       return await createDescriptor({ node: node.right, ast, cwd });
@@ -137,11 +150,13 @@ const getSpreadDescriptor = async ({ node, ast, cwd }) => {
 };
 
 const getObjectDescriptor = async ({ node, ast, cwd }) => {
+  const scopedAst =  node.ast || ast;
+  const scopedCwd = node.cwd || cwd;
   const methodPromises = node.properties.map(
     node =>
       types.isSpreadElement(node)
-        ? getSpreadDescriptor({ node: node.argument, ast, cwd })
-        : getPropertyDescriptor({ node: node, ast, cwd })
+        ? getSpreadDescriptor({ node: node.argument, ast: scopedAst, cwd: scopedCwd })
+        : getPropertyDescriptor({ node: node, ast: scopedAst, cwd: scopedCwd })
   );
   return flatten(await Promise.all(methodPromises));
 };

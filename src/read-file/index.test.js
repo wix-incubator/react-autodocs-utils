@@ -39,4 +39,19 @@ describe('readFile', () => {
   describe('given non existing path', () => {
     it('should reject with error', () => expect(readFile('you-dont-exist')).rejects.toBeDefined());
   });
+
+  describe('given dotted suffix without extension', () => {
+    it('should resolve with file content', () => {
+      const content = 'hello file content';
+      fs.__setFS({
+        'test.file.js': content,
+      });
+
+      return expect(readFile('test.file')).resolves.toEqual({
+        source: content,
+        path: 'test.file.js',
+        isTypescript: false,
+      });
+    });
+  });
 });

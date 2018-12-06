@@ -240,6 +240,107 @@ describe('import parsing', () => {
           }
         }
       }
+    },
+    {
+      spec: 're-exported default as ExportNamedDeclaration',
+      code: `
+        export {
+          default,
+        } from './component';
+      `,
+      files: {
+        'component.js': `
+          export default (base: any): any => ({
+            driver: {
+              method: (arg) => {}
+            }
+          });
+        `
+      }
+    },
+    {
+      spec: 'imported identifiers in spread element',
+      code: `
+        import internalDriverFactory from './folder/internal.js';
+        export default () => ({
+          ...internalDriverFactory()
+        });
+      `,
+      files: {
+        folder: {
+          'internal.js': `
+            import anotherDriverFactory from './another-internal.js';
+            export default () => ({
+              ...anotherDriverFactory()
+            });
+          `,
+          'another-internal.js': `
+            export default () => ({
+              driver: {
+                method: (arg) => {}
+              }
+            });
+          `
+        }
+      }
+    },
+    {
+      spec: 'member expression with imported spread',
+      code: `
+        import internalDriverFactory from './folder/internal.js';
+        const internalDriver = internalDriverFactory();
+        export default () => ({
+          driver: {
+            method: internalDriver.method
+          }
+        });
+      `,
+      files: {
+        folder: {
+          'internal.js': `
+            import anotherDriverFactory from './another-internal.js';
+            const anotherDriver = anotherDriverFactory();
+            export default () => ({
+              ...anotherDriver
+            });
+          `,
+          'another-internal.js': `
+            export default () => ({
+              method: (arg) => {}
+            });
+          `
+        }
+      }
+    },
+    {
+      spec: 'imported member expression via named default export with internal spread',
+      code: `
+        import driverFactory from './folder/internal';
+        export default () => {
+          const driver = driverFactory();
+          return {
+            driver: { method: driver.method },
+          };
+        };
+      `,
+      files: {
+        folder: {
+          'internal.js': `
+            export {
+              default,
+            } from './another-internal';
+          `,
+          'another-internal.js': `
+            const driverFactory = () => {
+              const driver = {
+                method: arg => {}
+              };
+              return { ...driver };
+            };
+            export default driverFactory;
+          `
+        }
+      }
     }
   ];
 
