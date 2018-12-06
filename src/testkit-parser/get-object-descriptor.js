@@ -37,7 +37,19 @@ const isValue = node => [types.isBooleanLiteral, types.isNumericLiteral].some(ch
 
 const getMemberProperty = async ({ node, ast, cwd }) => {
   const object = await reduceToObject({ node: node.object, ast, cwd });
-  const property = object.properties.find(property => property.key.name === node.property.name);
+  const properties = await Promise.all(object.properties.map(async property => {
+    if (property.type === 'SpreadElement') {
+      const resolvedObject = await reduceToObject({ 
+        ast: object.ast || ast,
+        cwd: object.cwd || cwd,
+        node: property.argument
+      });
+      return resolvedObject.properties.find(property => property.key.name === node.property.name);
+    } else {
+      return property
+    }
+  }))
+  const property = properties.find(property => property.key.name === node.property.name);
   return property.value;
 };
 

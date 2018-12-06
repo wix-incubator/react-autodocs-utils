@@ -283,6 +283,34 @@ describe('import parsing', () => {
           `
         }
       }
+    },
+    {
+      spec: 'member expression with imported spread',
+      code: `
+        import internalDriverFactory from './folder/internal.js';
+        const internalDriver = internalDriverFactory();
+        export default () => ({
+          driver: {
+            method: internalDriver.method
+          }
+        });
+      `,
+      files: {
+        folder: {
+          'internal.js': `
+            import anotherDriverFactory from './another-internal.js';
+            const anotherDriver = anotherDriverFactory();
+            export default () => ({
+              ...anotherDriver
+            });
+          `,
+          'another-internal.js': `
+            export default () => ({
+              method: (arg) => {}
+            });
+          `
+        }
+      }
     }
   ];
 
