@@ -1,4 +1,5 @@
 const flatten = require('./utils/flatten');
+const doctrine = require('doctrine');
 
 const supportedAnnotations = {
   '@deprecated': 'isDeprecated',
@@ -31,12 +32,27 @@ const extractAnnotations = lines => {
 };
 
 const getComments = node => {
-  if (!node.leadingComments) {
+  const {leadingComments} = node;
+  if (!leadingComments) {
     return {};
   }
-  const lines = convertCommentNodesToLines(node.leadingComments);
-  const { annotations, description } = extractAnnotations(lines);
-  return { ...annotations, description };
+
+  if (leadingComments.length === 1 && leadingComments[0].type === 'CommentBlock') {
+    const leadingComment = leadingComments[0];
+    const ast = doctrine.parse(leadingComment.value,{ unwrap: true });
+
+    // For backward compatibility of `isDeprecated` prop
+    const deprecatedTag = ast.tags.find(t => t.title === 'deprecated');
+    if (deprecatedTag) {
+      ast.isDeprecated = true;
+    }
+
+    return ast;
+  } else {
+    const lines = convertCommentNodesToLines(node.leadingComments);
+    const { annotations, description } = extractAnnotations(lines);
+    return { ...annotations, description };
+  }
 };
 
 module.exports = getComments;
