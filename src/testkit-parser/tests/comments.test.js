@@ -18,7 +18,7 @@ describe('get method comments', () => {
         /** method description within block */
         method: () => {}
       })`,
-      expected: [{ name: 'method', type: 'function', args: [], description: 'method description within block' }],
+      expected: [{ name: 'method', type: 'function', args: [], description: 'method description within block' , tags: []}],
     },
     {
       spec: 'multi-line block comment',
@@ -29,7 +29,7 @@ describe('get method comments', () => {
          */
         method: () => {}
       })`,
-      expected: [{ name: 'method', type: 'function', args: [], description: 'method description within block' }],
+      expected: [{ name: 'method', type: 'function', args: [], description: 'method description within block', tags: [] }],
     },
     {
       spec: 'multiple comments',
@@ -66,6 +66,7 @@ within multiple comments`,
           args: [],
           description: 'Focus related testing is done in e2e tests only.',
           isDeprecated: true,
+          tags: [{description: null, title: 'deprecated'}]
         },
       ],
     },
@@ -88,4 +89,52 @@ within multiple comments`,
       expect(result).toEqual(expected);
     });
   });
+
+  describe('jsdoc tags', () => {
+    it('@param', async () => {
+      const result = await getExport(`
+      export default () => ({
+        /** 
+         * method description within block 
+         * @param {string} txt a param description
+         */
+        method: () => {}
+      })`);
+      expect(result).toEqual([{
+        name: 'method',
+        type: 'function',
+        args: [],
+        description: 'method description within block' ,
+        tags: [{
+          title: 'param',
+          name: 'txt',
+          description : 'a param description',
+          type: {name: 'string', type: 'NameExpression'}
+        }]
+      }]);
+    });
+
+    it('@returns', async () => {
+      const result = await getExport(`
+      export default () => ({
+        /** 
+         * method description within block 
+         * @returns {boolean} true or false
+         */
+        method: () => {}
+      })`);
+      expect(result).toEqual([{
+        name: 'method',
+        type: 'function',
+        args: [],
+        description: 'method description within block' ,
+        tags: [{
+          title: 'returns',
+          description : 'true or false',
+          type: {name: 'boolean', type: 'NameExpression'}
+        }]
+      }]);
+    });
+  })
+  
 });
