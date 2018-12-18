@@ -2,9 +2,7 @@
 
 [![Build Status](https://travis-ci.org/wix/react-autodocs-utils.svg?branch=master)](https://travis-ci.org/wix/react-autodocs-utils)
 
-A collection of tools for automating React components documentation.
-
-Under development, may contain experiments
+A collection of React component parsers for automating documentation.
 
 ## Install
 
@@ -18,7 +16,7 @@ const path = './path/to/react-component.js';
 const componentMetadata = reactAutodocsUtils(path);
 ```
 
-`componentMetadata` is an object with, unsurprisingly, metadata of component.
+`componentMetadata` is an object with metadata of component.
 
 ## Example
 
@@ -45,7 +43,7 @@ export class Component extends React.PureComponent {
 `reactAutodocsUtils('./component.js')` Will return a JSON:
 
 
-```json
+```js
 {
   "props": {
     "thing": {
@@ -79,7 +77,9 @@ export class Component extends React.PureComponent {
   "readme": "source of `./readme.md` if exists, otherwise empty string",
   "readmeAccessibility": "source of `./readme.accessibility.md` if exists, otherwise empty string",
   "readmeTestkit": "source of `./readme.testkit.md` if exists, otherwise empty string",
-  "drivers": [ // metadata of exported methods in *.driver.js, *.protractor.driver.js or *.pupeteer.driver.js
+
+  // metadata of exported methods in *.driver.js, *.protractor.driver.js or *.pupeteer.driver.js
+  "drivers": [
     {
       "file": "component.driver.js",
       "descriptor": [
@@ -104,8 +104,7 @@ export class Component extends React.PureComponent {
 }
 ```
 
-With this information it is easy to display documentation with regular
-React components.
+With this information it is easy to display documentation with regular React components.
 
 It is used heavily in
 [wix-storybook-utils](https://github.com/wix/wix-ui/tree/master/packages/wix-storybook-utils).
