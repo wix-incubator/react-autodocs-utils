@@ -39,14 +39,16 @@ const gatherAll = path =>
           .catch(() => Promise.resolve(''));
 
       const readme = readMarkdown('readme.md');
+      const readmeApi = readMarkdown('readme.api.md');
       const readmeAccessibility = readMarkdown('readme.accessibility.md');
       const readmeTestkit = readMarkdown('readme.testkit.md');
       const drivers = scanFiles(files.map(file => pathJoin(dirname(path), file)), { basename: true });
 
-      return Promise.all([metadata, readme, readmeAccessibility, readmeTestkit, drivers]).then(
-        ([metadata, readme, readmeAccessibility, readmeTestkit, drivers]) => ({
+      return Promise.all([metadata, readme, readmeApi, readmeAccessibility, readmeTestkit, drivers]).then(
+        ([metadata, readme, readmeApi, readmeAccessibility, readmeTestkit, drivers]) => ({
           ...metadata,
           readme,
+          readmeApi,
           readmeAccessibility,
           readmeTestkit,
           drivers,

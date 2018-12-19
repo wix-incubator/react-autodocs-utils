@@ -27,6 +27,7 @@ const metadataMock = {
 };
 
 const readmeMock = '# Hello readme!';
+const readmeApiMock = '# Hello API!';
 const readmeAccessibilityMock = '# Hello Accessiblity!';
 const readmeTestkitMock = '# Hello Testkit!';
 
@@ -44,12 +45,13 @@ describe('gatherAll', () => {
       });
     });
 
-    describe('which is folder with index.js, README.md, README.accessibility.md and README.testkit.md', () => {
+    describe('which is folder with index.js, README.md, README.api.md, README.accessibility.md and README.testkit.md', () => {
       it('should resolve with component metadata', () => {
         fs.__setFS({
           'component-folder': {
             'index.js': componentSourceMock,
             'readme.md': readmeMock,
+            'readme.api.md': readmeApiMock,
             'readme.accessibility.md': readmeAccessibilityMock,
             'readme.testkit.md': readmeTestkitMock,
           },
@@ -59,6 +61,7 @@ describe('gatherAll', () => {
           ...metadataMock,
           displayName: 'component',
           readme: readmeMock,
+          readmeApi: readmeApiMock,
           readmeAccessibility: readmeAccessibilityMock,
           readmeTestkit: readmeTestkitMock,
           drivers: [],
@@ -72,6 +75,7 @@ describe('gatherAll', () => {
           'component-folder': {
             'index.js': componentSourceMock,
             'README.md': readmeMock,
+            'readme.API.md': readmeApiMock,
             'readme.accessibility.md': readmeAccessibilityMock,
             'README.testkit.md': readmeTestkitMock,
           },
@@ -81,6 +85,7 @@ describe('gatherAll', () => {
           ...metadataMock,
           displayName: 'component',
           readme: readmeMock,
+          readmeApi: readmeApiMock,
           readmeAccessibility: readmeAccessibilityMock,
           readmeTestkit: readmeTestkitMock,
           drivers: [],
@@ -135,6 +140,7 @@ describe('gatherAll', () => {
             },
           },
           readme: '',
+          readmeApi: '',
           readmeAccessibility: '',
           readmeTestkit: '',
           drivers: [],
@@ -155,6 +161,7 @@ describe('gatherAll', () => {
             `,
 
             'readme.md': readmeMock,
+            'readme.api.md': readmeApiMock,
             'readme.accessibility.md': readmeAccessibilityMock,
             'readme.testkit.md': readmeTestkitMock,
           },
@@ -175,6 +182,7 @@ describe('gatherAll', () => {
           ...metadataMock,
           displayName: 'component',
           readme: readmeMock,
+          readmeApi: readmeApiMock,
           readmeAccessibility: readmeAccessibilityMock,
           readmeTestkit: readmeTestkitMock,
           drivers: [],
@@ -201,6 +209,7 @@ describe('gatherAll', () => {
                   }`,
 
                 'readme.md': readmeMock,
+                'readme.api.md': readmeApiMock,
                 'readme.accessibility.md': readmeAccessibilityMock,
                 'readme.testkit.md': readmeTestkitMock,
               },
@@ -258,6 +267,7 @@ describe('gatherAll', () => {
             },
           },
           readme: readmeMock,
+          readmeApi: readmeApiMock,
           readmeAccessibility: readmeAccessibilityMock,
           readmeTestkit: readmeTestkitMock,
           drivers: [],
@@ -270,6 +280,7 @@ describe('gatherAll', () => {
         fs.__setFS({
           'index.js': componentSourceMock,
           'readme.md': readmeMock,
+          'readme.api.md': readmeApiMock,
           'readme.accessibility.md': readmeAccessibilityMock,
           'readme.testkit.md': readmeTestkitMock,
         });
@@ -278,6 +289,7 @@ describe('gatherAll', () => {
           ...metadataMock,
           displayName: 'component',
           readme: readmeMock,
+          readmeApi: readmeApiMock,
           readmeAccessibility: readmeAccessibilityMock,
           readmeTestkit: readmeTestkitMock,
           drivers: [],
