@@ -8,6 +8,7 @@ const parse = source =>
       'typescript',
       'classProperties',
       'objectRestSpread',
+      'dynamicImport',
     ],
     sourceType: 'module',
   });
