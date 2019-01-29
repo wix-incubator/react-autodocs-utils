@@ -407,6 +407,25 @@ describe('metadataParser()', () => {
         });
       });
     });
+
+    describe('with source containing dynamic imports', () => {
+      it('should not fail parsing', () => {
+        fs.__setFS({
+          'index.js': `import React from 'react';
+            /** component description */
+            class ILikeWaffles extends React.Component {}
+            ILikeWaffles.compoundComponent = () => import('./path');
+            export default ILikeWaffles;`,
+        });
+
+        return expect(metadataParser('index.js')).resolves.toEqual({
+          ...rootMock,
+          description: 'component description',
+          displayName: 'ILikeWaffles',
+          methods: [expect.objectContaining({ name: 'compoundComponent' })],
+        });
+      });
+    });
   });
 
   describe('given component importing from other modules', () => {
