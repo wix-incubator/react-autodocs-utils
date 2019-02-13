@@ -23,13 +23,9 @@ describe('pathFinder()', () => {
   });
 
   describe('given incomplete story config', () => {
-    it('should fail with error', () => {
+    it('should return null', () => {
       const source = 'export default { sections: [] };';
-      return expect(pathFinder(source)).rejects.toEqual(
-        new Error(
-          'ERROR: unable to resolve component path. Ensure exported story config has `componentPath` property with correct relative path to component implementation'
-        )
-      );
+      return expect(pathFinder(source)).resolves.null;
     });
   });
 
