@@ -10,14 +10,12 @@ const print = require('../parser/print');
 const builders = recast.types.builders;
 
 const metadataMerger = source => metadata =>
-  new Promise(
-    (resolve, reject) =>
-      source && metadata
-        ? resolve(parse(source))
-        : reject(
-            'ERROR: unable to merge `metadata` into exported story config, ensure `source` & `metadata` are defined'
-          )
+  new Promise((resolve, reject) =>
+    source && metadata
+      ? resolve(parse(source))
+      : reject('ERROR: unable to merge `metadata` into exported story config, ensure `source` & `metadata` are defined')
   ).then(ast => {
+    metadata = Object.keys(metadata).length ? metadata : { props: {} };
     const metadataAST = parse(`(${JSON.stringify(metadata)})`);
 
     let metadataProperties;

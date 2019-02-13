@@ -56,4 +56,26 @@ export default config;`;
       return expect(metadataMerger(source)(metadata)).resolves.toEqual(expectation);
     });
   });
+
+  describe('when metadata is provided empty object', () => {
+    it('should add props key', () => {
+      const source = `
+        const config = { a: 1, b: { c: 2 } };
+        export default config;
+      `;
+      const metadata = {};
+      const expectation = `const config = {
+  a: 1,
+  b: {
+    c: 2
+  },
+  _metadata: {
+    "props": {}
+  }
+};
+export default config;`;
+
+      return expect(metadataMerger(source)(metadata)).resolves.toEqual(expectation);
+    });
+  });
 });

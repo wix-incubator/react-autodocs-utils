@@ -18,20 +18,16 @@ const pathFinder = (source = '') => {
         const declaration = path.node.declaration;
 
         if (types.isObjectExpression(declaration)) {
-          const componentPath = extractKeyFromObject(declaration)('componentPath');
+          const getValue = key => extractKeyFromObject(declaration)(key);
+          const componentPath = getValue('componentPath');
 
           if (componentPath) {
-            resolve(componentPath.value.value);
-            return false;
+            return resolve(componentPath.value.value);
           } else {
-            const componentReference = get(extractKeyFromObject(declaration)('component'))('value.name');
+            const componentReference = get(getValue('component'))('value.name');
 
             if (!componentReference) {
-              return reject(
-                new Error(
-                  'ERROR: unable to resolve component path. Ensure exported story config has `componentPath` property with correct relative path to component implementation'
-                )
-              );
+              return resolve(null);
             }
 
             visit(ast)({
