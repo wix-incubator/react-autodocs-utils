@@ -148,6 +148,67 @@ describe('gatherAll', () => {
       });
     });
 
+    describe('which is folder with component importing from non direct node_modules', () => {
+      it('should resolve with component metadata', () => {
+        fs.__setFS({
+          library: {
+            src: {
+              components: {
+                Badge: {
+                  'index.js': `import * as React from 'react';
+                  import {Badge as CoreBadge} from 'wix-ui-core/Badge';
+                  const component = () => <div/>;
+                  component.propTypes = {
+                    ...CoreBadge.propTypes,
+                  };
+                  export default component;
+                  `,
+                },
+              },
+            },
+
+            node_modules: {
+              unrelated_module: {}
+            },
+          },
+
+          node_modules: {
+            'wix-ui-core': {
+              'Badge.js': "module.exports = require('./dist/src/components/Badge');",
+
+              src: {
+                components: {
+                  Badge: {
+                    'index.js': componentSourceMock,
+                  },
+                },
+              },
+            },
+          },
+        });
+
+        return expect(gatherAll('library/src/components/Badge')).resolves.toEqual({
+          description: '',
+          methods: [],
+          displayName: 'component',
+          props: {
+            test: {
+              description: '',
+              required: true,
+              type: {
+                name: 'string',
+              },
+            },
+          },
+          readme: '',
+          readmeApi: '',
+          readmeAccessibility: '',
+          readmeTestkit: '',
+          drivers: [],
+        });
+      });
+    });
+
     describe('which is folder with components of various extensions', () => {
       it('should resolve with component metadata', () => {
         fs.__setFS({
