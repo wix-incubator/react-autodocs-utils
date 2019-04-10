@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.4.3] - 2019-04-10
+### Fixed
+- better resolve node_modules [c866860f](https://github.com/wix/react-autodocs-utils/commit/c866860f9bb96d1014a1d4679d51473267df8dce)
+
 ## [3.4.2] - 2019-02-13
 ### Changed
 - allow  `pathFinder` to not include `componentPath` [#16](https://github.com/wix/react-autodocs-utils/pull/16)
