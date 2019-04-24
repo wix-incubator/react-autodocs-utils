@@ -426,6 +426,54 @@ describe('metadataParser()', () => {
         });
       });
     });
+
+    describe('with jsdoc descriptions', () => {
+      it('should add `tags` property to prop with jsdoc annotations', () => {
+        fs.__setFS({
+          'with-jsdoc.js': `import React from 'react';
+              import PropTypes from 'prop-types';
+              /** component description */
+              const deprecationIsMyMedication = () => <div></div>;
+              deprecationIsMyMedication.propTypes = {
+                /** deprecated prop comment
+                 * @deprecated
+                 * */
+                deprecatedProp: PropTypes.bool,
+
+                /** deprecated with text
+                 * @deprecated since forever
+                 * */
+                deprecatedWithText: PropTypes.string.isRequired,
+              };
+              export default deprecationIsMyMedication;
+              `,
+        });
+
+        return expect(metadataParser('with-jsdoc.js')).resolves.toEqual({
+          description: 'component description',
+          displayName: 'deprecationIsMyMedication',
+          methods: [],
+          props: {
+            deprecatedProp: {
+              description: 'deprecated prop comment',
+              required: false,
+              type: {
+                name: 'bool',
+              },
+              tags: [{ title: 'deprecated', description: null }],
+            },
+            deprecatedWithText: {
+              description: 'deprecated with text',
+              required: true,
+              type: {
+                name: 'string',
+              },
+              tags: [{ title: 'deprecated', description: 'since forever' }],
+            },
+          },
+        });
+      });
+    });
   });
 
   describe('given component importing from other modules', () => {
