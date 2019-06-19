@@ -10,14 +10,15 @@ describe('given component written in typescript', () => {
     expect(metadataParser(fixturePath('simple.ts'))).resolves.toEqual({
       description: 'This is the component',
       displayName: 'Component',
+      methods: [],
       props: {
-        text: {
+        text: expect.objectContaining({
           name: 'text',
           defaultValue: null,
           required: false,
           description: 'this is a text prop',
           type: { name: 'string' },
-        },
+        }),
       },
     }));
 
@@ -25,21 +26,22 @@ describe('given component written in typescript', () => {
     expect(metadataParser(fixturePath('heading.tsx'))).resolves.toEqual({
       description: '',
       displayName: 'Heading',
+      methods: [],
       props: {
-        skin: {
+        skin: expect.objectContaining({
           name: 'skin',
           defaultValue: { value: 'dark' },
           required: false,
           description: 'skin color of the heading',
           type: { name: 'Skin' },
-        },
-        appearance: {
+        }),
+        appearance: expect.objectContaining({
           name: 'appearance',
           defaultValue: { value: 'H1' },
           required: false,
           description: 'typography of the heading',
           type: { name: 'Appearance' },
-        },
+        }),
       },
     }));
 });
