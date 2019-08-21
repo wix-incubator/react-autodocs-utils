@@ -254,6 +254,20 @@ describe('followExports()', () => {
       });
     });
 
+    describe('which has multiple exports including default one', () => {
+      it('should stop following exports and return current source', () => {
+        const source = `
+          export { something } from './constants.js';
+          export default 1;
+        `;
+
+        return expect(followExports(source, '')).resolves.toEqual({
+          source,
+          path: '',
+        });
+      });
+    });
+
     describe('which has `export default Identifier`', () => {
       it('should return source of that export', () => {
         const source = `

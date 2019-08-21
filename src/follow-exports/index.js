@@ -17,8 +17,8 @@ const extractPath = source =>
     const ast = parse(source);
 
     const exportDeclarations = ast.program.body.filter(node =>
-      ['ExportDeclaration', 'ExportNamedDeclaration', 'ExportAllDeclaration'].some(checker =>
-        namedTypes[checker].check(node)
+      ['ExportDeclaration', 'ExportNamedDeclaration', 'ExportAllDeclaration', 'ExportDefaultDeclaration'].some(
+        checker => namedTypes[checker].check(node)
       )
     );
 
@@ -114,15 +114,14 @@ const extractPath = source =>
 
 // followExports (source: string, path: string) => Promise<{source: String, path: String}>
 const followExports = (source, path = '') =>
-  extractPath(source, path).then(
-    extractedPath =>
-      extractedPath
-        ? resolvePath(path, extractedPath).then(resolvedPath =>
-            readFile(resolvedPath)
-              .then(({ source, path }) => followExports(source, path))
-              .catch(e => console.log(`ERROR: unable to read ${resolvedPath}`, e))
-          )
-        : { source, path }
+  extractPath(source, path).then(extractedPath =>
+    extractedPath
+      ? resolvePath(path, extractedPath).then(resolvedPath =>
+          readFile(resolvedPath)
+            .then(({ source, path }) => followExports(source, path))
+            .catch(e => console.log(`ERROR: unable to read ${resolvedPath}`, e))
+        )
+      : { source, path }
   );
 
 module.exports = followExports;
