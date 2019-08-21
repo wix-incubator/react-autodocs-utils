@@ -269,7 +269,21 @@ describe('followExports()', () => {
     });
 
     describe('which has `export default Identifier`', () => {
-      it('should return source of that export', () => {
+      it('should return source of current file when Identifier is declared', () => {
+        const source = `
+          import { Component as SomethingElse } from 'shouldnt-go-here';
+          export { something } from 'shouldnt-go-here';
+          class Component {};
+          export default Component;
+        `;
+
+        return expect(followExports(source, '')).resolves.toEqual({
+          path: '',
+          source,
+        });
+      });
+
+      it('should return source of exported Identifier', () => {
         const source = `
           import Component from \'./Component\';
           export default Component;

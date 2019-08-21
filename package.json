@@ -30,6 +30,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/react": "^16.3.11",
+    "cista": "0.0.3",
     "jest": "^24.8.0"
   },
   "dependencies": {

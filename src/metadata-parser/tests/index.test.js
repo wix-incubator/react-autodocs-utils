@@ -1,9 +1,7 @@
 /* global Promise describe it expect jest afterEach beforeAll afterAll */
 
 const metadataParser = require('../');
-
-jest.mock('fs');
-const fs = require('fs');
+const cista = require('cista');
 
 const rootMock = {
   description: '',
@@ -23,31 +21,31 @@ describe('metadataParser()', () => {
     describe('with component source', () => {
       describe('that has no useful data', () => {
         it('should return initial object for functional component', () => {
-          fs.__setFS({
-            'simple-functional.js': `import React from 'react';
+          const fakeFs = cista({
+            'simple-functional.js': `import React from "react";
               export default () => <div>Hello World!</div>;`,
           });
 
-          return expect(metadataParser('simple-functional.js')).resolves.toEqual(rootMock);
+          return expect(metadataParser(fakeFs.dir + '/simple-functional.js')).resolves.toEqual(rootMock);
         });
 
         it('should return initial object for class component', () => {
-          fs.__setFS({
-            'simple-class.js': `import React from 'react';
+          const fakeFs = cista({
+            'simple-class.js': `import React from "react";
               export default class extends React.Component {
                 render() { return <div></div>; }
               }`,
           });
 
-          return expect(metadataParser('simple-class.js')).resolves.toEqual({ props: {} });
+          return expect(metadataParser(fakeFs.dir + '/simple-class.js')).resolves.toEqual({ props: {} });
         });
       });
 
       describe('that has props', () => {
         it('should return correct object for functional component', () => {
-          fs.__setFS({
-            'functional-with-props.js': `import React from 'react';
-              import PropTypes from 'prop-types';
+          const fakeFs = cista({
+            'functional-with-props.js': `import React from "react";
+              import PropTypes from "prop-types";
               const component = () => <div></div>;
               component.propTypes = {
                 /** hello comment */
@@ -59,13 +57,13 @@ describe('metadataParser()', () => {
                 /** Mr. Deez
                 *  Nuts
                 *  */
-                nuts: PropTypes.oneOf(['deez', 'deeez'])
+                nuts: PropTypes.oneOf(["deez", "deeez"])
               };
               export default component;
               `,
           });
 
-          return expect(metadataParser('functional-with-props.js')).resolves.toEqual({
+          return expect(metadataParser(fakeFs.dir + '/functional-with-props.js')).resolves.toEqual({
             description: '',
             methods: [],
             displayName: 'component',
@@ -87,7 +85,7 @@ describe('metadataParser()', () => {
                 required: false,
                 type: {
                   name: 'enum',
-                  value: [{ computed: false, value: "'deez'" }, { computed: false, value: "'deeez'" }],
+                  value: [{ computed: false, value: '"deez"' }, { computed: false, value: '"deeez"' }],
                 },
               },
             },
@@ -95,9 +93,9 @@ describe('metadataParser()', () => {
         });
 
         it('should return correct object for class component', () => {
-          fs.__setFS({
-            'class-with-props.js': `import React from 'react';
-              import PropTypes from 'prop-types';
+          const fakeFs = cista({
+            'class-with-props.js': `import React from "react";
+              import PropTypes from "prop-types";
               export default class Component extends React.Component {
                 static propTypes = {
                   /** hello comment */
@@ -109,17 +107,17 @@ describe('metadataParser()', () => {
                   /** Mr. Deez
                   *  Nuts
                   *  */
-                  nuts: PropTypes.oneOf(['deez', 'deeez'])
+                  nuts: PropTypes.oneOf(["deez", "deeez"])
                 };
 
                 render() {
-                  return '';
+                  return "";
                 }
               }
               `,
           });
 
-          return expect(metadataParser('class-with-props.js')).resolves.toEqual({
+          return expect(metadataParser(fakeFs.dir + '/class-with-props.js')).resolves.toEqual({
             description: '',
             methods: [],
             displayName: 'Component',
@@ -141,7 +139,7 @@ describe('metadataParser()', () => {
                 required: false,
                 type: {
                   name: 'enum',
-                  value: [{ computed: false, value: "'deez'" }, { computed: false, value: "'deeez'" }],
+                  value: [{ computed: false, value: '"deez"' }, { computed: false, value: '"deeez"' }],
                 },
               },
             },
@@ -151,11 +149,11 @@ describe('metadataParser()', () => {
 
       describe('that has spread props', () => {
         it('should return correct object for functional component', () => {
-          fs.__setFS({
-            'spread-functional.js': `import React from 'react';
-              import PropTypes from 'prop-types';
-              import moreProps from './more-props.js';
-              import evenMoreProps from './even-more-props.js';
+          const fakeFs = cista({
+            'spread-functional.js': `import React from "react";
+              import PropTypes from "prop-types";
+              import moreProps from "./more-props.js";
+              import evenMoreProps from "./even-more-props.js";
               const component = () => <div>Hello World!</div>;
               component.propTypes = {
                   ...moreProps.propTypes,
@@ -169,8 +167,8 @@ describe('metadataParser()', () => {
               `,
 
             'more-props.js': `
-              import React from 'react';
-              import PropTypes from 'prop-types';
+              import React from "react";
+              import PropTypes from "prop-types";
               const component = ({propFromAnotherFile}) => <div></div>;
               component.propTypes = {
                 propFromAnotherFile: PropTypes.bool.isRequired
@@ -178,9 +176,9 @@ describe('metadataParser()', () => {
               export default component;
               `,
 
-            'even-more-props.js': `import React from 'react';
-              import PropTypes from 'prop-types';
-              import goDeeperProps from './go-deeper-props.js';
+            'even-more-props.js': `import React from "react";
+              import PropTypes from "prop-types";
+              import goDeeperProps from "./go-deeper-props.js";
               const component = ({ propFromYetAnotherFile }) => <div></div>;
               component.propTypes = {
                 ...goDeeperProps.propTypes,
@@ -189,8 +187,8 @@ describe('metadataParser()', () => {
               export default component;
               `,
 
-            'go-deeper-props.js': `import React from 'react';
-              import PropTypes from 'prop-types';
+            'go-deeper-props.js': `import React from "react";
+              import PropTypes from "prop-types";
               const component = ({ propFromDeep }) => <div></div>;
               component.propTypes = {
                 propFromDeep: PropTypes.string.isRequired
@@ -199,7 +197,7 @@ describe('metadataParser()', () => {
               `,
           });
 
-          return expect(metadataParser('spread-functional.js')).resolves.toEqual({
+          return expect(metadataParser(fakeFs.dir + '/spread-functional.js')).resolves.toEqual({
             ...rootMock,
             displayName: 'component',
             props: {
@@ -249,15 +247,15 @@ describe('metadataParser()', () => {
 
     describe('with `export default from ...`', () => {
       it('should follow that export', () => {
-        fs.__setFS({
-          'index.js': "export {default} from './component.js';",
+        const fakeFs = cista({
+          'index.js': 'export {default} from "./component.js";',
 
           'component.js': `/** I am the one who props */
              const component = () => <div/>;
              export default component;`,
         });
 
-        return expect(metadataParser('index.js')).resolves.toEqual({
+        return expect(metadataParser(fakeFs.dir + '/index.js')).resolves.toEqual({
           ...rootMock,
           displayName: 'component',
           description: 'I am the one who props',
@@ -265,22 +263,15 @@ describe('metadataParser()', () => {
       });
 
       it('should follow many nested exports', () => {
-        fs.__setFS({
-          'index.js': "export {default} from './sibling.js'",
-
-          'sibling.js': "export {default} from './nested/deep/component.js'",
-
-          nested: {
-            deep: {
-              'component.js': "export {default} from '../component.js'",
-            },
-            'component.js': `/** You got me */
-              const component = () => <div/>;
-              export default component;`,
-          },
+        const fakeFs = cista({
+          'index.js': 'export {default} from "./sibling.js"',
+          'sibling.js': 'export {default} from "./nested/deep/component.js"',
+          'nested/deep/component.js': 'export {default} from "../component.js"',
+          'nested/component.js':
+            '/** You got me */\n              const component = () => <div/>;\n              export default component;',
         });
 
-        return expect(metadataParser('index.js')).resolves.toEqual({
+        return expect(metadataParser(fakeFs.dir + '/index.js')).resolves.toEqual({
           ...rootMock,
           displayName: 'component',
           description: 'You got me',
@@ -288,33 +279,15 @@ describe('metadataParser()', () => {
       });
 
       it('should follow a mix of proxy modules and components', () => {
-        fs.__setFS({
-          MyComponent: {
-            'index.js': "export {default} from './implementation';",
-            'implementation.js': `import React from 'react';
-              import Proxied from '../AnotherComponent/implementation';
-              export default class MyComponent extends React.Component {
-                static propTypes = {
-                  ...Proxied.propTypes
-                }
-                render() {
-                  return (<div></div>);
-                }
-              }
-              `,
-          },
-
-          AnotherComponent: {
-            'implementation.js': `import PropTypes from 'prop-types';
-              const component = () => <div/>;
-              component.propTypes = {
-                exportedProp: PropTypes.string.isRequired
-              };
-              export default component;`,
-          },
+        const fakeFs = cista({
+          'MyComponent/index.js': 'export {default} from "./implementation";',
+          'MyComponent/implementation.js':
+            'import React from "react";\n              import Proxied from "../AnotherComponent/implementation";\n              export default class MyComponent extends React.Component {\n                static propTypes = {\n                  ...Proxied.propTypes\n                }\n                render() {\n                  return (<div></div>);\n                }\n              }\n              ',
+          'AnotherComponent/implementation.js':
+            'import PropTypes from "prop-types";\n              const component = () => <div/>;\n              component.propTypes = {\n                exportedProp: PropTypes.string.isRequired\n              };\n              export default component;',
         });
 
-        return expect(metadataParser('MyComponent/index.js')).resolves.toEqual({
+        return expect(metadataParser(fakeFs.dir + '/MyComponent/index.js')).resolves.toEqual({
           description: '',
           displayName: 'MyComponent',
           methods: [],
@@ -333,39 +306,37 @@ describe('metadataParser()', () => {
 
     describe("with `module.exports = require('path')`", () => {
       it('should follow that export', () => {
-        fs.__setFS({
-          'index.js': "module.exports = require('./component')",
+        const fakeFs = cista({
+          'index.js': 'module.exports = require("./component")',
           'component.js': `
-          import React from 'react';
-          /** i'm looking for you */
-          const component = () => <div/>;
-          export default component;
+            import React from "react";
+            /** looking for you */
+            const component = () => <div/>;
+            export default component;
           `,
         });
 
-        return expect(metadataParser('index.js')).resolves.toEqual({
+        return expect(metadataParser(fakeFs.dir + '/index.js')).resolves.toEqual({
           ...rootMock,
           displayName: 'component',
-          description: "i'm looking for you",
+          description: 'looking for you',
         });
       });
 
       it('should remove `dist/` from path', () => {
         // TODO: yeah well removing `dist` is quite an assumption
-        fs.__setFS({
-          'index.js': "module.exports = require('./dist/src/component')",
+        const fakeFs = cista({
+          'index.js': 'module.exports = require("./dist/src/component")',
 
-          src: {
-            'component.jsx': `
-              import React from 'react';
-              /** what a lovely day */
-              const component = () => <div/>;
-              export default component;
-              `,
-          },
+          'src/component.jsx': `
+            import React from "react";
+            /** what a lovely day */
+            const component = () => <div/>;
+            export default component;
+          `,
         });
 
-        return expect(metadataParser('index.js')).resolves.toEqual({
+        return expect(metadataParser(fakeFs.dir + '/index.js')).resolves.toEqual({
           ...rootMock,
           displayName: 'component',
           description: 'what a lovely day',
@@ -375,14 +346,14 @@ describe('metadataParser()', () => {
 
     describe('with non `index.js` entry', () => {
       it('should resolve entry file correctly', () => {
-        fs.__setFS({
-          'index.js': "export {default} from './Component'",
-          'Component.jsx': `import React from 'react';
+        const fakeFs = cista({
+          'index.js': 'export {default} from "./Component"',
+          'Component.jsx': `import React from "react";
             /** jsx component */
             export default () => <div/>;`,
         });
 
-        return expect(metadataParser('index.js')).resolves.toEqual({
+        return expect(metadataParser(fakeFs.dir + '/index.js')).resolves.toEqual({
           ...rootMock,
           description: 'jsx component',
         });
@@ -391,16 +362,16 @@ describe('metadataParser()', () => {
 
     describe('with source containing decorators', () => {
       it('should not fail parsing', () => {
-        fs.__setFS({
-          'index.js': `import React from 'react';
+        const fakeFs = cista({
+          'index.js': `import React from "react";
             /** jsx component */
-            @Inject('formState')
+            @Inject("formState")
             @Observer
             class ILikeTurtles extends React.Component {}
             export default ILikeTurtles;`,
         });
 
-        return expect(metadataParser('index.js')).resolves.toEqual({
+        return expect(metadataParser(fakeFs.dir + '/index.js')).resolves.toEqual({
           ...rootMock,
           description: 'jsx component',
           displayName: 'ILikeTurtles',
@@ -410,15 +381,15 @@ describe('metadataParser()', () => {
 
     describe('with source containing dynamic imports', () => {
       it('should not fail parsing', () => {
-        fs.__setFS({
-          'index.js': `import React from 'react';
+        const fakeFs = cista({
+          'index.js': `import React from "react";
             /** component description */
             class ILikeWaffles extends React.Component {}
-            ILikeWaffles.compoundComponent = () => import('./path');
+            ILikeWaffles.compoundComponent = () => import("./path");
             export default ILikeWaffles;`,
         });
 
-        return expect(metadataParser('index.js')).resolves.toEqual({
+        return expect(metadataParser(fakeFs.dir + '/index.js')).resolves.toEqual({
           ...rootMock,
           description: 'component description',
           displayName: 'ILikeWaffles',
@@ -429,9 +400,9 @@ describe('metadataParser()', () => {
 
     describe('with jsdoc descriptions', () => {
       it('should add `tags` property to prop with jsdoc annotations', () => {
-        fs.__setFS({
-          'with-jsdoc.js': `import React from 'react';
-              import PropTypes from 'prop-types';
+        const fakeFs = cista({
+          'with-jsdoc.js': `import React from "react";
+              import PropTypes from "prop-types";
               /** component description */
               const deprecationIsMyMedication = () => <div></div>;
               deprecationIsMyMedication.propTypes = {
@@ -449,7 +420,7 @@ describe('metadataParser()', () => {
               `,
         });
 
-        return expect(metadataParser('with-jsdoc.js')).resolves.toEqual({
+        return expect(metadataParser(fakeFs.dir + '/with-jsdoc.js')).resolves.toEqual({
           description: 'component description',
           displayName: 'deprecationIsMyMedication',
           methods: [],
@@ -478,72 +449,44 @@ describe('metadataParser()', () => {
 
   describe('given component importing from other modules', () => {
     it('should resolve node_modules path', () => {
-      fs.__setFS({
-        MyComponent: {
-          'index.js': "export {default} from 'wix-ui-backoffice/Component'",
-        },
-
-        node_modules: {
-          'wix-ui-backoffice': {
-            Component: {
-              'index.js': "export {default} from './Component.js'",
-
-              'Component.js': `import React from 'react';
-                /** backoffice component */
-                export default () => <div/>;`,
-            },
-          },
-        },
+      const fakeFs = cista({
+        'MyComponent/index.js': `export {default} from "wix-ui-backoffice/Component"`,
+        'node_modules/wix-ui-backoffice/Component/index.js': `export {default} from "./Component.js"`,
+        'node_modules/wix-ui-backoffice/Component/Component.js': `import React from "react";\n                /** backoffice component */\n                export default () => <div/>;`,
       });
 
-      return expect(metadataParser('MyComponent/index.js')).resolves.toEqual({
+      return expect(metadataParser(fakeFs.dir + '/MyComponent/index.js')).resolves.toEqual({
         ...rootMock,
         description: 'backoffice component',
       });
     });
 
     it('should resolve deep node_modules path', () => {
-      fs.__setFS({
-        MyComponent: {
-          'index.js': "export {default} from 'wix-ui-backoffice/Component'",
-        },
+      const fakeFs = cista({
+        'MyComponent/index.js': `export {default} from "wix-ui-backoffice/Component"`,
 
-        node_modules: {
-          'wix-ui-backoffice': {
-            Component: {
-              'index.js': "export {default} from '../src/components/Component'",
-            },
+        'node_modules/wix-ui-backoffice/Component/index.js': `export {default} from "../src/components/Component"`,
 
-            src: {
-              components: {
-                'Component.js': `import React from 'react';
-                  import CoreProps from 'wix-ui-core/Component';
-                  /** backoffice component */
-                  const component = () => <div/>;
-                  component.propTypes = {
-                    ...CoreProps
-                  }
-                  export default component;`,
-              },
-            },
+        'node_modules/wix-ui-backoffice/src/components/Component.js': `import React from "react";
+          import CoreProps from "wix-ui-core/Component";
+          /** backoffice component */
+          const component = () => <div/>;
+          component.propTypes = {
+            ...CoreProps
+          }
+          export default component;`,
 
-            node_modules: {
-              'wix-ui-core': {
-                'Component.jsx': `import React from 'react'
-                import PropTypes from 'prop-types';
-                const component = () => <div/>;
-                component.propTypes = {
-                  /** hello from core */
-                  coreProp: PropTypes.func
-                };
-                export default component;`,
-              },
-            },
-          },
-        },
+        'node_modules/wix-ui-backoffice/node_modules/wix-ui-core/Component.jsx': `import React from "react"
+            import PropTypes from "prop-types";
+          const component = () => <div/>;
+          component.propTypes = {
+            /** hello from core */
+            coreProp: PropTypes.func
+          };
+          export default component;`,
       });
 
-      return expect(metadataParser('MyComponent/index.js')).resolves.toEqual({
+      return expect(metadataParser(fakeFs.dir + '/MyComponent/index.js')).resolves.toEqual({
         description: 'backoffice component',
         methods: [],
         displayName: 'component',

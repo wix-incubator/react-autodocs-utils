@@ -1,7 +1,6 @@
 /* global jest describe it expect */
 
-jest.mock('fs');
-const fs = require('fs');
+const cista = require('cista');
 
 // this function was extracted from `metadataParser` which
 // has the functionality of `followProps` tested over there.
@@ -27,47 +26,38 @@ describe('followProps()', () => {
           }
         }`;
 
-      fs.__setFS({
-        src: {
-          Backoffice: {
-            Component: {
-              'index.js': entrySource,
-            },
-          },
+      const fakeFs = cista({
+        'src/Backoffice/Component/index.js': entrySource,
+        'src/OtherComponent/OtherComponent.js': `
+          import React from "react";
+          import PropTypes from "prop-types";
+          import OneUpComponent from "../OneUpComponent";
 
-          OtherComponent: {
-            'OtherComponent.js': `
-              import React from 'react';
-              import PropTypes from 'prop-types';
-              import OneUpComponent from '../OneUpComponent';
+          export default class Component extends React.Component {
+            static propTypes = {
+              ...OneUpComponent.propTypes,
+              link: PropTypes.string
+            };
 
-              export default class Component extends React.Component {
-                static propTypes = {
-                  ...OneUpComponent.propTypes,
-                  link: PropTypes.string
-                };
+            render() {
+              return (<div/>);
+            }
+          }`,
 
-                render() {
-                  return (<div/>);
-                }
-              }`,
-          },
-
-          OneUpComponent: {
-            'index.js': `
-              import React from 'react';
-              import PropTypes from 'prop-types';
-              const component = () => <div/>;
-              component.propTypes = {
-                veryDeep: PropTypes.bool.isRequired
-              }
-              export default component;
-            `,
-          },
-        },
+        'src/OneUpComponent/index.js': `
+          import React from "react";
+          import PropTypes from "prop-types";
+          const component = () => <div/>;
+          component.propTypes = {
+            veryDeep: PropTypes.bool.isRequired
+          }
+          export default component;
+        `,
       });
 
-      return expect(followProps({ source: entrySource, path: 'src/Backoffice/Component/index.js' })).resolves.toEqual({
+      return expect(
+        followProps({ source: entrySource, path: fakeFs.dir + '/src/Backoffice/Component/index.js' })
+      ).resolves.toEqual({
         description: '',
         displayName: 'EntryComponent',
         methods: [],
@@ -94,10 +84,9 @@ describe('followProps()', () => {
 
   describe('given component that spreads props from absolute node_modules dist path', () => {
     it('should remove `dist/` from path', () => {
-      const entrySource = `
-        import PropTypes from 'prop-types';
-        import React from 'react';
-        import OtherComponent from 'wix-ui-backoffice/dist/src/Component';
+      const entrySource = `import PropTypes from "prop-types";
+        import React from "react";
+        import OtherComponent from "wix-ui-backoffice/dist/src/Component";
 
         export default class EntryComponent extends React.Component {
           static propTypes = {
@@ -109,30 +98,24 @@ describe('followProps()', () => {
           }
         }`;
 
-      fs.__setFS({
+      const fakeFs = cista({
         index: entrySource,
-        node_modules: {
-          'wix-ui-backoffice': {
-            src: {
-              'Component.js': `
-                import PropTypes from 'prop-types';
-                import React from 'react';
+        'node_modules/wix-ui-backoffice/src/Component.js': `
+          import PropTypes from "prop-types";
+          import React from "react";
 
-                export default class Component extends React.Component {
-                  static propTypes = {
-                    theThing: PropTypes.bool.isRequired
-                  };
+          export default class Component extends React.Component {
+            static propTypes = {
+              theThing: PropTypes.bool.isRequired
+            };
 
-                  render() {
-                    return <div/>;
-                  }
-                }`,
-            },
-          },
-        },
+            render() {
+              return <div/>;
+            }
+          }`,
       });
 
-      return expect(followProps({ source: entrySource, path: '' })).resolves.toEqual({
+      return expect(followProps({ source: entrySource, path: fakeFs.dir + '/index' })).resolves.toEqual({
         description: '',
         displayName: 'EntryComponent',
         methods: [],
