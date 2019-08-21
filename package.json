@@ -33,9 +33,9 @@
     "jest": "^24.8.0"
   },
   "dependencies": {
-    "@babel/parser": "7.0.0",
-    "@babel/traverse": "7.0.0",
-    "@babel/types": "7.0.0",
+    "@babel/parser": "^7.5.5",
+    "@babel/traverse": "^7.5.5",
+    "@babel/types": "^7.5.5",
     "doctrine": "^3.0.0",
     "react-docgen": "^4.1.1",
     "react-docgen-typescript": "^1.12.5",
