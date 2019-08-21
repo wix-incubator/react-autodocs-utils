@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.1] - 2019-08-21
+### Fixed
+- `followExports` - stop following exports when `export default` found [5d66cc3](https://github.com/wix/react-autodocs-utils/commit/5d66cc3458270cb1a634b7519f34b47a20101880)
+
 ## [3.5.0] - 2019-04-24
 ### Added
 - add `tags` array to prop object with parsed jsdoc annotations [48f8b7ab](https://github.com/wix/react-autodocs-utils/commit/48f8b7abc2736efb454909f1ebc3f47f2acda9cf)
