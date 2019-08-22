@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
-/* eslint no-console:0 */
-
 const path = require('path');
 const fs = require('fs');
 const getExport = require('./get-export');
 const readFile = require('../read-file');
+const isDriver = require('./utils/is-driver');
 
 const main = async () => {
   const [, script, ...argv] = process.argv;
@@ -24,10 +23,7 @@ const main = async () => {
 };
 
 async function scan({ target, isDirectory, isDumpMode }) {
-  // prettier-ignore
-  const result = isDirectory
-    ?  await scanDir(target)
-    : [await scanFile(target)];
+  const result = isDirectory ? await scanDir(target) : [await scanFile(target)];
 
   if (isDumpMode) {
     console.log(JSON.stringify(result));
@@ -57,6 +53,7 @@ async function scanFiles(files, options) {
 async function scanFile(filePath, { basename = false } = {}) {
   const { source } = await readFile(filePath);
   const file = basename ? path.basename(filePath) : filePath;
+
   return getExport(source, undefined, path.dirname(file)).then(
     descriptor => ({ file, descriptor }),
     error => ({ file, error: error.stack ? error.stack.toString() : error })
@@ -65,6 +62,7 @@ async function scanFile(filePath, { basename = false } = {}) {
 
 function getFiles(dir, predicate = () => true) {
   const results = [];
+
   fs.readdirSync(dir).forEach(file => {
     const newPath = path.join(dir, file);
     const stat = fs.statSync(newPath);
@@ -72,15 +70,13 @@ function getFiles(dir, predicate = () => true) {
       results.push(...getFiles(newPath, predicate));
       return;
     }
+
     if (predicate(newPath)) {
       results.push(newPath);
     }
   });
-  return results;
-}
 
-function isDriver(path) {
-  return /\.driver\.(js|ts)x?$/.test(path);
+  return results;
 }
 
 function fail(file, error) {
