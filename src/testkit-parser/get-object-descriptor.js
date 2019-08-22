@@ -4,7 +4,6 @@ const findIdentifierNode = require('./utils/find-identifier-node');
 const getComments = require('./get-comments');
 const flatten = require('./utils/flatten');
 const getReturnValue = require('./utils/get-return-value');
-const notSupported = context => `not supported: ${context}`;
 const reduceToObject = require('./utils/reduce-to-object');
 
 const getArgument = param => {
@@ -25,7 +24,7 @@ const getArgument = param => {
     return { name: `...${param.argument.name}` };
   }
 
-  throw notSupported(`getArgument ${param.type}`);
+  throw `not supported: getArgument ${param.type}`;
 };
 
 const isFunction = node =>
@@ -36,20 +35,24 @@ const isFunction = node =>
 const isValue = node => [types.isBooleanLiteral, types.isNumericLiteral].some(checker => checker(node));
 
 const getObjectProperties = async ({ node, ast, cwd }) => {
-  const properties = await Promise.all(node.properties.map(async property => {
-    if (property.type === 'SpreadElement') {
-      const object = await reduceToObject({ 
-        ast: node.ast || ast,
-        cwd: node.cwd || cwd,
-        node: property.argument
-      });
-      return object.properties;
-    } else {
+  const properties = await Promise.all(
+    node.properties.map(async property => {
+      if (property.type === 'SpreadElement') {
+        const object = await reduceToObject({
+          ast: node.ast || ast,
+          cwd: node.cwd || cwd,
+          node: property.argument,
+        });
+
+        return object.properties;
+      }
+
       return property;
-    }
-  }));
+    })
+  );
+
   return flatten(properties);
-}
+};
 
 const getMemberProperty = async ({ node, ast, cwd }) => {
   const object = await reduceToObject({ node: node.object, ast, cwd });
@@ -61,14 +64,18 @@ const getMemberProperty = async ({ node, ast, cwd }) => {
 const createDescriptor = async ({ node, ast, cwd }) => {
   switch (true) {
     case isFunction(node):
-      const args = node.params.map(getArgument);
-      const type = 'function';
-      return { args, type };
+      return {
+        args: node.params.map(getArgument),
+        type: 'function',
+      };
 
     case types.isIdentifier(node):
       try {
-        const resolvedNode = await findIdentifierNode({ name: node.name, ast, cwd });
-        return createDescriptor({ node: resolvedNode, ast, cwd });
+        return createDescriptor({
+          node: await findIdentifierNode({ name: node.name, ast, cwd }),
+          ast,
+          cwd,
+        });
       } catch (e) {
         if (e instanceof ReferenceError) {
           // identifier is not declared - probably a function argument
@@ -76,6 +83,7 @@ const createDescriptor = async ({ node, ast, cwd }) => {
             type: 'unknown',
           };
         }
+
         throw e;
       }
 
@@ -86,9 +94,7 @@ const createDescriptor = async ({ node, ast, cwd }) => {
       };
 
     case isValue(node):
-      return {
-        type: 'value',
-      };
+      return { type: 'value' };
 
     case types.isCallExpression(node):
       return createDescriptor({
@@ -98,12 +104,16 @@ const createDescriptor = async ({ node, ast, cwd }) => {
       });
 
     case types.isMemberExpression(node):
-      const memberProperty = await getMemberProperty({ node: node, ast, cwd });
-      return createDescriptor({ node: memberProperty, ast, cwd });
+      return createDescriptor({
+        node: await getMemberProperty({ node: node, ast, cwd }),
+        ast,
+        cwd,
+      });
 
     case types.isLogicalExpression(node):
       return await createDescriptor({ node: node.right, ast, cwd });
   }
+
   throw `Cannot resolve arguments for ${node.type}`;
 };
 
@@ -112,6 +122,7 @@ const getPropertyDescriptor = async ({ node, ast, cwd }) => {
   const descriptor = await createDescriptor({ node: valueNode, ast, cwd });
   const comments = getComments(node);
   const name = node.key.name;
+
   return { name, ...descriptor, ...comments };
 };
 
@@ -123,8 +134,11 @@ const getSpreadDescriptor = async ({ node, ast, cwd }) => {
   switch (true) {
     case types.isIdentifier(node):
       try {
-        const resolvedNode = await reduceToObject({ node, ast, cwd });
-        return await getObjectDescriptor({ node: resolvedNode, ast, cwd });
+        return await getObjectDescriptor({
+          node: await reduceToObject({ node, ast, cwd }),
+          ast,
+          cwd,
+        });
       } catch (e) {
         return {
           name: node.name,
@@ -140,8 +154,12 @@ const getSpreadDescriptor = async ({ node, ast, cwd }) => {
       });
 
     case types.isMemberExpression(node):
-      const memberProperty = await getMemberProperty({ node: node, ast, cwd });
-      const propertyDescriptor = await createDescriptor({ node: memberProperty, ast, cwd });
+      const propertyDescriptor = await createDescriptor({
+        node: await getMemberProperty({ node: node, ast, cwd }),
+        ast,
+        cwd,
+      });
+
       return propertyDescriptor.props;
 
     default:
@@ -150,14 +168,14 @@ const getSpreadDescriptor = async ({ node, ast, cwd }) => {
 };
 
 const getObjectDescriptor = async ({ node, ast, cwd }) => {
-  const scopedAst =  node.ast || ast;
+  const scopedAst = node.ast || ast;
   const scopedCwd = node.cwd || cwd;
-  const methodPromises = node.properties.map(
-    node =>
-      types.isSpreadElement(node)
-        ? getSpreadDescriptor({ node: node.argument, ast: scopedAst, cwd: scopedCwd })
-        : getPropertyDescriptor({ node: node, ast: scopedAst, cwd: scopedCwd })
+  const methodPromises = node.properties.map(node =>
+    types.isSpreadElement(node)
+      ? getSpreadDescriptor({ node: node.argument, ast: scopedAst, cwd: scopedCwd })
+      : getPropertyDescriptor({ node: node, ast: scopedAst, cwd: scopedCwd })
   );
+
   return flatten(await Promise.all(methodPromises));
 };
 
