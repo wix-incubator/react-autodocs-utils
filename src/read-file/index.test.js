@@ -1,7 +1,6 @@
 /* global describe it expect jest */
 
-jest.mock('fs');
-const fs = require('fs');
+const cista = require('cista');
 
 const readFile = require('./');
 
@@ -9,13 +8,13 @@ describe('readFile', () => {
   describe('given existing path', () => {
     it('should resolve with file content', () => {
       const content = 'hello file content';
-      fs.__setFS({
+      const fakeFs = cista({
         'test.file': content,
       });
 
-      return expect(readFile('test.file')).resolves.toEqual({
+      return expect(readFile(fakeFs.dir + '/test.file')).resolves.toEqual({
         source: content,
-        path: 'test.file',
+        path: fakeFs.dir + '/test.file',
         isTypescript: false,
       });
     });
@@ -25,11 +24,11 @@ describe('readFile', () => {
       const tsFiles = ['index.ts', 'index.tsx', 'index.d.ts'];
       const allFiles = [...jsFiles, ...tsFiles];
 
-      fs.__setFS(allFiles.reduce((acc, path) => ({ ...acc, [path]: ' ' }), {}));
+      const fakeFs = cista(allFiles.reduce((acc, path) => ({ ...acc, [path]: ' ' }), {}));
 
       const expectFlag = isTypescript => files => files.map(() => expect.objectContaining({ isTypescript }));
 
-      return expect(Promise.all(allFiles.map(readFile))).resolves.toEqual([
+      return expect(Promise.all(allFiles.map(files => readFile(fakeFs.dir + '/' + files)))).resolves.toEqual([
         ...expectFlag(false)(jsFiles),
         ...expectFlag(true)(tsFiles),
       ]);
@@ -43,13 +42,13 @@ describe('readFile', () => {
   describe('given dotted suffix without extension', () => {
     it('should resolve with file content', () => {
       const content = 'hello file content';
-      fs.__setFS({
+      const fakeFs = cista({
         'test.file.js': content,
       });
 
-      return expect(readFile('test.file')).resolves.toEqual({
+      return expect(readFile(fakeFs.dir + '/test.file')).resolves.toEqual({
         source: content,
-        path: 'test.file.js',
+        path: fakeFs.dir + '/test.file.js',
         isTypescript: false,
       });
     });

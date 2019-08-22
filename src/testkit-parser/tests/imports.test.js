@@ -15,7 +15,7 @@ describe('import parsing', () => {
       files: {
         'driver.js': `export default () => ({
           method: arg => {}
-        })`
+        })`,
       },
     },
     {
@@ -154,16 +154,16 @@ describe('import parsing', () => {
       files: {
         node_modules: {
           library: {
-            'driver.js':`
+            'driver.js': `
             export const internalDriver = () => ({
               driver: {
                 method: arg => {}
               }
             });
-            `
-          }
-        }
-      }
+            `,
+          },
+        },
+      },
     },
     {
       spec: 'Multi-level imports',
@@ -183,7 +183,7 @@ describe('import parsing', () => {
                   driver: {...baseUniDriverFactory(base)}
                 };
               };
-            `
+            `,
           },
           libraryB: {
             'driver.js': `
@@ -192,10 +192,10 @@ describe('import parsing', () => {
                   method: (arg) => {}
                 };
               };
-            `
-          }
-        }
-      }
+            `,
+          },
+        },
+      },
     },
     {
       spec: 'relative path in node_modules',
@@ -213,11 +213,11 @@ describe('import parsing', () => {
                 driver: {
                   method: (arg) => {}
                 }
-              });`
-            }
-          }
-        }
-      }
+              });`,
+            },
+          },
+        },
+      },
     },
     {
       spec: 're-exported identifier',
@@ -235,11 +235,11 @@ describe('import parsing', () => {
                 driver: {
                   method: (arg) => {}
                 }
-              });`
-            }
-          }
-        }
-      }
+              });`,
+            },
+          },
+        },
+      },
     },
     {
       spec: 're-exported default as ExportNamedDeclaration',
@@ -255,8 +255,8 @@ describe('import parsing', () => {
               method: (arg) => {}
             }
           });
-        `
-      }
+        `,
+      },
     },
     {
       spec: 'imported identifiers in spread element',
@@ -280,9 +280,9 @@ describe('import parsing', () => {
                 method: (arg) => {}
               }
             });
-          `
-        }
-      }
+          `,
+        },
+      },
     },
     {
       spec: 'member expression with imported spread',
@@ -308,9 +308,9 @@ describe('import parsing', () => {
             export default () => ({
               method: (arg) => {}
             });
-          `
-        }
-      }
+          `,
+        },
+      },
     },
     {
       spec: 'imported member expression via named default export with internal spread',
@@ -338,10 +338,10 @@ describe('import parsing', () => {
               return { ...driver };
             };
             export default driverFactory;
-          `
-        }
-      }
-    }
+          `,
+        },
+      },
+    },
   ];
 
   const expected = [

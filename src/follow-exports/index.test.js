@@ -2,8 +2,7 @@
 
 const followExports = require('./');
 
-jest.mock('fs');
-const fs = require('fs');
+const cista = require('cista');
 
 describe('followExports()', () => {
   describe('given source', () => {
@@ -19,35 +18,28 @@ describe('followExports()', () => {
       it('should return source of that export', () => {
         const source = "module.exports = require('./index.js')";
 
-        fs.__setFS({
+        const fakeFs = cista({
           'index.js': 'hello',
         });
 
-        return expect(followExports(source, '')).resolves.toEqual({
+        return expect(followExports(source, fakeFs.dir)).resolves.toEqual({
           source: 'hello',
-          path: 'index.js',
+          path: fakeFs.dir + '/index.js',
         });
       });
 
       it('should return source of resolved file without exports', () => {
         const source = "export {default} from './file.js'";
 
-        fs.__setFS({
-          node_modules: {
-            'file.js': "export {default} from '../nested/deep/index.js'",
-          },
-
-          nested: {
-            deep: {
-              'index.js': "export {default} from '../sibling.js'",
-            },
-            'sibling.js': 'hello',
-          },
+        const fakeFs = cista({
+          'node_modules/file.js': 'export {default} from "../nested/deep/index.js"',
+          'nested/deep/index.js': 'export {default} from "../sibling.js"',
+          'nested/sibling.js': 'hello',
         });
 
-        return expect(followExports(source, 'node_modules')).resolves.toEqual({
+        return expect(followExports(source, fakeFs.dir + '/node_modules')).resolves.toEqual({
           source: 'hello',
-          path: 'nested/sibling.js',
+          path: fakeFs.dir + '/nested/sibling.js',
         });
       });
     });
@@ -69,19 +61,13 @@ describe('followExports()', () => {
             );
           `;
 
-        fs.__setFS({
-          'index.ts': source,
-
-          node_modules: {
-            'wix-ui-core': {
-              'Component.js': 'hello',
-            },
-          },
+        const fakeFs = cista({
+          'node_modules/wix-ui-core/Component.js': 'hello',
         });
 
-        return expect(followExports(source, '')).resolves.toEqual({
+        return expect(followExports(source, fakeFs.dir + '/root')).resolves.toEqual({
           source: 'hello',
-          path: 'node_modules/wix-ui-core/Component.js',
+          path: fakeFs.dir + '/node_modules/wix-ui-core/Component.js',
         });
       });
 
@@ -182,14 +168,14 @@ describe('followExports()', () => {
             export const Label = createHOC(CoreComponent);
         `;
 
-        fs.__setFS({
+        const fakeFs = cista({
           'index.js': source,
           'Label.js': 'hello',
         });
 
-        return expect(followExports(source, '')).resolves.toEqual({
+        return expect(followExports(source, fakeFs.dir)).resolves.toEqual({
           source: 'hello',
-          path: 'Label.js',
+          path: fakeFs.dir + '/Label.js',
         });
       });
     });
@@ -201,14 +187,14 @@ describe('followExports()', () => {
           export const Label = createHOC(withFocusable(CoreComponent));
         `;
 
-        fs.__setFS({
+        const fakeFs = cista({
           'index.js': source,
           'Badge.js': 'hello',
         });
 
-        return expect(followExports(source, '')).resolves.toEqual({
+        return expect(followExports(source, fakeFs.dir)).resolves.toEqual({
           source: 'hello',
-          path: 'Badge.js',
+          path: fakeFs.dir + '/Badge.js',
         });
       });
     });
@@ -217,24 +203,17 @@ describe('followExports()', () => {
       it('should return source of component', () => {
         const source = "module.exports = require('./dist/src/components/component');";
 
-        fs.__setFS({
+        const fakeFs = cista({
           'index.js': source,
-
-          src: {
-            components: {
-              component: {
-                'index.js': `
-                  import Component from './component.js';
-                  export default withClasses(Component, styles)`,
-                'component.js': 'hello',
-              },
-            },
-          },
+          'src/components/component/index.js': `
+            import Component from "./component.js";
+            export default withClasses(Component, styles)`,
+          'src/components/component/component.js': 'hello',
         });
 
-        return expect(followExports(source, '')).resolves.toEqual({
+        return expect(followExports(source, fakeFs.dir)).resolves.toEqual({
           source: 'hello',
-          path: 'src/components/component/component.js',
+          path: fakeFs.dir + '/src/components/component/component.js',
         });
       });
     });
@@ -243,13 +222,13 @@ describe('followExports()', () => {
       it('should return source of component', () => {
         const source = "export {Component, AnythingElse} from './thing.js'\n'should ignore me'";
 
-        fs.__setFS({
+        const fakeFs = cista({
           'thing.js': 'hey!',
         });
 
-        return expect(followExports(source, '')).resolves.toEqual({
+        return expect(followExports(source, fakeFs.dir)).resolves.toEqual({
           source: 'hey!',
-          path: 'thing.js',
+          path: fakeFs.dir + '/thing.js',
         });
       });
     });
@@ -289,15 +268,13 @@ describe('followExports()', () => {
           export default Component;
         `;
 
-        fs.__setFS({
-          Component: {
-            'index.js': 'hello',
-          },
+        const fakeFs = cista({
+          'Component/index.js': 'hello',
         });
 
-        return expect(followExports(source, '')).resolves.toEqual({
-          path: 'Component/index.js',
+        return expect(followExports(source, fakeFs.dir)).resolves.toEqual({
           source: 'hello',
+          path: fakeFs.dir + '/Component/index.js',
         });
       });
     });
