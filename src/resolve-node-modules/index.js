@@ -8,21 +8,20 @@ const resolveNodeModulesPath = (cwd, modulePath) => {
 
   return readFolder(path.join(checkPath, 'node_modules'))
     .then(nodeModulesFiles => {
-      const candidate = nodeModulesFiles.find(f => modulePath.match(f))
+      const candidate = nodeModulesFiles.find(f => modulePath.match(f));
 
-      return candidate ?
-        path.join(checkPath, 'node_modules', modulePath)
+      return candidate
+        ? path.join(checkPath, 'node_modules', modulePath)
         : checkPath !== '.'
-          ? resolveNodeModulesPath(checkPath, modulePath)
-          : Promise.reject(`ERROR: Unable to resolve node_modules path in "${modulePath}"`)
-    }
-  )
+        ? resolveNodeModulesPath(checkPath, modulePath)
+        : Promise.reject(`ERROR: Unable to resolve node_modules path in "${modulePath}"`);
+    })
 
-  .catch(e =>
-    checkPath !== '.'
-      ? resolveNodeModulesPath(checkPath, modulePath)
-      : Promise.reject(`ERROR: Unable to resolve node_modules path in "${modulePath}, ${e}"`)
-  )
+    .catch(e =>
+      checkPath !== '.'
+        ? resolveNodeModulesPath(checkPath, modulePath)
+        : Promise.reject(`ERROR: Unable to resolve node_modules path in "${modulePath}, ${e}"`)
+    );
 };
 
 module.exports = resolveNodeModulesPath;

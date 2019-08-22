@@ -29,9 +29,9 @@ const gatherAll = path =>
 
     .then(path => metadataParser(path).catch(e => error(`Unable to parse component in path "${path}", reason: ${e}`)))
 
-    .then(metadata => Promise.all([Promise.resolve(metadata), readFolder(path)]))
+    .then(metadata => Promise.all([metadata, readFolder(path)]))
 
-    .then(async ([metadata, files]) => {
+    .then(([metadata, files]) => {
       const readMarkdown = markdownPath =>
         containsFile(files)(markdownPath)
           .then(file => readFile(pathJoin(dirname(path), file)))
