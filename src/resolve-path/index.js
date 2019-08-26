@@ -8,7 +8,7 @@ const resolveNodeModulesPath = require('../resolve-node-modules');
  */
 // resolvePath : (cwd: string, relativePath: string) -> Promise<path: string>
 const resolvePath = (cwd, relativePath) => {
-  const desiredPath = relativePath.replace('dist/', '');
+  const desiredPath = relativePath.replace(/(dist\/|standalone\/)/g, '');
 
   return relativePath.startsWith('.')
     ? Promise.resolve(path.join(dirname(cwd), desiredPath))

@@ -128,5 +128,51 @@ describe('followProps()', () => {
         },
       });
     });
+
+    it('should remove `standalone/` from path', () => {
+      const entrySource = `import PropTypes from "prop-types";
+        import React from "react";
+        import OtherComponent from "wix-ui-backoffice/dist/standalone/src/standalone-Component";
+
+        export default class EntryComponent extends React.Component {
+          static propTypes = {
+            ...OtherComponent.propTypes
+          };
+
+          render() {
+            return <div/>;
+          }
+        }`;
+
+      const fakeFs = cista({
+        index: entrySource,
+        'node_modules/wix-ui-backoffice/src/standalone-Component.js': `
+          import PropTypes from "prop-types";
+          import React from "react";
+
+          export default class Component extends React.Component {
+            static propTypes = {
+              theThing: PropTypes.bool.isRequired
+            };
+
+            render() {
+              return <div/>;
+            }
+          }`,
+      });
+
+      return expect(followProps({ source: entrySource, path: fakeFs.dir + '/index' })).resolves.toEqual({
+        description: '',
+        displayName: 'EntryComponent',
+        methods: [],
+        props: {
+          theThing: {
+            description: '',
+            required: true,
+            type: { name: 'bool' },
+          },
+        },
+      });
+    });
   });
 });

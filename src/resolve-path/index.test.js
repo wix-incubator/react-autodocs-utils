@@ -23,6 +23,16 @@ describe('resolvePath', () => {
 
       return expect(resolvePath(fakeFs.dir + '/folder', './file.js')).resolves.toEqual(fakeFs.dir + '/folder/file.js');
     });
+
+    it('should remove /dist & standalone parts from path', () => {
+      const fakeFs = cista({
+        'src/folder/standalone.dist.js': '',
+      });
+
+      return expect(resolvePath(fakeFs.dir + '/src', './standalone/folder/dist/standalone.dist.js')).resolves.toEqual(
+        fakeFs.dir + '/src/folder/standalone.dist.js'
+      );
+    });
   });
 
   describe('given absolute path', () => {

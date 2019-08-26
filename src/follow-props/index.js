@@ -30,7 +30,7 @@ const followComposedProps = (parsed, currentPath) =>
     parsed.composes.map(composedPath => {
       const readablePathPromise = composedPath.startsWith('.')
         ? Promise.resolve(pathJoin(pathDirname(currentPath), composedPath))
-        : resolveNodeModules(currentPath, composedPath.replace('dist/', ''));
+        : resolveNodeModules(currentPath, composedPath.replace(/(dist\/|standalone\/)/g, ''));
 
       return readablePathPromise.then(readFile);
     })
