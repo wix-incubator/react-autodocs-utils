@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [3.5.4] - 2019-08-26
+### Fixed
+- `testkitParser` - remove `standalone/` parts from paths while parsing, according to convention [0477c39](https://github.com/wix/react-autodocs-utils/commit/0477c39)
+
+
 ## [3.5.3] - 2019-08-26
 ### Fixed
 - `testkitParser` - some refactors and usage of full path as cwd (not dirnamed one) [dd3b723](https://github.com/wix/react-autodocs-utils/commit/dd3b723b71ea38fb5cbd8ae1ad3847a63d765bbd)
