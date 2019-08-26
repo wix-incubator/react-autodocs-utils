@@ -15,14 +15,12 @@ const findNamedExportDeclaration = (nodes, predicate) => {
   }
 };
 
-const getFirstExportIfOnlyOneExists = nodes =>
-  nodes.length === 1 && nodes[0]
+const getFirstExportIfOnlyOneExists = nodes => nodes.length === 1 && nodes[0];
 
-const isCommonJsExport = (node) =>
+const isCommonJsExport = node =>
   node.type === 'MemberExpression' && node.object.name === 'module' && node.property.name === 'exports';
 
-const isCommonJsImport = (node) =>
-  node.type === 'CallExpression' && node.callee.name === 'require';
+const isCommonJsImport = node => node.type === 'CallExpression' && node.callee.name === 'require';
 
 module.exports = async ({ ast, exportName = DEFAULT_EXPORT, cwd }) => {
   let exportedNode;
@@ -37,7 +35,7 @@ module.exports = async ({ ast, exportName = DEFAULT_EXPORT, cwd }) => {
       if (isSpecifierDefault) {
         exportDefaultNode = {
           source: path.node.source.value,
-          local: { name: exportName }
+          local: { name: exportName },
         };
       } else {
         const exportSource = path.node.source && path.node.source.value;
@@ -55,21 +53,21 @@ module.exports = async ({ ast, exportName = DEFAULT_EXPORT, cwd }) => {
         });
       }
     },
-    AssignmentExpression({node}) {
+    AssignmentExpression({ node }) {
       if (isCommonJsExport(node.left) && isCommonJsImport(node.right)) {
         const source = node.right.arguments[0].value;
         exportNamedNodes.push({
           source,
           local: { name: exportName },
-          node: { name: exportName }
+          node: { name: exportName },
         });
       }
-    }
+    },
   });
 
   if (exportName === DEFAULT_EXPORT) {
-    exportedNode = 
-      exportDefaultNode || 
+    exportedNode =
+      exportDefaultNode ||
       findNamedExportDeclaration(exportNamedNodes, byPattern(/DriverFactory$/i)) ||
       getFirstExportIfOnlyOneExists(exportNamedNodes);
   } else {

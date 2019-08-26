@@ -1,6 +1,6 @@
-const isDriver = require('./is-driver');
+const isTestkit = require('./is-testkit');
 
-describe('isDriver', () => {
+describe('isTestkit', () => {
   [
     ['file.driver.js', true],
     ['file.protractor.driver.js', true],
@@ -13,7 +13,7 @@ describe('isDriver', () => {
     ['driver.js', false],
   ].map(([assertion, expecation]) => {
     it(`should return ${expecation} for ${assertion}`, () => {
-      expect(isDriver(assertion)).toEqual(expecation);
+      expect(isTestkit(assertion)).toEqual(expecation);
     });
   });
 });
