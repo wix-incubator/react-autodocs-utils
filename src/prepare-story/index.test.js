@@ -58,16 +58,26 @@ export default story({
 
     it('should work with referenced story config', () => {
       const source = `
-        const config = { a: 1 };
+        const config = { a: 1, b: { c: 'hey' } };
         export default config;
       `;
-      const config = { hello: 'config!' };
+      const config = { hello: 'config!', time: { to: { say: { good: 'buy' } } } };
       const expectation = `import story from "wix-storybook-utils/Story";
 import { storiesOf } from "@storybook/react";
 const config = {
   a: 1,
+  b: {
+    c: 'hey'
+  },
   _config: {
     "hello": "config!",
+    "time": {
+      "to": {
+        "say": {
+          "good": "buy"
+        }
+      }
+    },
     storiesOf: storiesOf
   }
 };
@@ -104,6 +114,75 @@ export default story({
   },
   _config: {
     "i-am-config": "yes",
+    storiesOf: storiesOf
+  }
+});`;
+
+      return expect(prepareStory(config)(source)).resolves.toEqual(expectation);
+    });
+
+    it('should work with existing nested properties', () => {
+      const source = `
+        const stuff = { thing: { moreThings: ['hello'] } };
+        const callMe = () => true;
+        export default {
+          a: 1,
+          b: {
+            ...stuff,
+            c: ['d']
+          },
+          d: {
+            e: {
+              f: {
+                hello: callMe('maybe')
+              }
+            }
+          }
+        };
+      `;
+
+      const config = {
+        'i-am-config': 'yes',
+        nested: {
+          oh: {
+            boy: {
+              thing: 'hey there!',
+            },
+          },
+        },
+      };
+
+      const expectation = `import story from "wix-storybook-utils/Story";
+import { storiesOf } from "@storybook/react";
+const stuff = {
+  thing: {
+    moreThings: ['hello']
+  }
+};
+
+const callMe = () => true;
+
+export default story({
+  a: 1,
+  b: { ...stuff,
+    c: ['d']
+  },
+  d: {
+    e: {
+      f: {
+        hello: callMe('maybe')
+      }
+    }
+  },
+  _config: {
+    "i-am-config": "yes",
+    "nested": {
+      "oh": {
+        "boy": {
+          "thing": "hey there!"
+        }
+      }
+    },
     storiesOf: storiesOf
   }
 });`;

@@ -8,15 +8,15 @@ const print = require('../parser/print');
 const buildImportDeclaration = (specifier, path) => types.importDeclaration([specifier], types.stringLiteral(path));
 
 const prepareStory = storyConfig => source =>
-  new Promise(
-    (resolve, reject) =>
-      source && !!storyConfig
-        ? resolve(source)
-        : reject('ERROR: unable to prepare story, both `storyConfig` and `source` must be provided')
+  new Promise((resolve, reject) =>
+    source && !!storyConfig
+      ? resolve(source)
+      : reject('ERROR: unable to prepare story, both `storyConfig` and `source` must be provided')
   )
 
     .then(parse)
 
+    // add necessary imports
     .then(ast => {
       ast.program.body.unshift(
         buildImportDeclaration(
@@ -56,7 +56,7 @@ const prepareStory = storyConfig => source =>
               path.node.properties.push(storiesOfProperty);
 
               configProperties = path.node.properties;
-              return false;
+              path.stop();
             },
           });
 
