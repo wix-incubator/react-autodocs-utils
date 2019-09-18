@@ -13,16 +13,18 @@ const findNodeOrImport = ({ ast, name }) => {
           resolve({ node: path.node });
         } else if (types.isImportDeclaration(path.node)) {
           let isDefaultExport = false;
+          let importedName = '';
           let isImportedIdentifier = path.node.specifiers.some(specifier => {
             const matchesName = specifier.local.name === name;
             if (matchesName) {
               isDefaultExport = types.isImportDefaultSpecifier(specifier);
+              importedName = specifier.imported && specifier.imported.name;
               return true;
             }
           });
           if (isImportedIdentifier) {
             found = true;
-            resolve({ isImport: true, isDefaultExport, sourcePath: path.node.source.value });
+            resolve({ isImport: true, isDefaultExport, importedName, sourcePath: path.node.source.value });
           }
         }
       },
@@ -35,12 +37,12 @@ const findNodeOrImport = ({ ast, name }) => {
 };
 
 const findIdentifierNode = async ({ name, ast, cwd }) => {
-  const { node, isImport, sourcePath, isDefaultExport } = await findNodeOrImport({ ast, name });
+  const { node, isImport, sourcePath, isDefaultExport, importedName } = await findNodeOrImport({ ast, name });
   if (isImport) {
     return followImport({
       sourcePath,
       cwd,
-      exportName: isDefaultExport ? undefined : name,
+      exportName: isDefaultExport ? undefined : importedName || name,
     });
   }
   return node.init || node;

@@ -26,10 +26,12 @@ module.exports = async ({ ast, exportName = DEFAULT_EXPORT, cwd }) => {
   let exportedNode;
   let exportDefaultNode;
   let exportNamedNodes = [];
+
   visit(ast)({
     ExportDefaultDeclaration(path) {
       exportDefaultNode = path.node.declaration;
     },
+
     ExportNamedDeclaration(path) {
       const isSpecifierDefault = path.node.specifiers.some(({ exported }) => exported.name === 'default');
       if (isSpecifierDefault) {
@@ -53,6 +55,7 @@ module.exports = async ({ ast, exportName = DEFAULT_EXPORT, cwd }) => {
         });
       }
     },
+
     AssignmentExpression({ node }) {
       if (isCommonJsExport(node.left) && isCommonJsImport(node.right)) {
         const source = node.right.arguments[0].value;
