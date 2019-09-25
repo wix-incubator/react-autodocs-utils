@@ -17,20 +17,20 @@ const prepareStory = storyConfig => source =>
     .then(parse)
 
     // add necessary imports
-    .then(ast => {
-      ast.program.body.unshift(
-        buildImportDeclaration(
-          types.importSpecifier(types.identifier('storiesOf'), types.identifier('storiesOf')),
-          '@storybook/react'
-        )
-      );
-
-      ast.program.body.unshift(
-        buildImportDeclaration(types.importDefaultSpecifier(types.identifier('story')), 'wix-storybook-utils/Story')
-      );
-
-      return ast;
-    })
+    // .then(ast => {
+    //   ast.program.body.unshift(
+    //     buildImportDeclaration(
+    //       types.importSpecifier(types.identifier('storiesOf'), types.identifier('storiesOf')),
+    //       '@storybook/react'
+    //     )
+    //   );
+    //
+    //   ast.program.body.unshift(
+    //     buildImportDeclaration(types.importDefaultSpecifier(types.identifier('story')), 'wix-storybook-utils/Story')
+    //   );
+    //
+    //   return ast;
+    // })
 
     .then(ast => {
       // TODO: this is not too good, unfortunatelly, i cant return
@@ -48,12 +48,12 @@ const prepareStory = storyConfig => source =>
 
           visit(configAST)({
             ObjectExpression(path) {
-              const storiesOfProperty = types.objectProperty(
-                types.identifier('storiesOf'),
-                types.identifier('storiesOf')
-              );
-
-              path.node.properties.push(storiesOfProperty);
+              // const storiesOfProperty = types.objectProperty(
+              //   types.identifier('storiesOf'),
+              //   types.identifier('storiesOf')
+              // );
+              //
+              // path.node.properties.push(storiesOfProperty);
 
               configProperties = path.node.properties;
               path.stop();
@@ -73,7 +73,7 @@ const prepareStory = storyConfig => source =>
               types.objectProperty(types.identifier('_config'), types.objectExpression(configProperties))
             );
 
-            path.node.declaration = types.callExpression(types.identifier('story'), [path.node.declaration]);
+            // path.node.declaration = types.callExpression(types.identifier('story'), [path.node.declaration]);
           }
 
           if (exportsObject) {
@@ -84,7 +84,7 @@ const prepareStory = storyConfig => source =>
             );
 
             // wrap exported object with `story()`
-            path.node.declaration = types.callExpression(types.identifier('story'), [configObject]);
+            // path.node.declaration = types.callExpression(types.identifier('story'), [configObject]);
           }
 
           return false;
