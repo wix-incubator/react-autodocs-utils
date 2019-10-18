@@ -4,9 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.5.7] - 2019-10-18
+### Added
+- `metadataParser` - support `@autodocs-component` identifier comment to force props parser for [1346e9c](https://github.com/wix/react-autodocs-utils/commit/1346e9c)
+
 ## [3.5.6] - 2019-09-18
 ### Fixed
-- `testkitParser` - support import specifiers with local names, like `import { something as somethingElse } from '...';` [b3bb77f](https://github.com/wix/react-autodocs-utils/commit/b3bb77f)
+- `testkitParser` - support import specifiers with local names, like `import { something as somethingElse } from '...';` [b3bb77f](https://github.com/wix/react-auto1346e9cdocs-utils/commit/b3bb77f)
 
 ## [3.5.5] - 2019-09-05
 ### Fixed
