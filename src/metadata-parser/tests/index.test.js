@@ -445,6 +445,43 @@ describe('metadataParser()', () => {
         });
       });
     });
+
+    describe('with @autodocs-component annotation', () => {
+      it('should force props parsing', () => {
+        const fakeFs = cista({
+          'with-annotation.js': `import React from "react";
+              import PropTypes from "prop-types";
+              export const weirdComponent /** @autodocs-component */ = () => () => () => {};
+              weirdComponent.propTypes = {
+                awwyis: PropTypes.bool,
+                breadcrumbs: PropTypes.string.isRequired,
+              };
+              `,
+        });
+
+        return expect(metadataParser(fakeFs.dir + '/with-annotation.js')).resolves.toEqual({
+          description: '',
+          displayName: 'weirdComponent',
+          methods: [],
+          props: {
+            awwyis: {
+              description: '',
+              required: false,
+              type: {
+                name: 'bool',
+              },
+            },
+            breadcrumbs: {
+              description: '',
+              required: true,
+              type: {
+                name: 'string',
+              },
+            },
+          },
+        });
+      });
+    });
   });
 
   describe('given component importing from other modules', () => {

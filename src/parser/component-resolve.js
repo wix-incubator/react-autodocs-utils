@@ -29,10 +29,24 @@ const isReactComponentExtendedClass = path => {
   return true;
 };
 
+const isAnnotatedComponent = path => {
+  const leadingComments = path.node.leadingComments;
+  if (!leadingComments) {
+    return false;
+  }
+
+  // Search for the @autodocs-component in identifier comment
+  return leadingComments.some(comment => comment.value.includes('@autodocs-component'));
+};
+
 const isComponentDefinition = path =>
-  [isReactCreateClassCall, isReactComponentClass, isReactComponentExtendedClass, isStatelessComponent].some(fn =>
-    fn(path)
-  );
+  [
+    isReactCreateClassCall,
+    isReactComponentClass,
+    isReactComponentExtendedClass,
+    isStatelessComponent,
+    isAnnotatedComponent,
+  ].some(fn => fn(path));
 
 const resolveHOC = path => {
   const node = path.node;
@@ -57,6 +71,8 @@ const resolveDefinition = definition => {
     normalizeClassDefinition(definition);
     return definition;
   } else if (isStatelessComponent(definition)) {
+    return definition;
+  } else if (isAnnotatedComponent) {
     return definition;
   }
 
