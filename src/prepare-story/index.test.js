@@ -3,11 +3,7 @@
 const prepareStory = require('./');
 
 describe('prepareStory', () => {
-  it('should be a function', () => {
-    expect(typeof prepareStory).toBe('function');
-  });
-
-  describe('when erroneous input given', () => {
+  describe('given erroneous input', () => {
     it('should reject promise with message', () =>
       expect(prepareStory()()).rejects.toEqual(
         'ERROR: unable to prepare story, both `storyConfig` and `source` must be provided'
@@ -186,6 +182,102 @@ export default story({
     storiesOf: storiesOf
   }
 });`;
+
+      return expect(prepareStory(config)(source)).resolves.toEqual(expectation);
+    });
+
+    it('should work with module.exports', () => {
+      const source = 'module.exports = { a: 1 };';
+      const config = { a: 1 };
+      const expectation = `const story = require("wix-storybook-utils/Story");
+
+const {
+  storiesOf
+} = require("@storybook/react");
+
+module.exports = story({
+  a: 1,
+  _config: {
+    "a": 1,
+    storiesOf: storiesOf
+  }
+});`;
+
+      return expect(prepareStory(config)(source)).resolves.toEqual(expectation);
+    });
+
+    it('should work with referenced module.exports', () => {
+      const source = `
+        const stuff = { thing: { moreThings: ['hello'] } };
+        const callMe = () => true;
+        const reference = {
+          a: 1,
+          b: {
+            ...stuff,
+            c: ['d']
+          },
+          d: {
+            e: {
+              f: {
+                hello: callMe('maybe')
+              }
+            }
+          }
+        };
+
+        module.exports = reference;
+      `;
+
+      const config = {
+        'i-am-config': 'yes',
+        nested: {
+          oh: {
+            boy: {
+              thing: 'hey there!',
+            },
+          },
+        },
+      };
+
+      const expectation = `const story = require("wix-storybook-utils/Story");
+
+const {
+  storiesOf
+} = require("@storybook/react");
+
+const stuff = {
+  thing: {
+    moreThings: ['hello']
+  }
+};
+
+const callMe = () => true;
+
+const reference = {
+  a: 1,
+  b: { ...stuff,
+    c: ['d']
+  },
+  d: {
+    e: {
+      f: {
+        hello: callMe('maybe')
+      }
+    }
+  },
+  _config: {
+    "i-am-config": "yes",
+    "nested": {
+      "oh": {
+        "boy": {
+          "thing": "hey there!"
+        }
+      }
+    },
+    storiesOf: storiesOf
+  }
+};
+module.exports = story(reference);`;
 
       return expect(prepareStory(config)(source)).resolves.toEqual(expectation);
     });
