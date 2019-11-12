@@ -22,6 +22,25 @@ describe('pathFinder()', () => {
     );
   });
 
+  describe('given `componentPath` in `module.exports`', () => {
+    const path = '.' + 'hello'.repeat(Math.random() * 19);
+
+    const sourceTestCases = [
+      `module.exports = { componentPath: '${path}' }`,
+
+      `const config = {
+        componentPath: '${path}'
+      };
+      module.exports = config;
+      `,
+    ];
+
+    sourceTestCases.map(source =>
+      it('should resolve promise with value of `componentPath`', () =>
+        expect(pathFinder(source)).resolves.toEqual(path))
+    );
+  });
+
   describe('given incomplete story config', () => {
     it('should return null', () => {
       const source = 'export default { sections: [] };';

@@ -25,7 +25,9 @@ export default something;`;
     it('should wrap exported object with `story()`', () => {
       const source = 'export default { a: 1 };';
       const expectation = `import story from "wix-storybook-utils/Story";
+
 import { storiesOf } from "@storybook/react";
+
 export default story({
   a: 1,
   _config: {
@@ -40,7 +42,9 @@ export default story({
       const source = 'export default { a: 1 };';
       const config = { a: 1 };
       const expectation = `import story from "wix-storybook-utils/Story";
+
 import { storiesOf } from "@storybook/react";
+
 export default story({
   a: 1,
   _config: {
@@ -59,7 +63,9 @@ export default story({
       `;
       const config = { hello: 'config!', time: { to: { say: { good: 'buy' } } } };
       const expectation = `import story from "wix-storybook-utils/Story";
+
 import { storiesOf } from "@storybook/react";
+
 const config = {
   a: 1,
   b: {
@@ -97,7 +103,9 @@ export default story(config);`;
       const config = { 'i-am-config': 'yes' };
 
       const expectation = `import story from "wix-storybook-utils/Story";
+
 import { storiesOf } from "@storybook/react";
+
 const stuff = {
   thing: {
     moreThings: ['hello']
@@ -149,7 +157,9 @@ export default story({
       };
 
       const expectation = `import story from "wix-storybook-utils/Story";
+
 import { storiesOf } from "@storybook/react";
+
 const stuff = {
   thing: {
     moreThings: ['hello']
@@ -189,7 +199,7 @@ export default story({
     it('should work with module.exports', () => {
       const source = 'module.exports = { a: 1 };';
       const config = { a: 1 };
-      const expectation = `const story = require("wix-storybook-utils/Story");
+      const expectation = `const story = require("wix-storybook-utils/Story").default;
 
 const {
   storiesOf
@@ -239,7 +249,7 @@ module.exports = story({
         },
       };
 
-      const expectation = `const story = require("wix-storybook-utils/Story");
+      const expectation = `const story = require("wix-storybook-utils/Story").default;
 
 const {
   storiesOf

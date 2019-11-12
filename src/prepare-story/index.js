@@ -7,13 +7,16 @@ const print = require('../parser/print');
 const get = require('../get');
 
 const buildImportDeclaration = (specifier, path) => types.importDeclaration([specifier], types.stringLiteral(path));
+const buildRequireExpression = (identifier, path) => {
+  const id = types.identifier(identifier);
 
-const isModuleExports = path =>
-  [
-    types.isMemberExpression(path.node.expression.left),
-    get(path)('node.expression.left.object.name') === 'module',
-    get(path)('node.expression.left.property.name') === 'exports',
-  ].every(Boolean);
+  return types.variableDeclaration('const', [
+    types.variableDeclarator(
+      types.objectPattern([types.objectProperty(id, id, /*computed*/ false, /*shorthand*/ true)]),
+      types.callExpression(types.identifier('require'), [types.stringLiteral(path)])
+    ),
+  ]);
+};
 
 const prepareStory = storyConfig => source =>
   new Promise((resolve, reject) =>
@@ -36,42 +39,12 @@ const prepareStory = storyConfig => source =>
 
       if (isES5) {
         // add requires
-        const storyId = types.identifier('story');
-        const storiesOfId = types.identifier('storiesOf');
-        const requireId = types.identifier('require');
-        const wsuImportPath = types.stringLiteral('wix-storybook-utils/Story');
-        const storiesOfImportPath = types.stringLiteral('@storybook/react');
-
-        // const { storiesOf } = require("@storybook/react");
-        ast.program.body.unshift(
-          types.variableDeclaration('const', [
-            types.variableDeclarator(
-              types.objectPattern([
-                types.objectProperty(storiesOfId, storiesOfId, /*computed*/ false, /*shorthand*/ true),
-              ]),
-              types.callExpression(requireId, [storiesOfImportPath])
-            ),
-          ])
-        );
-
-        // const story = require('wix-storybook-utils/Story')
-        ast.program.body.unshift(
-          types.variableDeclaration('const', [
-            types.variableDeclarator(storyId, types.callExpression(requireId, [wsuImportPath])),
-          ])
-        );
+        ast.program.body.unshift(parse('const { storiesOf } = require("@storybook/react")'));
+        ast.program.body.unshift(parse('const story = require("wix-storybook-utils/Story").default'));
       } else {
-        // add necessary imports
-        ast.program.body.unshift(
-          buildImportDeclaration(
-            types.importSpecifier(types.identifier('storiesOf'), types.identifier('storiesOf')),
-            '@storybook/react'
-          )
-        );
-
-        ast.program.body.unshift(
-          buildImportDeclaration(types.importDefaultSpecifier(types.identifier('story')), 'wix-storybook-utils/Story')
-        );
+        // add imports
+        ast.program.body.unshift(parse('import { storiesOf } from "@storybook/react"'));
+        ast.program.body.unshift(parse('import story from "wix-storybook-utils/Story"'));
       }
 
       return ast;
@@ -133,7 +106,13 @@ const prepareStory = storyConfig => source =>
         },
 
         ExpressionStatement(path) {
-          if (isModuleExports(path)) {
+          const isModuleExports = [
+            types.isMemberExpression(path.node.expression.left),
+            get(path)('node.expression.left.object.name') === 'module',
+            get(path)('node.expression.left.property.name') === 'exports',
+          ].every(Boolean);
+
+          if (isModuleExports) {
             path.node.expression.right = handleExportObject(path, path.node.expression.right);
           }
         },
