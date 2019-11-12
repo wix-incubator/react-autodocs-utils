@@ -6,18 +6,6 @@ const parse = require('../parser/parse');
 const print = require('../parser/print');
 const get = require('../get');
 
-const buildImportDeclaration = (specifier, path) => types.importDeclaration([specifier], types.stringLiteral(path));
-const buildRequireExpression = (identifier, path) => {
-  const id = types.identifier(identifier);
-
-  return types.variableDeclaration('const', [
-    types.variableDeclarator(
-      types.objectPattern([types.objectProperty(id, id, /*computed*/ false, /*shorthand*/ true)]),
-      types.callExpression(types.identifier('require'), [types.stringLiteral(path)])
-    ),
-  ]);
-};
-
 const prepareStory = storyConfig => source =>
   new Promise((resolve, reject) =>
     source && !!storyConfig
