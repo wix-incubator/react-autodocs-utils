@@ -31,25 +31,39 @@ const metadataMerger = source => metadata =>
       return Promise.reject('ERROR: Unable to merge metadata with source');
     }
 
+    const handleExportObject = (path, node) => {
+      const { configNode } = [
+        {
+          pattern: types.isObjectExpression(node),
+          configNode: node,
+        },
+        {
+          pattern: types.isIdentifier(node),
+          configNode: get(path)(`scope.bindings.${node.name}.path.node.init`),
+        },
+      ].find(({ pattern }) => pattern);
+
+      if (configNode) {
+        configNode.properties.push(
+          builders.objectProperty(builders.identifier('_metadata'), builders.objectExpression(metadataProperties))
+        );
+      }
+    };
+
     visit(ast)({
       ExportDefaultDeclaration(path) {
-        const declaration = path.node.declaration;
+        handleExportObject(path, path.node.declaration);
+      },
 
-        const { configNode } = [
-          {
-            pattern: types.isObjectExpression(declaration),
-            configNode: declaration,
-          },
-          {
-            pattern: types.isIdentifier(declaration),
-            configNode: get(path)(`scope.bindings.${declaration.name}.path.node.init`),
-          },
-        ].find(({ pattern }) => pattern);
+      ExpressionStatement(path) {
+        const isModuleExports = [
+          types.isMemberExpression(path.node.expression.left),
+          get(path)('node.expression.left.object.name') === 'module',
+          get(path)('node.expression.left.property.name') === 'exports',
+        ].every(Boolean);
 
-        if (configNode) {
-          configNode.properties.push(
-            builders.objectProperty(builders.identifier('_metadata'), builders.objectExpression(metadataProperties))
-          );
+        if (isModuleExports) {
+          handleExportObject(path, path.node.expression.right);
         }
       },
     });

@@ -3,10 +3,6 @@
 const metadataMerger = require('./');
 
 describe('metadataMerger', () => {
-  it('should return function', () => {
-    expect(typeof metadataMerger()).toBe('function');
-  });
-
   describe('when erroneous input given', () => {
     it('should reject promise with message', () =>
       expect(metadataMerger()()).rejects.toEqual(
@@ -19,10 +15,11 @@ describe('metadataMerger', () => {
       expect(metadataMerger('"test"')({}).then).toBeDefined();
     });
 
-    it('should add `_metadata` to story config', () => {
-      const source = 'export default { a: 1, b: 2 }';
-      const metadata = { hello: 1, goodbye: { forReal: 'bye' } };
-      const expectation = `export default {
+    describe('when export default', () => {
+      it('should add `_metadata` to story config', () => {
+        const source = 'export default { a: 1, b: 2 }';
+        const metadata = { hello: 1, goodbye: { forReal: 'bye' } };
+        const expectation = `export default {
   a: 1,
   b: 2,
   _metadata: {
@@ -33,16 +30,16 @@ describe('metadataMerger', () => {
   }
 };`;
 
-      return expect(metadataMerger(source)(metadata)).resolves.toEqual(expectation);
-    });
+        return expect(metadataMerger(source)(metadata)).resolves.toEqual(expectation);
+      });
 
-    it('should add `_metadata` to referenced story config', () => {
-      const source = `
+      it('should add `_metadata` to referenced story config', () => {
+        const source = `
         const config = { a: 1, b: { c: 2 } };
         export default config;
       `;
-      const metadata = { whatIs: 'love' };
-      const expectation = `const config = {
+        const metadata = { whatIs: 'love' };
+        const expectation = `const config = {
   a: 1,
   b: {
     c: 2
@@ -53,7 +50,47 @@ describe('metadataMerger', () => {
 };
 export default config;`;
 
-      return expect(metadataMerger(source)(metadata)).resolves.toEqual(expectation);
+        return expect(metadataMerger(source)(metadata)).resolves.toEqual(expectation);
+      });
+    });
+
+    describe('when module.exports', () => {
+      it('should add `_metadata` to story config', () => {
+        const source = 'module.exports = { a: 1, b: 2 }';
+        const metadata = { hello: 1, goodbye: { forReal: 'bye' } };
+        const expectation = `module.exports = {
+  a: 1,
+  b: 2,
+  _metadata: {
+    "hello": 1,
+    "goodbye": {
+      "forReal": "bye"
+    }
+  }
+};`;
+
+        return expect(metadataMerger(source)(metadata)).resolves.toEqual(expectation);
+      });
+
+      it('should add `_metadata` to referenced story config', () => {
+        const source = `
+        const config = { a: 1, b: { c: 2 } };
+        module.exports = config;
+      `;
+        const metadata = { whatIs: 'love' };
+        const expectation = `const config = {
+  a: 1,
+  b: {
+    c: 2
+  },
+  _metadata: {
+    "whatIs": "love"
+  }
+};
+module.exports = config;`;
+
+        return expect(metadataMerger(source)(metadata)).resolves.toEqual(expectation);
+      });
     });
   });
 
