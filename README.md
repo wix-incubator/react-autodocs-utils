@@ -1,5 +1,8 @@
 # React Autodocs Utils
 
+# REPO MOVED TO https://github.com/wix/wix-ui/tree/master/packages/react-autodocs-utils
+## CONTENT HERE IS ARCHIVED
+
 [![Build Status](https://travis-ci.org/wix/react-autodocs-utils.svg?branch=master)](https://travis-ci.org/wix/react-autodocs-utils)
 
 A collection of React component parsers for automating documentation.
